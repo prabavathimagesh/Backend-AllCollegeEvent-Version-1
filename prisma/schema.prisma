@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Role {
+  id    Int    @id @default(autoincrement())
+  idnty String @unique @default(uuid())
+
+  name  String
+  isDel Boolean @default(false)
+
+  users User[]
+  orgs  Org[]
+}
+
+model User {
+  id    Int    @id @default(autoincrement())
+  idnty String @unique @default(uuid())
+
+  name  String
+  email String @unique
+  pwd   String
+
+  phone   String?
+  city    String?
+  state   String?
+  country String?
+  pImg    String?
+
+  isDel Boolean @default(false)
+
+  roleId Int?
+  role   Role? @relation(fields: [roleId], references: [id])
+
+  crAt DateTime @default(now())
+
+  otps OTP[] // <-- ADD THIS LINE
+}
+
+model Org {
+  id    Int    @id @default(autoincrement())
+  idnty String @unique @default(uuid())
+
+  name     String
+  domEmail String @unique
+  pwd      String
+
+  city     String?
+  state    String?
+  country  String?
+  pImg     String?
+  whatsapp String?
+  insta    String?
+  linkedIn String?
+
+  evCnt  Int     @default(0)
+  isDel  Boolean @default(false)
+  isVerf Boolean @default(false)
+
+  roleId Int?
+  role   Role? @relation(fields: [roleId], references: [id])
+
+  crAt DateTime @default(now())
+
+  otps OTP[] // <-- ADD THIS LINE
+}
+
+model OTP {
+  id    Int    @id @default(autoincrement())
+  idnty String @unique @default(uuid())
+
+  email   String
+  code    String
+  purpose String
+
+  expAt DateTime
+  crAt  DateTime @default(now())
+
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  orgId Int?
+  org   Org? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}
