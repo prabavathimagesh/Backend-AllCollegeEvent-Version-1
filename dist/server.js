@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const requestLogger_1 = require("./middlewares/requestLogger");
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -12,6 +13,7 @@ app.use(cors({
     origin: [process.env.DOMAIN],
     credentials: true,
 }));
+app.use(requestLogger_1.appLogger);
 app.use("/api/auth", authRoutes);
 app.get("/", (req, res) => {
     res.send("Backend running with CommonJS + Express + Prisma");

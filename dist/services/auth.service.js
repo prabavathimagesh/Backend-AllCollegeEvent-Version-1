@@ -8,7 +8,7 @@ const mailer_1 = require("../utils/mailer");
 const sendVerificationMail = async (org) => {
     const URL = process.env.MAIL_SEND;
     const token = (0, jwt_1.generateToken)(org.idnty);
-    const verifyUrl = `${URL}user/?token=${token}`;
+    const verifyUrl = `${URL}verify?token=${token}`;
     const html = `
     <h2>Verify Your Organization Account</h2>
     <p>Hello <b>${org.org_name}</b>,</p>

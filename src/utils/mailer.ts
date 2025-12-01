@@ -17,6 +17,9 @@ export const sendEmail = async ({
       user: process.env.SMTP_USER as string,
       pass: process.env.SMTP_PASS as string,
     },
+    tls: {
+      rejectUnauthorized: false, // allow Gmail TLS certs
+    },
   });
 
   await transporter.sendMail({

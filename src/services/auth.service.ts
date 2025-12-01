@@ -8,7 +8,7 @@ const sendVerificationMail = async (org: any) => {
 
   const token = generateToken(org.idnty);
 
-  const verifyUrl = `${URL}user/?token=${token}`;
+  const verifyUrl = `${URL}verify?token=${token}`;
 
   const html = `
     <h2>Verify Your Organization Account</h2>
@@ -172,9 +172,8 @@ export class AuthService {
 
     if (!account) throw new Error("Email not found");
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    const expAt = new Date(Date.now() + 5 * 60 * 1000); // 5 min expiry
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    const expAt = new Date(Date.now() + 10 * 60 * 1000);
 
     await prisma.oTP.create({
       data: {

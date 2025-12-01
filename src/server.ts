@@ -1,3 +1,4 @@
+import { appLogger } from "./middlewares/requestLogger";
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -15,6 +16,8 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(appLogger);
 
 app.use("/api/auth", authRoutes);
 

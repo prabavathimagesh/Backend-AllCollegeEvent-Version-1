@@ -11,7 +11,7 @@
     "start": "node dist/server.js",
     "dev": "ts-node src/server.ts",
     "postinstall": "npx prisma generate",
-    "seed":"node prisma/seed.js"
+    "seed": "node prisma/seed.js"
   },
   "keywords": [],
   "author": "",
@@ -25,7 +25,9 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.11",
-    "prisma": "^5.22.0"
+    "prisma": "^5.22.0",
+    "winston": "^3.18.3",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.5",
