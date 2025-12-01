@@ -1,6 +1,32 @@
 const prisma = require("../config/db.config");
 import { hashPassword, comparePassword } from "../utils/hash";
-import { generateToken } from "../utils/jwt";
+import { generateToken, verifyToken } from "../utils/jwt";
+import { sendEmail } from "../utils/mailer";
+
+const sendVerificationMail = async (org: any) => {
+  const URL = process.env.MAIL_SEND;
+
+  const token = generateToken(org.idnty);
+
+  const verifyUrl = `${URL}?token=${token}`;
+
+  const html = `
+    <h2>Verify Your Organization Account</h2>
+    <p>Hello <b>${org.org_name}</b>,</p>
+    <p>Your account was created successfully. Please click the link below to verify:</p>
+    <a href="${verifyUrl}" 
+       style="padding:10px 15px; background:#4CAF50; color:white; border-radius:4px; text-decoration:none;">
+      Verify Your Account
+    </a>
+    <p>After verification, you can login using the login page.</p>
+  `;
+
+  await sendEmail({
+    to: org.domEmail,
+    subject: "Verify your account",
+    html,
+  });
+};
 
 export class AuthService {
   static async signup(
@@ -53,6 +79,8 @@ export class AuthService {
         },
       });
 
+      await sendVerificationMail(org);
+
       return org;
     }
 
@@ -85,7 +113,7 @@ export class AuthService {
 
     const userResponse = {
       ...user,
-      roleId: roleUUID, 
+      roleId: roleUUID,
     };
 
     const token = generateToken({
@@ -97,5 +125,37 @@ export class AuthService {
     });
 
     return { user: userResponse, token };
+  }
+
+  static async verifyOrg(token: string) {
+    if (!token) throw new Error("Token missing");
+
+    let decoded: any;
+
+    try {
+      decoded = verifyToken(token);
+    } catch (err) {
+      throw new Error("Invalid or expired token");
+    }
+
+    const orgIdnty = decoded.data;
+
+    const org = await prisma.org.findUnique({
+      where: { idnty: orgIdnty },
+    });
+
+    if (!org) {
+      throw new Error("Organization not found");
+    }
+
+    await prisma.org.update({
+      where: { idnty: orgIdnty },
+      data: { isVerf: true },
+    });
+
+    return {
+      success: true,
+      message: "Account verified successfully",
+    };
   }
 }

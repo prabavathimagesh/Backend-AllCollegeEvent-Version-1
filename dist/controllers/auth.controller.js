@@ -27,5 +27,18 @@ class AuthController {
             res.status(400).json({ success: false, message: err.message });
         }
     }
+    static async verifyOrg(req, res) {
+        try {
+            const { token } = req.query;
+            const result = await auth_service_1.AuthService.verifyOrg(token);
+            return res.status(200).json(result);
+        }
+        catch (err) {
+            return res.status(400).json({
+                success: false,
+                message: err.message,
+            });
+        }
+    }
 }
 exports.AuthController = AuthController;

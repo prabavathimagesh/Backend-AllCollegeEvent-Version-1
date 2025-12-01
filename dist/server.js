@@ -8,7 +8,10 @@ dotenv.config();
 const app = express();
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: [process.env.DOMAIN],
+    credentials: true,
+}));
 app.use("/api/auth", authRoutes);
 app.get("/", (req, res) => {
     res.send("Backend running with CommonJS + Express + Prisma");

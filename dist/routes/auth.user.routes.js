@@ -5,4 +5,5 @@ const auth_controller_1 = require("../controllers/auth.controller");
 const router = (0, express_1.Router)();
 router.post("/signup", auth_controller_1.AuthController.signup);
 router.post("/login", auth_controller_1.AuthController.login);
+router.get("/org/verify", auth_controller_1.AuthController.verifyOrg);
 module.exports = router;

@@ -28,4 +28,19 @@ export class AuthController {
       res.status(400).json({ success: false, message: err.message });
     }
   }
+
+  static async verifyOrg(req: Request, res: Response) {
+    try {
+      const { token } = req.query;
+
+      const result = await AuthService.verifyOrg(token as string);
+
+      return res.status(200).json(result);
+    } catch (err: any) {
+      return res.status(400).json({
+        success: false,
+        message: err.message,
+      });
+    }
+  }
 }
