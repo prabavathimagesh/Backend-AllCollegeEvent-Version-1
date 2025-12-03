@@ -8,7 +8,7 @@ import { sendOtpEmail } from "../utils/sendOtp";
 const sendVerificationMail = async (org: any) => {
   const URL = process.env.MAIL_SEND;
 
-  const token = generateToken(org.idnty);
+  const token = generateToken(org.id);
 
   const verifyUrl = `${URL}verify?token=${token}`;
 
@@ -326,28 +326,5 @@ export class AuthService {
     });
 
     return { user, token };
-  }
-
-  static async createEventSrevice(
-    event_title: String,
-    description: String,
-    event_date: String,
-    event_time: String,
-    mode: String,
-    image: string,
-    venue: String
-  ) {
-    const event = await prisma.event.create({
-      data: {
-        title: event_title,
-        description: description,
-        banner_image: image,
-        event_date: event_date,
-        event_time: event_time,
-        venue: venue,
-      },
-    });
-
-    return event;
   }
 }
