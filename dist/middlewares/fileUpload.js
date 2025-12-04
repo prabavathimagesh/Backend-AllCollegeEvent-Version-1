@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
 // Always use project root folder
-const uploadDir = path_1.default.join(process.cwd(), "src/uploads");
+const uploadDir = path_1.default.join(process.cwd(), "uploads");
 const storage = multer_1.default.diskStorage({
     destination: (req, file, cb) => {
         cb(null, uploadDir);

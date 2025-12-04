@@ -3,7 +3,7 @@ import path from "path";
 import { Request, Express } from "express";
 
 // Always use project root folder
-const uploadDir = path.join(process.cwd(), "src/uploads");
+const uploadDir = path.join(process.cwd(), "uploads");
 
 const storage = multer.diskStorage({
   destination: (

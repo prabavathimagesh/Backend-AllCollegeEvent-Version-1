@@ -1,9 +1,11 @@
 import { appLogger } from "./middlewares/requestLogger";
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const authRoutes = require("./routes/auth.routes");
-const eventRoutes = require("./routes/event.routes");
+import express from 'express'
+const cors = require("cors")
+import dotenv from 'dotenv'
+import authRoutes from "./routes/auth.routes"
+import orgRoutes from "./routes/org.routes"
+import userRoutes from "./routes/user.routes";
+import path from 'path'
 
 dotenv.config();
 
@@ -16,11 +18,13 @@ app.use(
     credentials: true,
   })
 );
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use(appLogger);
 
 app.use("/acc", authRoutes);
-app.use("/org", eventRoutes);
+app.use("/org", orgRoutes);
+app.use("/user", userRoutes);
 
 app.get("/", (req: any, res: any) => {
   res.send("Backend running with CommonJS ");

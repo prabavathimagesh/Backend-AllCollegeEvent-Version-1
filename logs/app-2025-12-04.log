@@ -173,3 +173,28 @@ D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\auth.service.js:118:38
 
 Argument `identity`: Invalid value provided. Expected String, provided Object.
 [2025-12-04 11:39:47] [INFO] → Incoming → GET /acc/org/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkZW50aXR5IjoiMGUxMmMwNWEtMTc5MS00ZTM5LWIzNGYtZTM4YWFiMGEyZWRkIn0sImlhdCI6MTc2NDgyODQyMywiZXhwIjoxNzY0OTE0ODIzfQ.De-36b6Ylz5rCz6JEt7MLqZ6R42mMWSF91FsWMbhxVc
+[2025-12-04 11:52:43] [INFO] → Incoming → POST /org/eve/create
+[2025-12-04 11:54:01] [INFO] → Incoming → POST /org/eve/create
+[2025-12-04 11:59:39] [INFO] → Incoming → GET /org/eve
+[2025-12-04 12:01:00] [INFO] → Incoming → GET /org/
+[2025-12-04 12:10:41] [INFO] → Incoming → GET /org/0e12c05a-1791-4e39-b34f-e38aab0a2edd
+[2025-12-04 12:10:51] [INFO] → Incoming → GET /org/
+[2025-12-04 12:11:45] [INFO] → Incoming → GET /org/0e12c05a-1791-4e39-b34f-e38aab0a2edd
+[2025-12-04 12:13:16] [INFO] → Incoming → GET /org/0e12c05a-1791-4e39-b34f-e38aab0a2edd/eve
+[2025-12-04 12:14:32] [INFO] → Incoming → GET /org/0e12c05a-1791-4e39-b34f-e38aab0a2edd/eve
+[2025-12-04 12:21:23] [INFO] → Incoming → POST /org/eve/create
+[2025-12-04 12:27:12] [INFO] → Incoming → POST /org/eve/create
+[2025-12-04 12:28:09] [INFO] → Incoming → POST /org/eve/create
+[2025-12-04 12:28:35] [INFO] → Incoming → GET //uploads/image-1764831489704-575138086.jpg
+[2025-12-04 12:28:40] [INFO] → Incoming → GET /uploads/image-1764831489704-575138086.jpg
+[2025-12-04 12:52:45] [INFO] → Incoming → POST /org/eve/create
+[2025-12-04 12:53:13] [INFO] → Incoming → POST /org/eve/create
+[2025-12-04 12:53:54] [INFO] → Incoming → GET //uploads/image-1764832993025-358277881.jpg
+[2025-12-04 14:12:48] [INFO] → Incoming → POST /user
+[2025-12-04 14:12:54] [INFO] → Incoming → GET /user
+[2025-12-04 14:14:30] [INFO] → Incoming → GET /user/c527d325-7b29-41fd-9ed7-e0cdcc0434d3
+[2025-12-04 14:14:45] [INFO] → Incoming → GET /user/95c48535-a88e-4296-b8c5-30b33bf7f83f
+[2025-12-04 14:15:09] [INFO] → Incoming → GET /user/95c48535-a88e-4296-b8c5-30b33bf7f83
+[2025-12-04 14:15:09] [ERROR] → Error → GET /user/95c48535-a88e-4296-b8c5-30b33bf7f83 | Message: User not found
+[2025-12-04 14:25:00] [INFO] → Incoming → GET /user/95c48535-a88e-4296-b8c5-30b33bf7f83f
+[2025-12-04 14:27:11] [INFO] → Incoming → DELETE /user/95c48535-a88e-4296-b8c5-30b33bf7f83f

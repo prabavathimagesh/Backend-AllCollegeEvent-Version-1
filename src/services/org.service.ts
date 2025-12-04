@@ -34,41 +34,31 @@ export class OrgService {
     });
   }
 
-  static async getEventByIdService(id: String) {
-    return await prisma.event.findUnique({
-      where: { identity: id },
-    });
-  }
-
-  static async updateEventService(
-    id: String,
-    data: {
-      event_title?: string;
-      description?: string;
-      event_date?: string;
-      event_time?: string;
-      mode?: string;
-      image?: string | null;
-      venue?: string;
-    }
-  ) {
-    return await prisma.event.update({
-      where: { identity: id },
-      data: {
-        title: data.event_title,
-        description: data.description,
-        bannerImage: data.image ?? undefined,
-        eventDate: data.event_date,
-        eventTime: data.event_time,
-        mode: data.mode,
-        venue: data.venue,
+  static async getEventById(orgId: string, eventId: string) {
+    return prisma.event.findFirst({
+      where: {
+        identity: eventId,
+        orgIdentity: orgId,
       },
     });
   }
 
-  static async deleteEventService(id: String) {
-    return await prisma.event.delete({
-      where: { identity: id },
+  static async updateEvent(orgId: string, eventId: string, data: any) {
+    return prisma.event.updateMany({
+      where: {
+        identity: eventId,
+        orgIdentity: orgId,
+      },
+      data,
+    });
+  }
+
+  static async deleteEvent(orgId: string, eventId: string) {
+    return prisma.event.deleteMany({
+      where: {
+        identity: eventId,
+        orgIdentity: orgId,
+      },
     });
   }
 
@@ -97,6 +87,17 @@ export class OrgService {
     return prisma.org.update({
       where: { identity },
       data: { isDeleted: true },
+    });
+  }
+
+  static async getEventsByOrg(identity: string) {
+    return prisma.event.findMany({
+      where: {
+        orgIdentity: identity,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
   }
 }
