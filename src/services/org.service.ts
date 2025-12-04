@@ -45,19 +45,30 @@ export class OrgService {
   static async getEventById(
     orgId: string,
     eventId: string
-  ): Promise<EventType[]> {
+  ): Promise<EventType | null> {
     const BASE_URL = process.env.BASE_URL ?? "";
-    const events = prisma.event.findFirst({
+
+    const event = await prisma.event.findFirst({
       where: {
         identity: eventId,
         orgIdentity: orgId,
       },
+      include: {
+        org: {
+          select: {
+            organizationName: true,
+          },
+        },
+      },
     });
 
-    return events.map((event: EventType) => ({
+    if (!event) return null;
+
+    return {
       ...event,
       bannerImage: event.bannerImage ? `${BASE_URL}${event.bannerImage}` : null,
-    }));
+      organizationName: event.org?.organizationName ?? null,
+    };
   }
 
   static async updateEvent(orgId: string, eventId: string, data: any) {

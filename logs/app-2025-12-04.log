@@ -257,3 +257,10 @@ Argument `identity`: Invalid value provided. Expected String, provided Object.
 [2025-12-04 18:23:32] [ERROR] → Error → GET /org/be7c2a49-4d0f-4624-be0f-1c31210e1d8c/eve/0f19f57f-0425-47a2-b722-77d71c7503e2 | Message: events.map is not a function
 [2025-12-04 18:24:12] [INFO] → Incoming → GET /org/be7c2a49-4d0f-4624-be0f-1c31210e1d8c/eve/3b36d292-b8c5-4421-be4c-be4ac20e40e3
 [2025-12-04 18:24:12] [ERROR] → Error → GET /org/be7c2a49-4d0f-4624-be0f-1c31210e1d8c/eve/3b36d292-b8c5-4421-be4c-be4ac20e40e3 | Message: events.map is not a function
+[2025-12-04 18:29:31] [INFO] → Incoming → GET /org/be7c2a49-4d0f-4624-be0f-1c31210e1d8c/eve/3b36d292-b8c5-4421-be4c-be4ac20e40e3
+[2025-12-04 18:29:50] [INFO] → Incoming → GET /org/be7c2a49-4d0f-4624-be0f-1c31210e1d8c/eve/f7bd8f0a-40ba-4c65-a2ec-4e851c61df99
+[2025-12-04 18:29:50] [ERROR] → Error → GET /org/be7c2a49-4d0f-4624-be0f-1c31210e1d8c/eve/f7bd8f0a-40ba-4c65-a2ec-4e851c61df99 | Message: Event not found
+[2025-12-04 18:30:09] [INFO] → Incoming → GET /org/0e12c05a-1791-4e39-b34f-e38aab0a2edd/eve/f7bd8f0a-40ba-4c65-a2ec-4e851c61df99
+[2025-12-04 18:30:27] [INFO] → Incoming → GET /org/0e12c05a-1791-4e39-b34f-e38aab0a2edd/eve
+[2025-12-04 18:30:41] [INFO] → Incoming → GET /org/be7c2a49-4d0f-4624-be0f-1c31210e1d8c
+[2025-12-04 18:30:52] [INFO] → Incoming → GET /org/eve
