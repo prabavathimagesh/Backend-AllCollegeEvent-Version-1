@@ -114,7 +114,7 @@ class AuthService {
         catch (err) {
             throw new Error("Invalid or expired token");
         }
-        const orgIdnty = decoded.data;
+        const orgIdnty = decoded.data.identity;
         const org = await prisma.org.findUnique({
             where: { identity: orgIdnty },
         });

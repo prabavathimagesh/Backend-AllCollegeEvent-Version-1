@@ -20,7 +20,7 @@ app.use(
 app.use(appLogger);
 
 app.use("/acc", authRoutes);
-app.use("/org/eve", eventRoutes);
+app.use("/org", eventRoutes);
 
 app.get("/", (req: any, res: any) => {
   res.send("Backend running with CommonJS ");

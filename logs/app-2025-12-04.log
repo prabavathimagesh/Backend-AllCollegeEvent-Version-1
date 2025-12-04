@@ -150,3 +150,26 @@ D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event.service.js:28:35
 
 Argument `identity` is missing.
 [2025-12-04 10:12:02] [INFO] → Incoming → GET /org/eve/19f02608-1705-4b2a-b592-b3dbbf5aecc8
+[2025-12-04 10:13:35] [INFO] → Incoming → DELETE /org/eve/19f02608-1705-4b2a-b592-b3dbbf5aecc8
+[2025-12-04 11:35:49] [INFO] → Incoming → POST /acc/forgot-password
+[2025-12-04 11:36:17] [INFO] → Incoming → POST /acc/forgot-password
+[2025-12-04 11:37:03] [INFO] → Incoming → POST /acc/signup
+[2025-12-04 11:38:00] [INFO] → Incoming → GET /acc/org/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkZW50aXR5IjoiMGUxMmMwNWEtMTc5MS00ZTM5LWIzNGYtZTM4YWFiMGEyZWRkIn0sImlhdCI6MTc2NDgyODQyMywiZXhwIjoxNzY0OTE0ODIzfQ.De-36b6Ylz5rCz6JEt7MLqZ6R42mMWSF91FsWMbhxVc
+[2025-12-04 11:38:00] [ERROR] → Error → GET /acc/org/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkZW50aXR5IjoiMGUxMmMwNWEtMTc5MS00ZTM5LWIzNGYtZTM4YWFiMGEyZWRkIn0sImlhdCI6MTc2NDgyODQyMywiZXhwIjoxNzY0OTE0ODIzfQ.De-36b6Ylz5rCz6JEt7MLqZ6R42mMWSF91FsWMbhxVc | Message: 
+Invalid `prisma.org.findUnique()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\auth.service.js:118:38
+
+  115     throw new Error("Invalid or expired token");
+  116 }
+  117 const orgIdnty = decoded.data;
+→ 118 const org = await prisma.org.findUnique({
+        where: {
+          identity: {
+            identity: "0e12c05a-1791-4e39-b34f-e38aab0a2edd"
+          }
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        }
+      })
+
+Argument `identity`: Invalid value provided. Expected String, provided Object.
+[2025-12-04 11:39:47] [INFO] → Incoming → GET /acc/org/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkZW50aXR5IjoiMGUxMmMwNWEtMTc5MS00ZTM5LWIzNGYtZTM4YWFiMGEyZWRkIn0sImlhdCI6MTc2NDgyODQyMywiZXhwIjoxNzY0OTE0ODIzfQ.De-36b6Ylz5rCz6JEt7MLqZ6R42mMWSF91FsWMbhxVc

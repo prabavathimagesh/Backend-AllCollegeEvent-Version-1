@@ -15,7 +15,7 @@ app.use(cors({
 }));
 app.use(requestLogger_1.appLogger);
 app.use("/acc", authRoutes);
-app.use("/org/eve", eventRoutes);
+app.use("/org", eventRoutes);
 app.get("/", (req, res) => {
     res.send("Backend running with CommonJS ");
 });
