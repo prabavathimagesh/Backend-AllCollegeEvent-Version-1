@@ -198,3 +198,51 @@ Argument `identity`: Invalid value provided. Expected String, provided Object.
 [2025-12-04 14:15:09] [ERROR] → Error → GET /user/95c48535-a88e-4296-b8c5-30b33bf7f83 | Message: User not found
 [2025-12-04 14:25:00] [INFO] → Incoming → GET /user/95c48535-a88e-4296-b8c5-30b33bf7f83f
 [2025-12-04 14:27:11] [INFO] → Incoming → DELETE /user/95c48535-a88e-4296-b8c5-30b33bf7f83f
+[2025-12-04 15:03:35] [INFO] → Incoming → POST /acc/signup
+[2025-12-04 15:03:35] [ERROR] → Error → POST /acc/signup | Message: Email already registered
+[2025-12-04 15:04:04] [INFO] → Incoming → POST /acc/login
+[2025-12-04 15:17:08] [INFO] → Incoming → POST /acc/signup
+[2025-12-04 15:24:15] [INFO] → Incoming → GET /api/auth/org/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkZW50aXR5IjoiYmU3YzJhNDktNGQwZi00NjI0LWJlMGYtMWMzMTIxMGUxZDhjIn0sImlhdCI6MTc2NDg0MTYyOCwiZXhwIjoxNzY0OTI4MDI4fQ.SyuIvfx9eUuTp8RYtIEMgIzejB2xOsIAGGtxUf3D3ko
+[2025-12-04 15:24:45] [INFO] → Incoming → GET /acc/org/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkZW50aXR5IjoiYmU3YzJhNDktNGQwZi00NjI0LWJlMGYtMWMzMTIxMGUxZDhjIn0sImlhdCI6MTc2NDg0MTYyOCwiZXhwIjoxNzY0OTI4MDI4fQ.SyuIvfx9eUuTp8RYtIEMgIzejB2xOsIAGGtxUf3D3ko
+[2025-12-04 15:25:54] [INFO] → Incoming → POST /org/eve/create
+[2025-12-04 15:29:37] [INFO] → Incoming → POST /org/eve/create
+[2025-12-04 15:29:55] [INFO] → Incoming → POST /org/eve/create
+[2025-12-04 15:35:39] [INFO] → Incoming → GET /org/0e12c05a-1791-4e39-b34f-e38aab0a2edd/eve/0e12c05a-1791-4e39-b34f-e38aab0a2edd
+[2025-12-04 15:35:39] [ERROR] → Error → GET /org/0e12c05a-1791-4e39-b34f-e38aab0a2edd/eve/0e12c05a-1791-4e39-b34f-e38aab0a2edd | Message: Event not found
+[2025-12-04 15:35:58] [INFO] → Incoming → GET /org/0e12c05a-1791-4e39-b34f-e38aab0a2edd/eve/08f8de30-cf02-4366-8103-90427538ec50
+[2025-12-04 15:36:11] [INFO] → Incoming → GET /org/0e12c05a-1791-4e39-b34f-e38aab0a2edd/eve/0f19f57f-0425-47a2-b722-77d71c7503e2
+[2025-12-04 15:36:11] [ERROR] → Error → GET /org/0e12c05a-1791-4e39-b34f-e38aab0a2edd/eve/0f19f57f-0425-47a2-b722-77d71c7503e2 | Message: Event not found
+[2025-12-04 15:36:37] [INFO] → Incoming → GET /org/be7c2a49-4d0f-4624-be0f-1c31210e1d8c/eve/0f19f57f-0425-47a2-b722-77d71c7503e2
+[2025-12-04 15:36:57] [INFO] → Incoming → GET /org/eve
+[2025-12-04 15:42:51] [INFO] → Incoming → DELETE /org/0e12c05a-1791-4e39-b34f-e38aab0a2edd/eve/08f8de30-cf02-4366-8103-90427538ec50
+[2025-12-04 15:43:28] [INFO] → Incoming → GET /org/0e12c05a-1791-4e39-b34f-e38aab0a2edd/eve
+[2025-12-04 15:43:57] [INFO] → Incoming → GET /org/be7c2a49-4d0f-4624-be0f-1c31210e1d8c/eve
+[2025-12-04 15:44:45] [INFO] → Incoming → GET /org
+[2025-12-04 15:44:58] [INFO] → Incoming → GET /org/0e12c05a-1791-4e39-b34f-e38aab0a2edd
+[2025-12-04 15:45:05] [INFO] → Incoming → GET /org/be7c2a49-4d0f-4624-be0f-1c31210e1d8c
+[2025-12-04 16:33:22] [INFO] → Incoming → GET /org/eve
+[2025-12-04 16:33:23] [ERROR] → Error → GET /org/eve | Message: Organization not found
+[2025-12-04 16:33:55] [INFO] → Incoming → GET /org/eve
+[2025-12-04 16:33:55] [ERROR] → Error → GET /org/eve | Message: Organization not found
+[2025-12-04 16:35:26] [INFO] → Incoming → GET /org/eve
+[2025-12-04 16:35:27] [ERROR] → Error → GET /org/eve | Message: Organization not found
+[2025-12-04 16:42:37] [INFO] → Incoming → GET /org/eve
+[2025-12-04 16:42:37] [ERROR] → Error → GET /org/eve | Message: Organization not found
+[2025-12-04 16:43:11] [INFO] → Incoming → POST /acc/login
+[2025-12-04 16:43:24] [INFO] → Incoming → GET /org/eve
+[2025-12-04 16:43:24] [ERROR] → Error → GET /org/eve | Message: Organization not found
+[2025-12-04 16:44:19] [INFO] → Incoming → GET /org/eve
+[2025-12-04 16:44:19] [ERROR] → Error → GET /org/eve | Message: Organization not found
+[2025-12-04 16:44:37] [INFO] → Incoming → GET /org/be7c2a49-4d0f-4624-be0f-1c31210e1d8c/eve/0f19f57f-0425-47a2-b722-77d71c7503e2
+[2025-12-04 16:44:49] [INFO] → Incoming → GET /org/be7c2a49-4d0f-4624-be0f-1c31210e1d8c/eve
+[2025-12-04 16:44:57] [INFO] → Incoming → GET /org/eve
+[2025-12-04 16:44:57] [ERROR] → Error → GET /org/eve | Message: Organization not found
+[2025-12-04 16:47:38] [INFO] → Incoming → GET /org/eve
+[2025-12-04 16:47:38] [ERROR] → Error → GET /org/eve | Message: Organization not found
+[2025-12-04 16:47:49] [INFO] → Incoming → GET /api/user
+[2025-12-04 16:47:53] [INFO] → Incoming → GET /org/eve
+[2025-12-04 16:47:53] [ERROR] → Error → GET /org/eve | Message: Organization not found
+[2025-12-04 16:47:53] [INFO] → Incoming → GET /.well-known/appspecific/com.chrome.devtools.json
+[2025-12-04 16:51:17] [INFO] → Incoming → GET /org/eve
+[2025-12-04 16:51:17] [ERROR] → Error → GET /org/eve | Message: Organization not found
+[2025-12-04 16:52:52] [INFO] → Incoming → GET /org/eve

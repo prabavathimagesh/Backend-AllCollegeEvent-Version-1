@@ -1,4 +1,5 @@
 const prisma = require("../config/db.config");
+import { EventType } from "../types/event.type";
 
 export class OrgService {
   // Events
@@ -28,19 +29,32 @@ export class OrgService {
     return event;
   }
 
-  static async getAllEventsService() {
-    return await prisma.event.findMany({
-      orderBy: { createdBy: "desc" },
+  static async getAllEventsService(): Promise<EventType[]> {
+    const BASE_URL = process.env.BASE_URL ?? "";
+
+    const events = await prisma.event.findMany({
+      orderBy: { createdAt: "desc" },
     });
+
+    return events.map((event: EventType) => ({
+      ...event,
+      bannerImage: event.bannerImage ? `${BASE_URL}${event.bannerImage}` : null,
+    }));
   }
 
-  static async getEventById(orgId: string, eventId: string) {
-    return prisma.event.findFirst({
+  static async getEventById(orgId: string, eventId: string): Promise<EventType[]> {
+    const BASE_URL = process.env.BASE_URL ?? "";
+    const events = prisma.event.findFirst({
       where: {
         identity: eventId,
         orgIdentity: orgId,
       },
     });
+
+    return events.map((event: EventType) => ({
+      ...event,
+      bannerImage: event.bannerImage ? `${BASE_URL}${event.bannerImage}` : null,
+    }));
   }
 
   static async updateEvent(orgId: string, eventId: string, data: any) {
@@ -90,8 +104,10 @@ export class OrgService {
     });
   }
 
-  static async getEventsByOrg(identity: string) {
-    return prisma.event.findMany({
+  static async getEventsByOrg(identity: string): Promise<EventType[]> {
+    const BASE_URL = process.env.BASE_URL ?? "";
+
+    const events = await prisma.event.findMany({
       where: {
         orgIdentity: identity,
       },
@@ -99,5 +115,10 @@ export class OrgService {
         createdAt: "desc",
       },
     });
+
+    return events.map((event: EventType) => ({
+      ...event,
+      bannerImage: event.bannerImage ? `${BASE_URL}${event.bannerImage}` : null,
+    }));
   }
 }
