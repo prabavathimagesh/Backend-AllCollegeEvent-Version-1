@@ -14,4 +14,8 @@ export interface EventType {
   publishedAt?: Date | null;
   orgIdentity: string;
   createdBy?: number | null;
+
+  org?: {
+    organizationName: string;
+  };
 }

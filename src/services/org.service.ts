@@ -32,14 +32,23 @@ export class OrgService {
   static async getAllEventsService(): Promise<EventType[]> {
     const BASE_URL = process.env.BASE_URL ?? "";
 
-    const events = await prisma.event.findMany({
+    const rawEvents = await prisma.event.findMany({
       orderBy: { createdAt: "desc" },
+      include: {
+        org: {
+          select: {
+            organizationName: true,
+          },
+        },
+      },
     });
 
-    return events.map((event: EventType) => ({
-      ...event,
-      bannerImage: event.bannerImage ? `${BASE_URL}${event.bannerImage}` : null,
+    const events: EventType[] = rawEvents.map((e: EventType) => ({
+      ...e,
+      bannerImage: e.bannerImage ? `${BASE_URL}${e.bannerImage}` : null,
     }));
+
+    return events;
   }
 
   static async getEventById(
@@ -67,7 +76,6 @@ export class OrgService {
     return {
       ...event,
       bannerImage: event.bannerImage ? `${BASE_URL}${event.bannerImage}` : null,
-      organizationName: event.org?.organizationName ?? null,
     };
   }
 
@@ -127,6 +135,13 @@ export class OrgService {
       },
       orderBy: {
         createdAt: "desc",
+      },
+      include: {
+        org: {
+          select: {
+            organizationName: true,
+          },
+        },
       },
     });
 
