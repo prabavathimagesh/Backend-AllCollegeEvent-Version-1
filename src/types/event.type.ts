@@ -25,3 +25,12 @@ export interface DecodedToken {
   roleId: number;
   email: string;
 }
+
+export interface JwtPayload {
+  identity: string;
+  email: string;
+  roleId?: string | null;
+  type?: string;
+  iat?: number;
+  exp?: number;
+}

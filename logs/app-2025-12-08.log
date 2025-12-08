@@ -94,3 +94,8 @@
 [2025-12-08 14:54:19] [INFO] → Incoming → GET /api/v1/events/b0cf3ed4-ff03-49ce-90a5-0dcec180997f
 [2025-12-08 14:54:26] [INFO] → Incoming → GET /api/v1/events
 [2025-12-08 14:54:42] [INFO] → Incoming → GET /api/v1/events/e517e390-2f24-4947-b41f-5083aa75e56f
+[2025-12-08 14:56:12] [INFO] → Incoming → GET /api/v1/events/e517e390-2f24-4947-b41f-5083aa75e56f
+[2025-12-08 15:18:23] [INFO] → Incoming → GET /api/v1/events
+[2025-12-08 15:19:19] [INFO] → Incoming → GET /api/v1/events/b0cf3ed4-ff03-49ce-90a5-0dcec180997f
+[2025-12-08 15:48:24] [INFO] → Incoming → GET /api/v1/organizations
+[2025-12-08 15:48:24] [INFO] → Incoming → GET /favicon.ico
