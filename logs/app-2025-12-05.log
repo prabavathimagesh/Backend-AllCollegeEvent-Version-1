@@ -181,3 +181,31 @@ Unknown argument `org_name`. Available options are marked with ?.
 [2025-12-05 18:18:33] [INFO] → Incoming → DELETE /api/v1/user/95c48535-a88e-4296-b8c5-30b33bf7f83f
 [2025-12-05 18:19:49] [INFO] → Incoming → PUT /api/v1/user/95c48535-a88e-4296-b8c5-30b33bf7f83f
 [2025-12-05 18:20:24] [INFO] → Incoming → PUT /api/v1/user/95c48535-a88e-4296-b8c5-30b33bf7f83f
+[2025-12-05 18:30:18] [INFO] → Incoming → POST /api/v1/auth/login
+[2025-12-05 18:30:50] [INFO] → Incoming → POST /api/v1/auth/login
+[2025-12-05 18:30:50] [ERROR] → Error → POST /api/v1/auth/login | Message: Account not found
+[2025-12-05 18:31:02] [INFO] → Incoming → POST /api/v1/auth/login
+[2025-12-05 18:32:01] [INFO] → Incoming → POST /api/v1/auth/forgot-password
+[2025-12-05 18:34:03] [INFO] → Incoming → POST /api/v1/auth/verify-otp
+[2025-12-05 18:34:33] [INFO] → Incoming → POST /api/v1/auth/resend-otp
+[2025-12-05 18:35:06] [INFO] → Incoming → POST /api/v1/auth/reset-password
+[2025-12-05 18:35:54] [INFO] → Incoming → POST /api/v1/auth/google-login
+[2025-12-05 18:35:54] [ERROR] → Error → POST /api/v1/auth/google-login | Message: Token used too late, 1764939954.866 > 1764826332: {"iss":"https://accounts.google.com","azp":"314936427170-7fllsiqr9r9kugsd4246onum2pqqco9h.apps.googleusercontent.com","aud":"314936427170-7fllsiqr9r9kugsd4246onum2pqqco9h.apps.googleusercontent.com","sub":"113620763572279472591","email":"prabavathi3898@gmail.com","email_verified":true,"nbf":1764822132,"name":"Prabavathi M","picture":"https://lh3.googleusercontent.com/a/ACg8ocJ3EVCb7pCKL7iVB4lgaJdM7hy5wWYdCrHCVrIFhWPSLvEc2bGM=s96-c","given_name":"Prabavathi","family_name":"M","iat":1764822432,"exp":1764826032,"jti":"6249edc56cee22d993d073d9d797d7a92dc6200c"}
+[2025-12-05 18:36:54] [INFO] → Incoming → GET /api/v1/auth/org/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkZW50aXR5IjoiYmU3YzJhNDktNGQwZi00NjI0LWJlMGYtMWMzMTIxMGUxZDhjIn0sImlhdCI6MTc2NDg0MTYyOCwiZXhwIjoxNzY0OTI4MDI4fQ.SyuIvfx9eUuTp8RYtIEMgIzejB2xOsIAGGtxUf3D3ko
+[2025-12-05 18:36:54] [ERROR] → Error → GET /api/v1/auth/org/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkZW50aXR5IjoiYmU3YzJhNDktNGQwZi00NjI0LWJlMGYtMWMzMTIxMGUxZDhjIn0sImlhdCI6MTc2NDg0MTYyOCwiZXhwIjoxNzY0OTI4MDI4fQ.SyuIvfx9eUuTp8RYtIEMgIzejB2xOsIAGGtxUf3D3ko | Message: Invalid or expired token
+[2025-12-05 18:37:25] [INFO] → Incoming → GET /api/v1/users
+[2025-12-05 18:37:48] [INFO] → Incoming → GET /api/v1/users/95c48535-a88e-4296-b8c5-30b33bf7f83f
+[2025-12-05 18:38:43] [INFO] → Incoming → PUT /api/v1/user/95c48535-a88e-4296-b8c5-30b33bf7f83f
+[2025-12-05 18:39:20] [INFO] → Incoming → DELETE /api/v1/user/95c48535-a88e-4296-b8c5-30b33bf7f83f
+[2025-12-05 18:40:40] [INFO] → Incoming → GET /api/v1/organizations/
+[2025-12-05 18:40:51] [INFO] → Incoming → GET /api/v1/organizations/be7c2a49-4d0f-4624-be0f-1c31210e1d8c
+[2025-12-05 18:41:25] [INFO] → Incoming → PUT /api/v1/organizations/be7c2a49-4d0f-4624-be0f-1c31210e1d8c
+[2025-12-05 18:41:36] [INFO] → Incoming → DELETE /api/v1/organizations/be7c2a49-4d0f-4624-be0f-1c31210e1d8c
+[2025-12-05 18:42:04] [INFO] → Incoming → GET /api/v1/organizations/be7c2a49-4d0f-4624-be0f-1c31210e1d8c/events
+[2025-12-05 18:42:37] [INFO] → Incoming → GET /api/v1/organizations/0e12c05a-1791-4e39-b34f-e38aab0a2edd/events/d4eff323-fa38-41fb-92de-1a97919c4e4d
+[2025-12-05 18:42:37] [ERROR] → Error → GET /api/v1/organizations/0e12c05a-1791-4e39-b34f-e38aab0a2edd/events/d4eff323-fa38-41fb-92de-1a97919c4e4d | Message: Event not found
+[2025-12-05 18:42:54] [INFO] → Incoming → GET /api/v1/organizations/0e12c05a-1791-4e39-b34f-e38aab0a2edd/events/312c2c2c-b794-4153-a275-071030763103
+[2025-12-05 18:44:28] [INFO] → Incoming → POST /api/v1/organizations/be7c2a49-4d0f-4624-be0f-1c31210e1d8c/events
+[2025-12-05 18:45:33] [INFO] → Incoming → PUT /api/v1/organizations/0e12c05a-1791-4e39-b34f-e38aab0a2edd/events/312c2c2c-b794-4153-a275-071030763103
+[2025-12-05 18:46:12] [INFO] → Incoming → DELETE /api/v1/organizations/0e12c05a-1791-4e39-b34f-e38aab0a2edd/events/d4eff323-fa38-41fb-92de-1a97919c4e4d
+[2025-12-05 18:47:17] [INFO] → Incoming → DELETE /api/v1/organizations/0e12c05a-1791-4e39-b34f-e38aab0a2edd/events/f7bd8f0a-40ba-4c65-a2ec-4e851c61df99

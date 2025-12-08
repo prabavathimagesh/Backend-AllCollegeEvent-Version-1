@@ -21,10 +21,12 @@ app.use(cors({
 }));
 app.use("/uploads", express_1.default.static(path_1.default.join(__dirname, "../uploads")));
 app.use(requestLogger_1.appLogger);
+// Version 1 API prefix
 app.use("/api/v1/auth", auth_routes_1.default);
 app.use("/api/v1", user_routes_1.default);
 app.use("/api/v1", org_routes_1.default);
 app.use("/api/v1/organizations", event_routes_1.default);
+// testing API
 app.get("/", (req, res) => {
     res.send("Backend running with CommonJS ");
 });

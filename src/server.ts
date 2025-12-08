@@ -24,11 +24,13 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use(appLogger);
 
+// Version 1 API prefix
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1", userRoutes);
 app.use("/api/v1", orgRoutes);
 app.use("/api/v1/organizations",eventRoutes)
 
+// testing API
 app.get("/", (req: any, res: any) => {
   res.send("Backend running with CommonJS ");
 });

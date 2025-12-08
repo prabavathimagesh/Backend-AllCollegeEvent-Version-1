@@ -113,7 +113,7 @@ export class AuthService {
       roleUUID = role?.idnty || null;
     }
 
-    const userResponse = {
+    const data = {
       ...user,
       roleId: roleUUID,
     };
@@ -125,7 +125,7 @@ export class AuthService {
       type: type,
     });
 
-    return { user: userResponse, token };
+    return { data, token };
   }
 
   static async verifyOrg(token: string) {

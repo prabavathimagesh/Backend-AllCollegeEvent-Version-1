@@ -9,24 +9,23 @@ export class AuthController {
       const user = await AuthService.signup(name, email, password, type, rest);
 
       res.status(201).json({
-        success: true,
+        status: true,
         message: `${type} created successfully`,
-        user,
+        data: user,
       });
     } catch (err: any) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ status: false, message: err.message });
     }
   }
 
   static async login(req: Request, res: Response) {
     try {
       const { email, password, type } = req.body;
-      console.log(email, password, type);
 
       const data = await AuthService.login(email, password, type);
-      res.status(200).json({ success: true, ...data });
+      res.status(200).json({ status: true, ...data });
     } catch (err: any) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ status: false, message: err.message });
     }
   }
 
@@ -36,10 +35,12 @@ export class AuthController {
 
       const result = await AuthService.verifyOrg(token as string);
 
-      return res.status(200).json(result);
+      return res
+        .status(200)
+        .json({ status: true, data: result, message: "verified" });
     } catch (err: any) {
       return res.status(400).json({
-        success: false,
+        status: false,
         message: err.message,
       });
     }
@@ -51,9 +52,11 @@ export class AuthController {
 
       const result = await AuthService.forgotPassword(email);
 
-      return res.status(200).json(result);
+      return res
+        .status(200)
+        .json({ data: result, status: true, message: "email received" });
     } catch (err: any) {
-      return res.status(400).json({ success: false, message: err.message });
+      return res.status(400).json({ status: false, message: err.message });
     }
   }
 
@@ -63,9 +66,9 @@ export class AuthController {
 
       const result = await AuthService.resendOtp(email);
 
-      return res.status(200).json(result);
+      return res.status(200).json({ data: result, status: true, message: "" });
     } catch (err: any) {
-      return res.status(400).json({ success: false, message: err.message });
+      return res.status(400).json({ status: false, message: err.message });
     }
   }
 
@@ -75,9 +78,11 @@ export class AuthController {
 
       const result = await AuthService.verifyOtp(email, otp);
 
-      return res.status(200).json(result);
+      return res
+        .status(200)
+        .json({ data: result, status: true, message: "otp verified" });
     } catch (err: any) {
-      return res.status(400).json({ success: false, message: err.message });
+      return res.status(400).json({ status: false, message: err.message });
     }
   }
 
@@ -87,9 +92,13 @@ export class AuthController {
 
       const result = await AuthService.resetPassword(email, password);
 
-      return res.status(200).json(result);
+      return res.status(200).json({
+        data: result,
+        status: true,
+        message: "Password reset successfully",
+      });
     } catch (err: any) {
-      return res.status(400).json({ success: false, message: err.message });
+      return res.status(400).json({ status: false, message: err.message });
     }
   }
 
@@ -118,14 +127,15 @@ export class AuthController {
       });
 
       return res.status(200).json({
-        success: true,
-        user,
+        status: true,
+        data: user,
         token,
+        message: "Login Successfully",
       });
     } catch (err: any) {
       console.error("Google Login Error:", err);
       return res.status(500).json({
-        success: false,
+        status: false,
         message: err.message || "Google login failed",
       });
     }
