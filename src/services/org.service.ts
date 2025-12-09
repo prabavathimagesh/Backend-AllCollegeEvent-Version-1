@@ -3,6 +3,7 @@ import { EventType } from "../types/event.type";
 
 export class OrgService {
   static async getAllOrgs() {
+    // fetching all organizations that are not deleted
     return prisma.org.findMany({
       where: { isDeleted: false },
       orderBy: { createdAt: "desc" },
@@ -10,12 +11,14 @@ export class OrgService {
   }
 
   static async getOrgById(identity: string) {
+    // fetching a single organization by identity
     return prisma.org.findUnique({
       where: { identity },
     });
   }
 
   static async updateOrg(identity: string, data: any) {
+    // mapping incoming fields to database fields before update
     const mappedData = {
       ...(data.password && { password: data.password }),
       ...(data.org_name && { organizationName: data.org_name }),
@@ -31,6 +34,7 @@ export class OrgService {
       }),
     };
 
+    // updating organization details with mapped values
     return prisma.org.update({
       where: { identity },
       data: mappedData,
@@ -38,6 +42,7 @@ export class OrgService {
   }
 
   static async deleteOrg(identity: string) {
+    // soft-deleting organization by setting isDeleted = true
     return prisma.org.update({
       where: { identity },
       data: { isDeleted: true },
@@ -47,6 +52,7 @@ export class OrgService {
   static async getEventsByOrg(identity: string): Promise<EventType[]> {
     const BASE_URL = process.env.BASE_URL ?? "";
 
+    // fetching all events that belong to specific organization
     const events = await prisma.event.findMany({
       where: {
         orgIdentity: identity,
@@ -63,6 +69,7 @@ export class OrgService {
       },
     });
 
+    // mapping banner image URLs to include BASE_URL
     return events.map((event: EventType) => ({
       ...event,
       bannerImage: event.bannerImage ? `${BASE_URL}${event.bannerImage}` : null,

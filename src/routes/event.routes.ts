@@ -2,6 +2,8 @@ import { Router } from "express";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { EventController } from "../controllers/event.controller";
 import upload from "../middlewares/fileUpload";
+import { validate } from "../utils/validate";
+import { eventValidation } from "../validations/event.validation";
 
 const router = Router();
 
@@ -23,6 +25,7 @@ router.get("/organizations/:orgId/events/:eventId", EventController.getEventById
  */
 router.post(
   "/organizations/:orgId/events",
+  validate(eventValidation.create),
   upload.single("image"),
   EventController.createEvent
 );
@@ -34,6 +37,7 @@ router.post(
 router.put(
   "/organizations/:orgId/events/:eventId",
   upload.single("image"),
+  validate(eventValidation.create),
   EventController.updateEvent
 );
 

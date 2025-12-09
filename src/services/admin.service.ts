@@ -6,24 +6,29 @@ import { sendOtpEmail } from "../utils/sendOtp";
 
 export default class AdminService {
   static async login(email: string, password: string) {
+    // fetching user along with role to verify admin permissions
     const user = await prisma.user.findUnique({
       where: { email },
       include: { role: true },
     });
 
+    // checking if user exists
     if (!user) throw new Error("Admin account not found");
 
+    // validating account status
     if (user.isDeleted) throw new Error("Account deleted");
     if (!user.isActive) throw new Error("Account inactive");
 
-    // Check admin identity: flag or role name
+    // verifying if user is actually an admin (via flag or role name)
     const isAdminFlag = (user as any).isAdmin === true;
     const roleIsAdmin = user.role?.name?.toLowerCase() === "admin";
     if (!isAdminFlag && !roleIsAdmin) throw new Error("Not an admin");
 
+    // checking password correctness
     const ok = await comparePassword(password, user.password);
     if (!ok) throw new Error("Invalid credentials");
 
+    // generating admin login token
     const token = generateToken({
       identity: user.identity,
       email: user.email,
@@ -31,15 +36,17 @@ export default class AdminService {
       type: "admin",
     });
 
-    // hide password
+    // removing password from response
     const { password: _p, ...rest } = user as any;
     return { user: rest, token };
   }
 
   static async listUsers(page = 1, limit = 20) {
+    // applying pagination logic
     const take = Number(limit);
     const skip = (Number(page) - 1) * take;
 
+    // fetching users + total count in parallel
     const [rows, total] = await Promise.all([
       prisma.user.findMany({
         skip,
@@ -59,6 +66,7 @@ export default class AdminService {
       prisma.user.count(),
     ]);
 
+    // returning paginated response
     return {
       data: rows,
       meta: {
@@ -70,6 +78,7 @@ export default class AdminService {
   }
 
   static async getUserById(userID: string) {
+    // fetching a single user with selected fields only
     const user = await prisma.user.findUnique({
       where: { identity: userID },
       select: {
@@ -88,24 +97,25 @@ export default class AdminService {
   }
 
   static async createUser(payload: any) {
-    // ensure email not taken
+    // checking if the email already exists
     const found = await prisma.user.findUnique({
       where: { email: payload.email },
     });
     if (found) throw new Error("Email already in use");
 
+    // ensuring password is provided
     if (payload.password) {
       payload.password = await hashPassword(payload.password);
     } else {
-      // optional: generate random password or reject
       throw new Error("Password is required");
     }
 
+    // creating new user
     const user = await prisma.user.create({
       data: {
         name: payload.name,
         email: payload.email,
-        password: payload.password
+        password: payload.password,
       },
       select: {
         identity: true,
@@ -119,16 +129,20 @@ export default class AdminService {
   }
 
   static async updateUser(userID: string, payload: any) {
-    // disallow updating identity, id, createdAt
+    // preventing modification of restricted fields
     delete payload.identity;
     delete payload.id;
     delete payload.createdAt;
 
+    // hashing password if updated
     if (payload.password) {
       payload.password = await hashPassword(payload.password);
     }
+
+    // normalizing phone number field
     if (payload.phone) payload.phone = String(payload.phone);
 
+    // updating user with new payload
     const user = await prisma.user.update({
       where: { identity: userID },
       data: payload,
@@ -146,7 +160,7 @@ export default class AdminService {
   }
 
   static async deleteUser(userID: string) {
-    // soft delete: set isDeleted = true (safer)
+    // soft-delete user (safer than permanent deletion)
     const user = await prisma.user.update({
       where: { identity: userID },
       data: { isDeleted: true, isActive: false },
