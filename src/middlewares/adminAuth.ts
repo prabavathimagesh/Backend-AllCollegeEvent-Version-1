@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 const prisma = require("../config/db.config");
-import { JwtPayload } from "../types/event.type";
+import { JwtPayload } from "../types/type";
 
 export default async function adminAuth(
   req: Request & { user?: any },

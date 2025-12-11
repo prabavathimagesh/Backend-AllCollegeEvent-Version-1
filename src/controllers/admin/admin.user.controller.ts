@@ -1,26 +1,7 @@
-import { Request, Response, NextFunction } from "express";
-import { AuthService } from "../services/auth.service";
-import AdminService from "../services/admin.service";
+import { Request, Response } from "express";
+import AdminUserService from "../../services/admin/admin.user.service";
 
-export default class AdminController {
-  static async login(req: Request, res: Response) {
-    try {
-      // extracting admin login credentials from request body
-      const { email, password } = req.body;
-
-      // validating admin credentials using service
-      const result = await AdminService.login(email, password);
-
-      // sending login success response
-      return res
-        .status(200)
-        .json({ status: true, data: result, message: "Logged in" });
-    } catch (err: any) {
-      // invalid credentials or login failure
-      return res.status(400).json({ status: false, message: err.message });
-    }
-  }
-
+export class AdminUserController {
   static async listUsers(req: Request, res: Response) {
     try {
       // parsing pagination values (page & limit)
@@ -28,10 +9,10 @@ export default class AdminController {
       const limit = req.query.limit ? Number(req.query.limit) : 20;
 
       // fetching paginated list of users
-      const result = await AdminService.listUsers(page, limit);
+      const result = await  AdminUserService.listUsers(page, limit);
 
       // returning list of users
-      return res.status(200).json({ status: true, ...result });
+      return res.status(200).json({ status: true, data:result, message:"User list fetched" });
     } catch (err: any) {
       // server error during user listing
       return res.status(500).json({ status: false, message: err.message });
@@ -44,7 +25,7 @@ export default class AdminController {
       const { userID } = req.params;
 
       // fetching user by id
-      const user = await AdminService.getUserById(userID);
+      const user = await  AdminUserService.getUserById(userID);
 
       // checking if user exists
       if (!user)
@@ -53,7 +34,7 @@ export default class AdminController {
           .json({ status: false, message: "User not found" });
 
       // returning user data
-      return res.status(200).json({ status: true, data: user });
+      return res.status(200).json({ status: true, data: user, message:"User data fetched" });
     } catch (err: any) {
       // internal error fetching specific user
       return res.status(500).json({ status: false, message: err.message });
@@ -66,7 +47,7 @@ export default class AdminController {
       const payload = req.body;
 
       // creating new user using service layer
-      const user = await AdminService.createUser(payload);
+      const user = await  AdminUserService.createUser(payload);
 
       // returning creation success response
       return res
@@ -87,7 +68,7 @@ export default class AdminController {
       const payload = req.body;
 
       // updating user in service layer
-      const user = await AdminService.updateUser(userID, payload);
+      const user = await  AdminUserService.updateUser(userID, payload);
 
       // returning update success message
       return res
@@ -105,7 +86,7 @@ export default class AdminController {
       const { userID } = req.params;
 
       // deleting user through service
-      const user = await AdminService.deleteUser(userID);
+      const user = await  AdminUserService.deleteUser(userID);
 
       // returning delete success message
       return res

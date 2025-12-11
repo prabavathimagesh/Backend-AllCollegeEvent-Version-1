@@ -1,46 +1,8 @@
-const prisma = require("../config/db.config");
-import { hashPassword, comparePassword } from "../utils/hash";
-import { generateToken, verifyToken } from "../utils/jwt";
-import { sendEmail } from "../utils/mailer";
-import { sendOtpEmail } from "../utils/sendOtp";
+const prisma = require("../../config/db.config");
+import { hashPassword, comparePassword } from "../../utils/hash";
+import { generateToken, verifyToken } from "../../utils/jwt";
 
-export default class AdminService {
-  static async login(email: string, password: string) {
-    // fetching user along with role to verify admin permissions
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: { role: true },
-    });
-
-    // checking if user exists
-    if (!user) throw new Error("Admin account not found");
-
-    // validating account status
-    if (user.isDeleted) throw new Error("Account deleted");
-    if (!user.isActive) throw new Error("Account inactive");
-
-    // verifying if user is actually an admin (via flag or role name)
-    const isAdminFlag = (user as any).isAdmin === true;
-    const roleIsAdmin = user.role?.name?.toLowerCase() === "admin";
-    if (!isAdminFlag && !roleIsAdmin) throw new Error("Not an admin");
-
-    // checking password correctness
-    const ok = await comparePassword(password, user.password);
-    if (!ok) throw new Error("Invalid credentials");
-
-    // generating admin login token
-    const token = generateToken({
-      identity: user.identity,
-      email: user.email,
-      roleId: user.role ? user.role.idnty : null,
-      type: "admin",
-    });
-
-    // removing password from response
-    const { password: _p, ...rest } = user as any;
-    return { user: rest, token };
-  }
-
+export default class AdminUserService {
   static async listUsers(page = 1, limit = 20) {
     // applying pagination logic
     const take = Number(limit);
@@ -103,12 +65,20 @@ export default class AdminService {
     });
     if (found) throw new Error("Email already in use");
 
-    // ensuring password is provided
-    if (payload.password) {
-      payload.password = await hashPassword(payload.password);
-    } else {
+    const role = await prisma.role.findFirst({
+      where: { name: "user" },
+    });
+
+    if (!role) {
+      throw new Error("Invalid role name");
+    }
+
+    // ensure password provided
+    if (!payload.password) {
       throw new Error("Password is required");
     }
+
+    payload.password = await hashPassword(payload.password);
 
     // creating new user
     const user = await prisma.user.create({
@@ -116,12 +86,14 @@ export default class AdminService {
         name: payload.name,
         email: payload.email,
         password: payload.password,
+        roleId: role.id,
       },
       select: {
         identity: true,
         name: true,
         email: true,
         isActive: true,
+        roleId: true,
       },
     });
 

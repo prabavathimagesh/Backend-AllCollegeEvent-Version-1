@@ -1,5 +1,5 @@
 const prisma = require("../config/db.config");
-import { EventType } from "../types/event.type";
+import { EventType } from "../types/type";
 
 export class OrgService {
   static async getAllOrgs() {
@@ -49,6 +49,7 @@ export class OrgService {
     });
   }
 
+  
   static async getEventsByOrg(identity: string): Promise<EventType[]> {
     const BASE_URL = process.env.BASE_URL ?? "";
 

@@ -35,4 +35,30 @@ export const eventValidation = {
       venue: Joi.string().required(),
     }),
   },
+
+  getSingle: {
+    params: Joi.object({
+      orgId: Joi.string().uuid().required(),
+      eventId: Joi.string().uuid().required(),
+    }),
+  },
+
+  getAll: {
+    params: Joi.object({
+      orgId: Joi.string().uuid().required(),
+    }),
+  },
+
+  deleteEvent: {
+    params: Joi.object({
+      orgId: Joi.string().uuid().required(),
+      eventId: Joi.string().uuid().required(),
+    }),
+  },
+
+  getSinglePublicEvent: {
+    params: Joi.object({
+      eventId: Joi.string().uuid().required(),
+    }),
+  },
 };

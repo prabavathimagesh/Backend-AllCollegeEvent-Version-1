@@ -1,5 +1,5 @@
 const prisma = require("../config/db.config");
-import { EventType } from "../types/event.type";
+import { EventType } from "../types/type";
 
 export class EventService {
   static async createEventService(data: {

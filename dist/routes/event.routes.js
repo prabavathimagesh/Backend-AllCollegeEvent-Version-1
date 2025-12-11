@@ -13,12 +13,12 @@ const router = (0, express_1.Router)();
  * @route GET /api/v1/organizations/:orgId/events
  * @desc  Get all events of a specific organization
  */
-router.get("/organizations/:orgId/events", event_controller_1.EventController.getOrgEvents);
+router.get("/organizations/:orgId/events", (0, validate_1.validate)(event_validation_1.eventValidation.getAll), event_controller_1.EventController.getOrgEvents);
 /**
  * @route GET /api/v1/organizations/:orgId/events/:eventId
  * @desc  Get a single event under an organization
  */
-router.get("/organizations/:orgId/events/:eventId", event_controller_1.EventController.getEventById);
+router.get("/organizations/:orgId/events/:eventId", (0, validate_1.validate)(event_validation_1.eventValidation.getSingle), event_controller_1.EventController.getEventById);
 /**
  * @route POST /api/v1/organizations/:orgId/events
  * @desc  Create a new event (with image upload)
@@ -28,12 +28,12 @@ router.post("/organizations/:orgId/events", (0, validate_1.validate)(event_valid
  * @route PUT /api/v1/organizations/:orgId/events/:eventId
  * @desc  Update an event (with optional image upload)
  */
-router.put("/organizations/:orgId/events/:eventId", fileUpload_1.default.single("image"), (0, validate_1.validate)(event_validation_1.eventValidation.create), event_controller_1.EventController.updateEvent);
+router.put("/organizations/:orgId/events/:eventId", (0, validate_1.validate)(event_validation_1.eventValidation.update), fileUpload_1.default.single("image"), event_controller_1.EventController.updateEvent);
 /**
  * @route DELETE /api/v1/organizations/:orgId/events/:eventId
  * @desc  Delete an event
  */
-router.delete("/organizations/:orgId/events/:eventId", event_controller_1.EventController.deleteEvent);
+router.delete("/organizations/:orgId/events/:eventId", (0, validate_1.validate)(event_validation_1.eventValidation.deleteEvent), event_controller_1.EventController.deleteEvent);
 /* ----------------------- PUBLIC EVENT ROUTES ----------------------- */
 /**
  * @route GET /api/v1/events
@@ -44,5 +44,5 @@ router.get("/events", event_controller_1.EventController.getAllEvents);
  * @route GET /api/v1/events/:eventId
  * @desc  Get a single public event
  */
-router.get("/events/:eventId", event_controller_1.EventController.getSingleEvent);
+router.get("/events/:eventId", (0, validate_1.validate)(event_validation_1.eventValidation.getSinglePublicEvent), event_controller_1.EventController.getSingleEvent);
 exports.default = router;

@@ -34,3 +34,26 @@ export interface JwtPayload {
   iat?: number;
   exp?: number;
 }
+
+export interface UserType {
+  identity: string;
+  id: string;
+
+  name: string;
+  email: string;
+  password?: string;
+
+  phone?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  profileImage?: string;
+
+  isActive: boolean;
+  isDeleted: boolean;
+
+  createdAt: Date;
+  lastLoginAt?: Date;
+
+  roleId?: number;
+}

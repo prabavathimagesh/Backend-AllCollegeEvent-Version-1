@@ -24,13 +24,13 @@ model User {
 
   name     String
   email    String @unique
-  password String // was pwd
+  password String 
 
   phone        String?
   city         String?
   state        String?
   country      String?
-  profileImage String? // was pImg
+  profileImage String? 
 
   isDeleted   Boolean   @default(false)
   isActive    Boolean?  @default(true)
@@ -39,7 +39,10 @@ model User {
   roleId Int?
   role   Role? @relation(fields: [roleId], references: [id])
 
-  createdAt DateTime @default(now()) // was crAt
+  isAdminCreated Boolean @default(false)
+  adminCreatedBy String?
+
+  createdAt DateTime @default(now())
 
   otps          OTP[]
   events        Event[] // was Event Event[]
@@ -74,6 +77,9 @@ model Org {
   isActive  Boolean?  @default(true)
   logoUrl   String?
   website   String?
+
+  isAdminCreated Boolean @default(false)
+  adminCreatedBy String?
 
   createdAt DateTime @default(now())
 

@@ -19,8 +19,6 @@ export const userValidation = {
       userId: Joi.string().uuid().required(),
     }),
     body: Joi.object({
-      name: Joi.string().min(3),
-      email: Joi.string().email(),
       password: Joi.string().min(6),
       phone: Joi.string(),
       city: Joi.string(),
@@ -28,6 +26,19 @@ export const userValidation = {
       country: Joi.string(),
       profileImage: Joi.string(),
       isActive: Joi.boolean(),
+      isDeleted: Joi.boolean(),
+    }),
+  },
+
+  getSingle: {
+    params: Joi.object({
+      userId: Joi.string().uuid().required(),
+    }),
+  },
+
+  deleteUser: {
+    params: Joi.object({
+      userId: Joi.string().uuid().required(),
     }),
   },
 };

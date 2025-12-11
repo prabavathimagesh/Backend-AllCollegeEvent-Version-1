@@ -13,7 +13,7 @@ const sendVerificationMail = async (org) => {
     // generating token for org verification
     const token = (0, jwt_1.generateToken)({ identity: org.identity });
     // preparing verification link
-    const verifyUrl = `${URL}verify?token=${token}`;
+    const verifyUrl = `${URL}auth?token=${token}`;
     // html template for verification mail
     const html = `
     <h2>Verify Your Organization Account</h2>

@@ -11,13 +11,21 @@ const router = Router();
  * @route GET /api/v1/organizations/:orgId/events
  * @desc  Get all events of a specific organization
  */
-router.get("/organizations/:orgId/events", EventController.getOrgEvents);
+router.get(
+  "/organizations/:orgId/events",
+  validate(eventValidation.getAll),
+  EventController.getOrgEvents
+);
 
 /**
  * @route GET /api/v1/organizations/:orgId/events/:eventId
  * @desc  Get a single event under an organization
  */
-router.get("/organizations/:orgId/events/:eventId", EventController.getEventById);
+router.get(
+  "/organizations/:orgId/events/:eventId",
+  validate(eventValidation.getSingle),
+  EventController.getEventById
+);
 
 /**
  * @route POST /api/v1/organizations/:orgId/events
@@ -36,8 +44,8 @@ router.post(
  */
 router.put(
   "/organizations/:orgId/events/:eventId",
+  validate(eventValidation.update),
   upload.single("image"),
-  validate(eventValidation.create),
   EventController.updateEvent
 );
 
@@ -47,6 +55,7 @@ router.put(
  */
 router.delete(
   "/organizations/:orgId/events/:eventId",
+  validate(eventValidation.deleteEvent),
   EventController.deleteEvent
 );
 
@@ -62,6 +71,10 @@ router.get("/events", EventController.getAllEvents);
  * @route GET /api/v1/events/:eventId
  * @desc  Get a single public event
  */
-router.get("/events/:eventId", EventController.getSingleEvent);
+router.get(
+  "/events/:eventId",
+  validate(eventValidation.getSinglePublicEvent),
+  EventController.getSingleEvent
+);
 
 export default router;
