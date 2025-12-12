@@ -6,7 +6,6 @@ export default class AdminOrgService {
   static async getAllOrgs() {
     //fetch all non-deleted organizations for admin panel
     return prisma.org.findMany({
-      where: { isDeleted: false },
       orderBy: { createdAt: "desc" },
     });
   }

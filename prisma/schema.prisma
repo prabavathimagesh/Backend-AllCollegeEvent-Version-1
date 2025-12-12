@@ -121,7 +121,7 @@ model Event {
   id       Int    @unique @default(autoincrement())
 
   orgIdentity String
-  createdBy   Int? // <-- FIXED (must match User.id)
+  createdBy   Int?
 
   title       String
   slug        String?
@@ -138,7 +138,7 @@ model Event {
   updatedAt   DateTime  @updatedAt
 
   status EventStatus @default(PENDING)
-  
+
   org          Org     @relation(fields: [orgIdentity], references: [identity])
   User         User?   @relation(fields: [userIdentity], references: [identity])
   userIdentity String?

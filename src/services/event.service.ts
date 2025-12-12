@@ -97,8 +97,7 @@ export class EventService {
     // fetching all events created by a specific organization
     const events = await prisma.event.findMany({
       where: {
-        orgIdentity: identity,
-        status: "APPROVED", 
+        orgIdentity: identity
       },
       orderBy: {
         createdAt: "desc",
@@ -125,7 +124,7 @@ export class EventService {
     // fetch ONLY approved events
     const rawEvents = await prisma.event.findMany({
       where: {
-        status: "APPROVED", 
+        status: "APPROVED",
       },
       orderBy: { createdAt: "desc" },
       include: {
@@ -180,6 +179,4 @@ export class EventService {
   static getAllStatuses() {
     return EVENT_STATUS_LIST;
   }
-
-  
 }

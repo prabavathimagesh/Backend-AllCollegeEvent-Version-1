@@ -75,4 +75,31 @@ export class OrgService {
       bannerImage: event.bannerImage ? `${BASE_URL}${event.bannerImage}` : null,
     }));
   }
+
+    static async getEventsByOrganization(identity: string): Promise<EventType[]> {
+    const BASE_URL = process.env.BASE_URL ?? "";
+
+    // fetching all events created by a specific organization
+    const events = await prisma.event.findMany({
+      where: {
+        orgIdentity: identity,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        org: {
+          select: {
+            organizationName: true,
+          },
+        },
+      },
+    });
+
+    // mapping image URLs to include full base URL
+    return events.map((event: EventType) => ({
+      ...event,
+      bannerImage: event.bannerImage ? `${BASE_URL}${event.bannerImage}` : null,
+    }));
+  }
 }

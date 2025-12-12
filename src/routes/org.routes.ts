@@ -4,6 +4,7 @@ import upload from "../middlewares/fileUpload";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { validate } from "../utils/validate";
 import { orgValidation } from "../validations/org.validation";
+import { eventValidation } from "../validations/event.validation";
 
 const router = Router();
 
@@ -31,4 +32,9 @@ router.put("/organizations/:orgId", validate(orgValidation.update) ,OrgControlle
  */
 router.delete("/organizations/:orgId", validate(orgValidation.deleteOrg),OrgController.deleteOrg);
 
+router.get(
+  "/organization/:orgId/events",
+  validate(eventValidation.getAll),
+  OrgController.getOrgEvents
+);
 export default router;

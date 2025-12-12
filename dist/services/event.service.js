@@ -78,8 +78,7 @@ class EventService {
         // fetching all events created by a specific organization
         const events = await prisma.event.findMany({
             where: {
-                orgIdentity: identity,
-                status: "APPROVED",
+                orgIdentity: identity
             },
             orderBy: {
                 createdAt: "desc",
