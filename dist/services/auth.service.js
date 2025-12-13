@@ -228,6 +228,10 @@ class AuthService {
         };
     }
     static async resetPassword(email, newPassword) {
+        if (!email)
+            throw new Error(auth_message_1.AUTH_MESSAGES.EMAIL_REQUIRED);
+        if (!newPassword)
+            throw new Error(auth_message_1.AUTH_MESSAGES.PASSWORD_REQUIRED);
         const hashed = await (0, hash_1.hashPassword)(newPassword);
         let updatedUser = await prisma.user.updateMany({
             where: { email },
@@ -239,8 +243,9 @@ class AuthService {
                 data: { password: hashed },
             });
         }
-        if (updatedUser.count === 0)
+        if (updatedUser.count === 0) {
             throw new Error(auth_message_1.AUTH_MESSAGES.EMAIL_NOT_FOUND);
+        }
         return {
             success: true,
             message: auth_message_1.AUTH_MESSAGES.PASSWORD_RESET_SUCCESS,
