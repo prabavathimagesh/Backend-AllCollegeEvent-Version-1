@@ -19,7 +19,7 @@ export default class AdminEventService {
             profileImage: true,
             whatsapp: true,
             instagram: true,
-            linkedIn: true, // <-- FIXED (case sensitive)
+            linkedIn: true,
             logoUrl: true,
           },
         },
@@ -49,7 +49,7 @@ export default class AdminEventService {
             profileImage: true,
             whatsapp: true,
             instagram: true,
-            linkedIn: true, // <-- FIXED (case sensitive)
+            linkedIn: true, 
             logoUrl: true,
           },
         },
@@ -80,7 +80,7 @@ export default class AdminEventService {
             profileImage: true,
             whatsapp: true,
             instagram: true,
-            linkedIn: true, // <-- FIXED (case sensitive)
+            linkedIn: true,
             logoUrl: true,
           },
         },

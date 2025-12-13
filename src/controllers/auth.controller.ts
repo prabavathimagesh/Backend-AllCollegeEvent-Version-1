@@ -81,7 +81,7 @@ export class AuthController {
       const { token } = req.query;
 
       if (!token) {
-        return res.status(400).json({
+        return res.status(200).json({
           status: false,
           message: AUTH_MESSAGES.TOKEN_MISSING,
         });
@@ -95,9 +95,25 @@ export class AuthController {
         message: AUTH_MESSAGES.ORG_VERIFIED_SUCCESS,
       });
     } catch (err: any) {
-      return res.status(400).json({
+      const safeErrors = [
+        AUTH_MESSAGES.TOKEN_MISSING,
+        AUTH_MESSAGES.INVALID_OR_EXPIRED_TOKEN,
+        AUTH_MESSAGES.ORG_NOT_FOUND_BY_TOKEN,
+      ];
+
+      // ✅ Known errors → 200
+      if (safeErrors.includes(err.message)) {
+        return res.status(200).json({
+          status: false,
+          message: err.message,
+        });
+      }
+
+      // ❌ Unknown errors → 500
+      return res.status(500).json({
         status: false,
-        message: err.message || AUTH_MESSAGES.INVALID_OR_EXPIRED_TOKEN,
+        message: AUTH_MESSAGES.INTERNAL_SERVER_ERROR,
+        error: err.message,
       });
     }
   }
@@ -107,7 +123,7 @@ export class AuthController {
       const { email } = req.body;
 
       if (!email) {
-        return res.status(400).json({
+        return res.status(200).json({
           status: false,
           message: AUTH_MESSAGES.EMAIL_REQUIRED,
         });
@@ -116,14 +132,29 @@ export class AuthController {
       const result = await AuthService.forgotPassword(email);
 
       return res.status(200).json({
-        data: result,
         status: true,
+        data: result,
         message: AUTH_MESSAGES.OTP_SENT,
       });
     } catch (err: any) {
-      return res.status(400).json({
+      const safeErrors = [
+        AUTH_MESSAGES.EMAIL_REQUIRED,
+        AUTH_MESSAGES.EMAIL_NOT_FOUND,
+      ];
+
+      // ✅ Known / safe errors → 200
+      if (safeErrors.includes(err.message)) {
+        return res.status(200).json({
+          status: false,
+          message: err.message,
+        });
+      }
+
+      // ❌ Unknown errors → 500
+      return res.status(500).json({
         status: false,
-        message: err.message || AUTH_MESSAGES.INTERNAL_SERVER_ERROR,
+        message: AUTH_MESSAGES.INTERNAL_SERVER_ERROR,
+        error: err.message,
       });
     }
   }
@@ -132,17 +163,39 @@ export class AuthController {
     try {
       const { email } = req.body;
 
+      if (!email) {
+        return res.status(200).json({
+          status: false,
+          message: AUTH_MESSAGES.EMAIL_REQUIRED,
+        });
+      }
+
       const result = await AuthService.resendOtp(email);
 
       return res.status(200).json({
-        data: result,
         status: true,
+        data: result,
         message: AUTH_MESSAGES.OTP_RESENT,
       });
     } catch (err: any) {
-      return res.status(400).json({
+      const safeErrors = [
+        AUTH_MESSAGES.EMAIL_REQUIRED,
+        AUTH_MESSAGES.ACCOUNT_NOT_FOUND,
+      ];
+
+      // ✅ Known / business errors → 200
+      if (safeErrors.includes(err.message)) {
+        return res.status(200).json({
+          status: false,
+          message: err.message,
+        });
+      }
+
+      // ❌ Unknown errors → 500
+      return res.status(500).json({
         status: false,
-        message: err.message || AUTH_MESSAGES.INTERNAL_SERVER_ERROR,
+        message: AUTH_MESSAGES.INTERNAL_SERVER_ERROR,
+        error: err.message,
       });
     }
   }
@@ -154,14 +207,26 @@ export class AuthController {
       const result = await AuthService.verifyOtp(email, otp);
 
       return res.status(200).json({
-        data: result,
         status: true,
+        data: result,
         message: AUTH_MESSAGES.OTP_VERIFIED,
       });
     } catch (err: any) {
-      return res.status(400).json({
+      const safeErrors = [AUTH_MESSAGES.INVALID_OTP, AUTH_MESSAGES.OTP_EXPIRED];
+
+      // ✅ Known / business errors → 200
+      if (safeErrors.includes(err.message)) {
+        return res.status(200).json({
+          status: false,
+          message: err.message,
+        });
+      }
+
+      // ❌ Unknown errors → 500
+      return res.status(500).json({
         status: false,
-        message: err.message,
+        message: AUTH_MESSAGES.INTERNAL_SERVER_ERROR,
+        error: err.message,
       });
     }
   }
@@ -170,17 +235,48 @@ export class AuthController {
     try {
       const { email, password } = req.body;
 
+      // reuse existing message
+      if (!email) {
+        return res.status(200).json({
+          status: false,
+          message: AUTH_MESSAGES.EMAIL_REQUIRED,
+        });
+      }
+
+      if (!password) {
+        return res.status(200).json({
+          status: false,
+          message: AUTH_MESSAGES.PASSWORD_REQUIRED,
+        });
+      }
+
       const result = await AuthService.resetPassword(email, password);
 
       return res.status(200).json({
-        data: result,
         status: true,
+        data: result,
         message: AUTH_MESSAGES.PASSWORD_RESET_SUCCESS,
       });
     } catch (err: any) {
-      return res.status(400).json({
+      const safeErrors = [
+        AUTH_MESSAGES.EMAIL_REQUIRED,
+        AUTH_MESSAGES.PASSWORD_REQUIRED,
+        AUTH_MESSAGES.EMAIL_NOT_FOUND,
+      ];
+
+      // ✅ business errors → 200
+      if (safeErrors.includes(err.message)) {
+        return res.status(200).json({
+          status: false,
+          message: err.message,
+        });
+      }
+
+      // ❌ system errors → 500
+      return res.status(500).json({
         status: false,
-        message: err.message,
+        message: AUTH_MESSAGES.INTERNAL_SERVER_ERROR,
+        error: err.message,
       });
     }
   }
@@ -190,8 +286,8 @@ export class AuthController {
       const { googleToken } = req.body;
 
       if (!googleToken) {
-        return res.status(400).json({
-          success: false,
+        return res.status(200).json({
+          status: false,
           message: AUTH_MESSAGES.GOOGLE_TOKEN_MISSING,
         });
       }
@@ -200,7 +296,7 @@ export class AuthController {
 
       res.cookie("token", token, {
         httpOnly: true,
-        secure: false,
+        secure: false, // set true in production with HTTPS
         sameSite: "lax",
         path: "/",
       });
@@ -212,9 +308,25 @@ export class AuthController {
         message: AUTH_MESSAGES.LOGIN_SUCCESS,
       });
     } catch (err: any) {
+      const safeErrors = [
+        AUTH_MESSAGES.GOOGLE_TOKEN_MISSING,
+        AUTH_MESSAGES.GOOGLE_LOGIN_FAILED,
+        AUTH_MESSAGES.DEFAULT_ROLE_NOT_FOUND,
+      ];
+
+      // ✅ Known / business errors → 200
+      if (safeErrors.includes(err.message)) {
+        return res.status(200).json({
+          status: false,
+          message: err.message,
+        });
+      }
+
+      // ❌ Unknown errors → 500
       return res.status(500).json({
         status: false,
-        message: AUTH_MESSAGES.GOOGLE_LOGIN_FAILED,
+        message: AUTH_MESSAGES.INTERNAL_SERVER_ERROR,
+        error: err.message,
       });
     }
   }

@@ -142,13 +142,13 @@ class EventController {
             return res.status(200).json({
                 status: true,
                 data: statuses,
-                message: "Event status list fetched",
+                message: event_message_1.EVENT_MESSAGES.EVENT_LIST_FETCHED,
             });
         }
         catch (err) {
             return res.status(500).json({
                 status: false,
-                message: "Internal Server Error",
+                message: event_message_1.EVENT_MESSAGES.INTERNAL_ERROR,
                 error: err.message,
             });
         }

@@ -35,6 +35,7 @@ export const AUTH_MESSAGES = {
 
   // Reset Password
   PASSWORD_RESET_SUCCESS: "Password reset successful",
+  PASSWORD_REQUIRED:"Password Required",
 
   // Google Login
   GOOGLE_TOKEN_MISSING: "Google token missing",

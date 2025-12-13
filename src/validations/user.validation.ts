@@ -16,29 +16,33 @@ export const userValidation = {
 
   update: {
     params: Joi.object({
-      userID: Joi.string().uuid().required(),
+      userId: Joi.string().uuid().required(),
     }),
-    body: Joi.object({
-      password: Joi.string().min(6),
-      phone: Joi.string(),
-      city: Joi.string(),
-      state: Joi.string(),
-      country: Joi.string(),
-      profileImage: Joi.string(),
-      isActive: Joi.boolean(),
-      isDeleted: Joi.boolean(),
-    }),
-  },
 
+    body: Joi.object({
+      name: Joi.string().min(3).optional(),
+      password: Joi.string().min(6).optional(),
+      email:Joi.string().optional(),
+      phone: Joi.string().optional(),
+      city: Joi.string().optional(),
+      state: Joi.string().optional(),
+      country: Joi.string().optional(),
+      profileImage: Joi.string().optional(),
+      isActive: Joi.boolean().optional(),
+      isDeleted: Joi.boolean().optional(),
+    })
+      // ✅ require at least ONE field to update
+      .min(1),
+  },
   getSingle: {
     params: Joi.object({
-      userID: Joi.string().uuid().required(),
+      userId: Joi.string().uuid().required(),
     }),
   },
 
   deleteUser: {
     params: Joi.object({
-      userID: Joi.string().uuid().required(),
+      userId: Joi.string().uuid().required(),
     }),
   },
 };

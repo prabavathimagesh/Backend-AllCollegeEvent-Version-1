@@ -52,7 +52,7 @@ export default class AdminUserService {
         isActive: true,
         isDeleted: true,
         createdAt: true,
-        updatedAt: true,
+        // updatedAt: true,
       },
     });
     return user;

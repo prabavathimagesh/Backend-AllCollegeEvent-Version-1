@@ -22,10 +22,10 @@ export class AdminUserController {
   static async getUser(req: Request, res: Response) {
     try {
       // extracting user id from request params
-      const { userID } = req.params;
+      const { userId } = req.params;
 
       // fetching user by id
-      const user = await  AdminUserService.getUserById(userID);
+      const user = await  AdminUserService.getUserById(userId);
 
       // checking if user exists
       if (!user)
@@ -62,13 +62,13 @@ export class AdminUserController {
   static async updateUser(req: Request, res: Response) {
     try {
       // extracting user id from request params
-      const { userID } = req.params;
+      const { userId } = req.params;
 
       // new data to update user
       const payload = req.body;
 
       // updating user in service layer
-      const user = await  AdminUserService.updateUser(userID, payload);
+      const user = await  AdminUserService.updateUser(userId, payload);
 
       // returning update success message
       return res
@@ -83,10 +83,10 @@ export class AdminUserController {
   static async deleteUser(req: Request, res: Response) {
     try {
       // extracting user id to delete
-      const { userID } = req.params;
+      const { userId } = req.params;
 
       // deleting user through service
-      const user = await  AdminUserService.deleteUser(userID);
+      const user = await  AdminUserService.deleteUser(userId);
 
       // returning delete success message
       return res

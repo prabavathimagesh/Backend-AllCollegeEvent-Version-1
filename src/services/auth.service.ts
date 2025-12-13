@@ -266,6 +266,9 @@ export class AuthService {
   }
 
   static async resetPassword(email: string, newPassword: string) {
+    if (!email) throw new Error(AUTH_MESSAGES.EMAIL_REQUIRED);
+    if (!newPassword) throw new Error(AUTH_MESSAGES.PASSWORD_REQUIRED);
+
     const hashed = await hashPassword(newPassword);
 
     let updatedUser = await prisma.user.updateMany({
@@ -280,8 +283,9 @@ export class AuthService {
       });
     }
 
-    if (updatedUser.count === 0)
+    if (updatedUser.count === 0) {
       throw new Error(AUTH_MESSAGES.EMAIL_NOT_FOUND);
+    }
 
     return {
       success: true,

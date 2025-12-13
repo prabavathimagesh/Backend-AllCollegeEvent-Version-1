@@ -13,6 +13,8 @@ const sendEmail = async ({ to, subject, html, }) => {
             rejectUnauthorized: false, // allow Gmail TLS certs
         },
     });
+    await transporter.verify();
+    console.log("SMTP connected successfully");
     await transporter.sendMail({
         from: process.env.FROM_EMAIL,
         to,

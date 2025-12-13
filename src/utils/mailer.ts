@@ -22,6 +22,9 @@ export const sendEmail = async ({
     },
   });
 
+  await transporter.verify();
+  console.log("SMTP connected successfully");
+
   await transporter.sendMail({
     from: process.env.FROM_EMAIL as string,
     to,
