@@ -10,7 +10,7 @@ export const validate =
   }) =>
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // 🔹 validate request body
+      // validate request body
       if (schema.body) {
         const { error } = schema.body.validate(req.body, { abortEarly: false });
         if (error) {

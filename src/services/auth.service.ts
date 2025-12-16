@@ -1,22 +1,30 @@
 const prisma = require("../config/db.config");
+
+// Utility imports
 import { hashPassword, comparePassword } from "../utils/hash";
 import { generateToken, verifyToken } from "../utils/jwt";
 import { sendEmail } from "../utils/mailer";
 import { OAuth2Client } from "google-auth-library";
 import { sendOtpEmail } from "../utils/sendOtp";
+
+// Auth-related constant messages
 import { AUTH_MESSAGES } from "../constants/auth.message";
 
-// sending account verification email for organization signup
+/**
+ * Send organization account verification email
+ * Triggered after successful org signup
+ */
 const sendVerificationMail = async (org: any) => {
+  // Frontend verification URL base
   const URL = process.env.MAIL_SEND;
 
-  // generating token for org verification
+  // Generate verification token
   const token = generateToken({ identity: org.identity });
 
-  // preparing verification link
+  // Construct verification URL
   const verifyUrl = `${URL}auth/email-verify?token=${token}`;
 
-  // html template for verification mail
+  // Email HTML template
   const html = `
     <h2>Verify Your Organization Account</h2>
     <p>Hello <b>${org.organizationName}</b>,</p>
@@ -28,7 +36,7 @@ const sendVerificationMail = async (org: any) => {
     <p>After verification, you can login using the login page.</p>
   `;
 
-  // sending email
+  // Send verification email
   await sendEmail({
     to: org.domainEmail,
     subject: "Verify your account",
@@ -36,7 +44,15 @@ const sendVerificationMail = async (org: any) => {
   });
 };
 
+/**
+ * Authentication service
+ * Handles signup, login, verification, OTP, password reset & Google login
+ */
 export class AuthService {
+
+  /**
+   * Signup user or organization
+   */
   static async signup(
     name: string,
     email: string,
@@ -44,12 +60,14 @@ export class AuthService {
     type: "user" | "org",
     extra: any
   ) {
+    // Fetch role based on type
     const role = await prisma.role.findFirst({
       where: { name: type },
     });
 
     if (!role) throw new Error(AUTH_MESSAGES.ROLE_NOT_FOUND);
 
+    // Check if email already exists
     const existsUser = await prisma.user.findUnique({ where: { email } });
     const existsOrg = await prisma.org.findUnique({
       where: { domainEmail: email },
@@ -58,8 +76,10 @@ export class AuthService {
     if (existsUser || existsOrg)
       throw new Error(AUTH_MESSAGES.EMAIL_ALREADY_REGISTERED);
 
+    // Hash password
     const hashed = await hashPassword(password);
 
+    // User signup
     if (type === "user") {
       const user = await prisma.user.create({
         data: {
@@ -73,6 +93,7 @@ export class AuthService {
       return user;
     }
 
+    // Organization signup
     if (type === "org") {
       const org = await prisma.org.create({
         data: {
@@ -88,6 +109,7 @@ export class AuthService {
         },
       });
 
+      // Send verification email
       await sendVerificationMail(org);
 
       return org;
@@ -96,16 +118,22 @@ export class AuthService {
     throw new Error(AUTH_MESSAGES.INVALID_TYPE);
   }
 
+  /**
+   * Login for user or organization
+   */
   static async login(email: string, password: string, type: "user" | "org") {
     let user;
 
+    // User login validation
     if (type === "user") {
       user = await prisma.user.findUnique({ where: { email } });
 
       if (!user) throw new Error(AUTH_MESSAGES.ACCOUNT_NOT_FOUND);
       if (user.isDeleted) throw new Error(AUTH_MESSAGES.ACCOUNT_DELETED);
       if (!user.isActive) throw new Error(AUTH_MESSAGES.ACCOUNT_INACTIVE);
-    } else if (type === "org") {
+    }
+    // Organization login validation
+    else if (type === "org") {
       user = await prisma.org.findUnique({ where: { domainEmail: email } });
 
       if (!user) throw new Error(AUTH_MESSAGES.ORG_NOT_FOUND);
@@ -113,9 +141,11 @@ export class AuthService {
       if (!user.isVerified) throw new Error(AUTH_MESSAGES.ORG_NOT_VERIFIED);
     }
 
+    // Validate password
     const ok = await comparePassword(password, user.password);
     if (!ok) throw new Error(AUTH_MESSAGES.INVALID_PASSWORD);
 
+    // Fetch role UUID
     let roleUUID = null;
 
     if (user.roleId) {
@@ -126,11 +156,13 @@ export class AuthService {
       roleUUID = role?.idnty || null;
     }
 
+    // Attach role UUID to response
     const data = {
       ...user,
       roleId: roleUUID,
     };
 
+    // Generate JWT
     const token = generateToken({
       identity: user.identity,
       email,
@@ -141,6 +173,9 @@ export class AuthService {
     return { data, token };
   }
 
+  /**
+   * Verify organization account using token
+   */
   static async verifyOrg(token: string) {
     if (!token) throw new Error(AUTH_MESSAGES.TOKEN_MISSING);
 
@@ -148,7 +183,7 @@ export class AuthService {
 
     try {
       decoded = verifyToken(token);
-    } catch (err) {
+    } catch {
       throw new Error(AUTH_MESSAGES.INVALID_OR_EXPIRED_TOKEN);
     }
 
@@ -160,6 +195,7 @@ export class AuthService {
 
     if (!org) throw new Error(AUTH_MESSAGES.ORG_NOT_FOUND_BY_TOKEN);
 
+    // Mark org as verified
     await prisma.org.update({
       where: { identity: orgIdnty },
       data: { isVerified: true },
@@ -171,6 +207,9 @@ export class AuthService {
     };
   }
 
+  /**
+   * Forgot password - send OTP
+   */
   static async forgotPassword(email: string) {
     if (!email) throw new Error(AUTH_MESSAGES.EMAIL_REQUIRED);
 
@@ -184,9 +223,11 @@ export class AuthService {
 
     if (!account) throw new Error(AUTH_MESSAGES.EMAIL_NOT_FOUND);
 
+    // Generate OTP
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     const expAt = new Date(Date.now() + 10 * 60 * 1000);
 
+    // Save OTP
     await prisma.oTP.create({
       data: {
         email,
@@ -198,6 +239,7 @@ export class AuthService {
       },
     });
 
+    // Send OTP email
     await sendOtpEmail(email, otp, 10);
 
     return {
@@ -206,6 +248,9 @@ export class AuthService {
     };
   }
 
+  /**
+   * Resend OTP
+   */
   static async resendOtp(email: string) {
     const user = await prisma.user.findUnique({ where: { email } });
     const org = await prisma.org.findUnique({ where: { domainEmail: email } });
@@ -220,6 +265,7 @@ export class AuthService {
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     const expAt = new Date(Date.now() + 10 * 60 * 1000);
 
+    // Update or create OTP
     if (existingOtp) {
       await prisma.oTP.update({
         where: { id: existingOtp.id },
@@ -250,6 +296,9 @@ export class AuthService {
     };
   }
 
+  /**
+   * Verify OTP
+   */
   static async verifyOtp(email: string, otp: string) {
     const record = await prisma.oTP.findFirst({
       where: { email, code: otp, purpose: "FORGOT_PASSWORD" },
@@ -265,6 +314,9 @@ export class AuthService {
     };
   }
 
+  /**
+   * Reset password using OTP
+   */
   static async resetPassword(email: string, newPassword: string) {
     if (!email) throw new Error(AUTH_MESSAGES.EMAIL_REQUIRED);
     if (!newPassword) throw new Error(AUTH_MESSAGES.PASSWORD_REQUIRED);
@@ -293,6 +345,9 @@ export class AuthService {
     };
   }
 
+  /**
+   * Google OAuth login
+   */
   static async googleLogin(googleToken: string) {
     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 

@@ -2,20 +2,26 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const prisma = require("../config/db.config");
+// Utility imports
 const hash_1 = require("../utils/hash");
 const jwt_1 = require("../utils/jwt");
 const mailer_1 = require("../utils/mailer");
 const google_auth_library_1 = require("google-auth-library");
 const sendOtp_1 = require("../utils/sendOtp");
+// Auth-related constant messages
 const auth_message_1 = require("../constants/auth.message");
-// sending account verification email for organization signup
+/**
+ * Send organization account verification email
+ * Triggered after successful org signup
+ */
 const sendVerificationMail = async (org) => {
+    // Frontend verification URL base
     const URL = process.env.MAIL_SEND;
-    // generating token for org verification
+    // Generate verification token
     const token = (0, jwt_1.generateToken)({ identity: org.identity });
-    // preparing verification link
+    // Construct verification URL
     const verifyUrl = `${URL}auth/email-verify?token=${token}`;
-    // html template for verification mail
+    // Email HTML template
     const html = `
     <h2>Verify Your Organization Account</h2>
     <p>Hello <b>${org.organizationName}</b>,</p>
@@ -26,27 +32,38 @@ const sendVerificationMail = async (org) => {
     </a>
     <p>After verification, you can login using the login page.</p>
   `;
-    // sending email
+    // Send verification email
     await (0, mailer_1.sendEmail)({
         to: org.domainEmail,
         subject: "Verify your account",
         html,
     });
 };
+/**
+ * Authentication service
+ * Handles signup, login, verification, OTP, password reset & Google login
+ */
 class AuthService {
+    /**
+     * Signup user or organization
+     */
     static async signup(name, email, password, type, extra) {
+        // Fetch role based on type
         const role = await prisma.role.findFirst({
             where: { name: type },
         });
         if (!role)
             throw new Error(auth_message_1.AUTH_MESSAGES.ROLE_NOT_FOUND);
+        // Check if email already exists
         const existsUser = await prisma.user.findUnique({ where: { email } });
         const existsOrg = await prisma.org.findUnique({
             where: { domainEmail: email },
         });
         if (existsUser || existsOrg)
             throw new Error(auth_message_1.AUTH_MESSAGES.EMAIL_ALREADY_REGISTERED);
+        // Hash password
         const hashed = await (0, hash_1.hashPassword)(password);
+        // User signup
         if (type === "user") {
             const user = await prisma.user.create({
                 data: {
@@ -58,6 +75,7 @@ class AuthService {
             });
             return user;
         }
+        // Organization signup
         if (type === "org") {
             const org = await prisma.org.create({
                 data: {
@@ -72,13 +90,18 @@ class AuthService {
                     profileImage: extra.pImg ?? null,
                 },
             });
+            // Send verification email
             await sendVerificationMail(org);
             return org;
         }
         throw new Error(auth_message_1.AUTH_MESSAGES.INVALID_TYPE);
     }
+    /**
+     * Login for user or organization
+     */
     static async login(email, password, type) {
         let user;
+        // User login validation
         if (type === "user") {
             user = await prisma.user.findUnique({ where: { email } });
             if (!user)
@@ -88,6 +111,7 @@ class AuthService {
             if (!user.isActive)
                 throw new Error(auth_message_1.AUTH_MESSAGES.ACCOUNT_INACTIVE);
         }
+        // Organization login validation
         else if (type === "org") {
             user = await prisma.org.findUnique({ where: { domainEmail: email } });
             if (!user)
@@ -97,9 +121,11 @@ class AuthService {
             if (!user.isVerified)
                 throw new Error(auth_message_1.AUTH_MESSAGES.ORG_NOT_VERIFIED);
         }
+        // Validate password
         const ok = await (0, hash_1.comparePassword)(password, user.password);
         if (!ok)
             throw new Error(auth_message_1.AUTH_MESSAGES.INVALID_PASSWORD);
+        // Fetch role UUID
         let roleUUID = null;
         if (user.roleId) {
             const role = await prisma.role.findUnique({
@@ -108,10 +134,12 @@ class AuthService {
             });
             roleUUID = role?.idnty || null;
         }
+        // Attach role UUID to response
         const data = {
             ...user,
             roleId: roleUUID,
         };
+        // Generate JWT
         const token = (0, jwt_1.generateToken)({
             identity: user.identity,
             email,
@@ -120,6 +148,9 @@ class AuthService {
         });
         return { data, token };
     }
+    /**
+     * Verify organization account using token
+     */
     static async verifyOrg(token) {
         if (!token)
             throw new Error(auth_message_1.AUTH_MESSAGES.TOKEN_MISSING);
@@ -127,7 +158,7 @@ class AuthService {
         try {
             decoded = (0, jwt_1.verifyToken)(token);
         }
-        catch (err) {
+        catch {
             throw new Error(auth_message_1.AUTH_MESSAGES.INVALID_OR_EXPIRED_TOKEN);
         }
         const orgIdnty = decoded.data.identity;
@@ -136,6 +167,7 @@ class AuthService {
         });
         if (!org)
             throw new Error(auth_message_1.AUTH_MESSAGES.ORG_NOT_FOUND_BY_TOKEN);
+        // Mark org as verified
         await prisma.org.update({
             where: { identity: orgIdnty },
             data: { isVerified: true },
@@ -145,6 +177,9 @@ class AuthService {
             message: auth_message_1.AUTH_MESSAGES.ORG_VERIFIED_SUCCESS,
         };
     }
+    /**
+     * Forgot password - send OTP
+     */
     static async forgotPassword(email) {
         if (!email)
             throw new Error(auth_message_1.AUTH_MESSAGES.EMAIL_REQUIRED);
@@ -156,8 +191,10 @@ class AuthService {
         }
         if (!account)
             throw new Error(auth_message_1.AUTH_MESSAGES.EMAIL_NOT_FOUND);
+        // Generate OTP
         const otp = Math.floor(1000 + Math.random() * 9000).toString();
         const expAt = new Date(Date.now() + 10 * 60 * 1000);
+        // Save OTP
         await prisma.oTP.create({
             data: {
                 email,
@@ -168,12 +205,16 @@ class AuthService {
                 orgIdentity: account.domainEmail ? account.identity : null,
             },
         });
+        // Send OTP email
         await (0, sendOtp_1.sendOtpEmail)(email, otp, 10);
         return {
             success: true,
             message: auth_message_1.AUTH_MESSAGES.OTP_SENT,
         };
     }
+    /**
+     * Resend OTP
+     */
     static async resendOtp(email) {
         const user = await prisma.user.findUnique({ where: { email } });
         const org = await prisma.org.findUnique({ where: { domainEmail: email } });
@@ -185,6 +226,7 @@ class AuthService {
         });
         const otp = Math.floor(1000 + Math.random() * 9000).toString();
         const expAt = new Date(Date.now() + 10 * 60 * 1000);
+        // Update or create OTP
         if (existingOtp) {
             await prisma.oTP.update({
                 where: { id: existingOtp.id },
@@ -213,6 +255,9 @@ class AuthService {
             message: auth_message_1.AUTH_MESSAGES.OTP_RESENT,
         };
     }
+    /**
+     * Verify OTP
+     */
     static async verifyOtp(email, otp) {
         const record = await prisma.oTP.findFirst({
             where: { email, code: otp, purpose: "FORGOT_PASSWORD" },
@@ -227,6 +272,9 @@ class AuthService {
             message: auth_message_1.AUTH_MESSAGES.OTP_VERIFIED,
         };
     }
+    /**
+     * Reset password using OTP
+     */
     static async resetPassword(email, newPassword) {
         if (!email)
             throw new Error(auth_message_1.AUTH_MESSAGES.EMAIL_REQUIRED);
@@ -251,6 +299,9 @@ class AuthService {
             message: auth_message_1.AUTH_MESSAGES.PASSWORD_RESET_SUCCESS,
         };
     }
+    /**
+     * Google OAuth login
+     */
     static async googleLogin(googleToken) {
         const client = new google_auth_library_1.OAuth2Client(process.env.GOOGLE_CLIENT_ID);
         const ticket = await client.verifyIdToken({

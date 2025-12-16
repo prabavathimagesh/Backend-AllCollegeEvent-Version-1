@@ -1,14 +1,30 @@
 const prisma = require("../../config/db.config");
+
+// Event type definition
 import { EventType } from "../../types/type";
+
+// Allowed event status values
 import { EVENT_STATUS_LIST } from "../../constants/event.status.message";
 
+/**
+ * Admin Event Service
+ * Handles admin-level event operations
+ */
 export default class AdminEventService {
+
+  /**
+   * Fetch all events in the system
+   * Includes organization details
+   */
   static async getAllEvents() {
+    // Base URL for image mapping
     const BASE_URL = process.env.BASE_URL ?? "";
 
+    // Fetch all events ordered by latest first
     const events = await prisma.event.findMany({
       orderBy: { createdAt: "desc" },
       include: {
+        // Include organization details
         org: {
           select: {
             organizationName: true,
@@ -26,19 +42,25 @@ export default class AdminEventService {
       },
     });
 
+    // Attach full banner image URL
     return events.map((e: EventType) => ({
       ...e,
       bannerImage: e.bannerImage ? `${BASE_URL}${e.bannerImage}` : null,
     }));
   }
 
+  /**
+   * Fetch all events created by a specific organization
+   */
   static async getEventsByOrg(orgId: string) {
-    //fetch all events for a specific organization
+    // Base URL for image mapping
     const BASE_URL = process.env.BASE_URL ?? "";
 
+    // Fetch events for the given organization
     const events = await prisma.event.findMany({
       where: { orgIdentity: orgId },
       include: {
+        // Include organization details
         org: {
           select: {
             organizationName: true,
@@ -49,7 +71,7 @@ export default class AdminEventService {
             profileImage: true,
             whatsapp: true,
             instagram: true,
-            linkedIn: true, 
+            linkedIn: true,
             logoUrl: true,
           },
         },
@@ -57,19 +79,25 @@ export default class AdminEventService {
       orderBy: { createdAt: "desc" },
     });
 
+    // Attach full banner image URL
     return events.map((e: EventType) => ({
       ...e,
       bannerImage: e.bannerImage ? `${BASE_URL}${e.bannerImage}` : null,
     }));
   }
 
+  /**
+   * Fetch a single event by organization and event ID
+   */
   static async getEventById(orgId: string, eventId: string) {
-    //fetch a specific event from an organization
+    // Base URL for image mapping
     const BASE_URL = process.env.BASE_URL ?? "";
 
+    // Fetch event matching org and event ID
     const event = await prisma.event.findFirst({
       where: { identity: eventId, orgIdentity: orgId },
       include: {
+        // Include organization details
         org: {
           select: {
             organizationName: true,
@@ -87,16 +115,20 @@ export default class AdminEventService {
       },
     });
 
+    // Return null if event not found
     if (!event) return null;
 
+    // Attach full banner image URL
     return {
       ...event,
       bannerImage: event.bannerImage ? `${BASE_URL}${event.bannerImage}` : null,
     };
   }
 
+  /**
+   * Create a new event under an organization
+   */
   static async createEvent(orgId: string, data: any) {
-    //create new event under this organization
     return prisma.event.create({
       data: {
         orgIdentity: orgId,
@@ -111,8 +143,10 @@ export default class AdminEventService {
     });
   }
 
+  /**
+   * Update event details
+   */
   static async updateEvent(orgId: string, eventId: string, payload: any) {
-    //update event details
     return prisma.event.update({
       where: { identity: eventId, orgIdentity: orgId },
       data: {
@@ -128,19 +162,25 @@ export default class AdminEventService {
     });
   }
 
+  /**
+   * Delete an event under an organization
+   */
   static async deleteEvent(orgId: string, eventId: string) {
-    //remove event under an organization
     return prisma.event.deleteMany({
       where: { identity: eventId, orgIdentity: orgId },
     });
   }
 
+  /**
+   * Update event status (Admin action)
+   */
   static async updateEventStatus(eventId: string, status: string) {
-    // Validate incoming status
+    // Validate incoming status value
     if (!EVENT_STATUS_LIST.includes(status)) {
       throw new Error("Invalid event status");
     }
 
+    // Check if event exists
     const event = await prisma.event.findUnique({
       where: { identity: eventId },
     });
@@ -149,6 +189,7 @@ export default class AdminEventService {
       throw new Error("Event not found");
     }
 
+    // Update status and published time
     return prisma.event.update({
       where: { identity: eventId },
       data: {

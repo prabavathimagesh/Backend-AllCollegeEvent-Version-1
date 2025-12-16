@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import AdminEventService from "../../services/admin/admin.event.service";
 
 export class AdminEventController {
-  
   static async getAllEvents(req: Request, res: Response) {
     try {
       //fetch all events across all organizations
@@ -38,7 +37,9 @@ export class AdminEventController {
       const event = await AdminEventService.getEventById(orgId, eventId);
 
       if (!event) {
-        return res.status(404).json({ status: false, message: "Event not found" });
+        return res
+          .status(404)
+          .json({ status: false, message: "Event not found" });
       }
 
       res.json({ status: true, data: event, message: "Event fetched" });
@@ -84,7 +85,11 @@ export class AdminEventController {
       const payload = { ...req.body, ...(image && { bannerImage: image }) };
 
       //update event
-      const event = await AdminEventService.updateEvent(orgId, eventId, payload);
+      const event = await AdminEventService.updateEvent(
+        orgId,
+        eventId,
+        payload
+      );
 
       res.json({ status: true, data: event, message: "Event updated" });
     } catch (err: any) {
@@ -108,24 +113,26 @@ export class AdminEventController {
     }
   }
 
-static async updateEventStatus(req: Request, res: Response) {
-  try {
-    const { eventId } = req.params;
-    const { status } = req.body; // new status from frontend
+  static async updateEventStatus(req: Request, res: Response) {
+    try {
+      const { eventId } = req.params;
+      const { status } = req.body; // new status from frontend
 
-    const updated = await AdminEventService.updateEventStatus(eventId, status);
+      const updated = await AdminEventService.updateEventStatus(
+        eventId,
+        status
+      );
 
-    return res.status(200).json({
-      status: true,
-      data: updated,
-      message: "Event status updated successfully",
-    });
-  } catch (err: any) {
-    return res.status(500).json({
-      status: false,
-      message: err.message || "Internal server error",
-    });
+      return res.status(200).json({
+        status: true,
+        data: updated,
+        message: "Event status updated successfully",
+      });
+    } catch (err: any) {
+      return res.status(500).json({
+        status: false,
+        message: err.message || "Internal server error",
+      });
+    }
   }
-}
-
 }
