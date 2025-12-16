@@ -3,7 +3,48 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EventService = void 0;
 const prisma = require("../config/db.config");
 const event_status_message_1 = require("../constants/event.status.message");
+const event_message_1 = require("../constants/event.message");
 class EventService {
+    static async getEventsByOrg(identity) {
+        if (!identity) {
+            throw new Error(event_message_1.EVENT_MESSAGES.ORG_ID_REQUIRED);
+        }
+        const BASE_URL = process.env.BASE_URL ?? "";
+        const events = await prisma.event.findMany({
+            where: {
+                orgIdentity: identity,
+                status: "APPROVED",
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+            include: {
+                org: {
+                    select: {
+                        organizationName: true,
+                        organizationCategory: true,
+                        city: true,
+                        state: true,
+                        country: true,
+                        profileImage: true,
+                        whatsapp: true,
+                        instagram: true,
+                        linkedIn: true,
+                        logoUrl: true,
+                    },
+                },
+            },
+        });
+        if (!events.length) {
+            throw new Error(event_message_1.EVENT_MESSAGES.EVENTS_NOT_FOUND);
+        }
+        return events.map((event) => ({
+            ...event,
+            bannerImage: event.bannerImage
+                ? `${BASE_URL}${event.bannerImage}`
+                : null,
+        }));
+    }
     static async createEventService(data) {
         // creating new event record in database
         const event = await prisma.event.create({
@@ -41,7 +82,7 @@ class EventService {
                         profileImage: true,
                         whatsapp: true,
                         instagram: true,
-                        linkedIn: true, // <-- FIXED (case sensitive)
+                        linkedIn: true,
                         logoUrl: true,
                     },
                 },
@@ -81,40 +122,6 @@ class EventService {
                 orgIdentity: orgId,
             },
         });
-    }
-    static async getEventsByOrg(identity) {
-        const BASE_URL = process.env.BASE_URL ?? "";
-        // fetching all events created by a specific organization
-        const events = await prisma.event.findMany({
-            where: {
-                orgIdentity: identity,
-                status: "APPROVED",
-            },
-            orderBy: {
-                createdAt: "desc",
-            },
-            include: {
-                org: {
-                    select: {
-                        organizationName: true,
-                        organizationCategory: true,
-                        city: true,
-                        state: true,
-                        country: true,
-                        profileImage: true,
-                        whatsapp: true,
-                        instagram: true,
-                        linkedIn: true, // <-- FIXED (case sensitive)
-                        logoUrl: true,
-                    },
-                },
-            },
-        });
-        // mapping image URLs to include full base URL
-        return events.map((event) => ({
-            ...event,
-            bannerImage: event.bannerImage ? `${BASE_URL}${event.bannerImage}` : null,
-        }));
     }
     static async getAllEventsService() {
         const BASE_URL = process.env.BASE_URL ?? "";
@@ -164,7 +171,7 @@ class EventService {
                         profileImage: true,
                         whatsapp: true,
                         instagram: true,
-                        linkedIn: true, // <-- FIXED (case sensitive)
+                        linkedIn: true,
                         logoUrl: true,
                     },
                 },

@@ -1,8 +1,55 @@
 const prisma = require("../config/db.config");
 import { EventType } from "../types/type";
 import { EVENT_STATUS_LIST } from "../constants/event.status.message";
+import { EVENT_MESSAGES } from "../constants/event.message";
 
 export class EventService {
+static async getEventsByOrg(identity: string): Promise<EventType[]> {
+  if (!identity) {
+    throw new Error(EVENT_MESSAGES.ORG_ID_REQUIRED);
+  }
+
+  const BASE_URL = process.env.BASE_URL ?? "";
+
+  const events = await prisma.event.findMany({
+    where: {
+      orgIdentity: identity,
+      status: "APPROVED",
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      org: {
+        select: {
+          organizationName: true,
+          organizationCategory: true,
+          city: true,
+          state: true,
+          country: true,
+          profileImage: true,
+          whatsapp: true,
+          instagram: true,
+          linkedIn: true,
+          logoUrl: true,
+        },
+      },
+    },
+  });
+
+  if (!events.length) {
+    throw new Error(EVENT_MESSAGES.EVENTS_NOT_FOUND);
+  }
+
+  return events.map((event: EventType) => ({
+    ...event,
+    bannerImage: event.bannerImage
+      ? `${BASE_URL}${event.bannerImage}`
+      : null,
+  }));
+}
+
+
   static async createEventService(data: {
     org_id: String;
     event_title: string;
@@ -55,7 +102,7 @@ export class EventService {
             profileImage: true,
             whatsapp: true,
             instagram: true,
-            linkedIn: true, // <-- FIXED (case sensitive)
+            linkedIn: true,
             logoUrl: true,
           },
         },
@@ -98,43 +145,6 @@ export class EventService {
         orgIdentity: orgId,
       },
     });
-  }
-
-  static async getEventsByOrg(identity: string): Promise<EventType[]> {
-    const BASE_URL = process.env.BASE_URL ?? "";
-
-    // fetching all events created by a specific organization
-    const events = await prisma.event.findMany({
-      where: {
-        orgIdentity: identity,
-        status: "APPROVED",
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      include: {
-        org: {
-          select: {
-            organizationName: true,
-            organizationCategory: true,
-            city: true,
-            state: true,
-            country: true,
-            profileImage: true,
-            whatsapp: true,
-            instagram: true,
-            linkedIn: true, // <-- FIXED (case sensitive)
-            logoUrl: true,
-          },
-        },
-      },
-    });
-
-    // mapping image URLs to include full base URL
-    return events.map((event: EventType) => ({
-      ...event,
-      bannerImage: event.bannerImage ? `${BASE_URL}${event.bannerImage}` : null,
-    }));
   }
 
   static async getAllEventsService(): Promise<EventType[]> {
@@ -192,7 +202,7 @@ export class EventService {
             profileImage: true,
             whatsapp: true,
             instagram: true,
-            linkedIn: true, // <-- FIXED (case sensitive)
+            linkedIn: true,
             logoUrl: true,
           },
         },

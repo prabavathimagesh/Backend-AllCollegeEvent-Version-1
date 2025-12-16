@@ -90,14 +90,14 @@ class AuthController {
                 auth_message_1.AUTH_MESSAGES.INVALID_OR_EXPIRED_TOKEN,
                 auth_message_1.AUTH_MESSAGES.ORG_NOT_FOUND_BY_TOKEN,
             ];
-            // ✅ Known errors → 200
+            // Known errors → 200
             if (safeErrors.includes(err.message)) {
                 return res.status(200).json({
                     status: false,
                     message: err.message,
                 });
             }
-            // ❌ Unknown errors → 500
+            // Unknown errors → 500
             return res.status(500).json({
                 status: false,
                 message: auth_message_1.AUTH_MESSAGES.INTERNAL_SERVER_ERROR,

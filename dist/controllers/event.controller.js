@@ -7,17 +7,37 @@ class EventController {
     static async getOrgEvents(req, res) {
         try {
             const identity = String(req.params.orgId);
+            if (!identity) {
+                return res.status(200).json({
+                    status: false,
+                    message: event_message_1.EVENT_MESSAGES.ORG_ID_REQUIRED,
+                });
+            }
             const events = await event_service_1.EventService.getEventsByOrg(identity);
-            res.json({
+            return res.status(200).json({
                 status: true,
                 data: events,
                 message: event_message_1.EVENT_MESSAGES.EVENTS_FETCHED,
             });
         }
         catch (err) {
-            res
-                .status(500)
-                .json({ status: false, message: event_message_1.EVENT_MESSAGES.INTERNAL_ERROR });
+            const safeErrors = [
+                event_message_1.EVENT_MESSAGES.ORG_ID_REQUIRED,
+                event_message_1.EVENT_MESSAGES.EVENTS_NOT_FOUND,
+            ];
+            // known / business errors → 200
+            if (safeErrors.includes(err.message)) {
+                return res.status(200).json({
+                    status: false,
+                    message: err.message,
+                });
+            }
+            // unknown / system errors → 500
+            return res.status(500).json({
+                status: false,
+                message: event_message_1.EVENT_MESSAGES.INTERNAL_ERROR,
+                error: err.message,
+            });
         }
     }
     static async getEventById(req, res) {

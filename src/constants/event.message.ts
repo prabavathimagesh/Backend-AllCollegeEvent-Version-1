@@ -14,7 +14,11 @@ export const EVENT_MESSAGES = {
   // Delete Event
   EVENT_DELETED: "Event deleted successfully",
 
-  EVENT_LIST_FETCHED : "Event status list fetched",
+  EVENT_LIST_FETCHED: "Event status list fetched",
+
+  EVENTS_NOT_FOUND: "Events Not Found",
+
+  ORG_ID_REQUIRED: "Org Id Required",
 
   // Errors
   INTERNAL_ERROR: "Internal server error",

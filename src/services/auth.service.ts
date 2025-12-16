@@ -14,7 +14,7 @@ const sendVerificationMail = async (org: any) => {
   const token = generateToken({ identity: org.identity });
 
   // preparing verification link
-  const verifyUrl = `${URL}auth?token=${token}`;
+  const verifyUrl = `${URL}auth/email-verify?token=${token}`;
 
   // html template for verification mail
   const html = `

@@ -3,22 +3,49 @@ import { EventService } from "../services/event.service";
 import { EVENT_MESSAGES } from "../constants/event.message";
 
 export class EventController {
-  static async getOrgEvents(req: Request, res: Response) {
-    try {
-      const identity = String(req.params.orgId);
-      const events = await EventService.getEventsByOrg(identity);
+static async getOrgEvents(req: Request, res: Response) {
+  try {
+    const identity = String(req.params.orgId);
 
-      res.json({
-        status: true,
-        data: events,
-        message: EVENT_MESSAGES.EVENTS_FETCHED,
+    if (!identity) {
+      return res.status(200).json({
+        status: false,
+        message: EVENT_MESSAGES.ORG_ID_REQUIRED,
       });
-    } catch (err) {
-      res
-        .status(500)
-        .json({ status: false, message: EVENT_MESSAGES.INTERNAL_ERROR });
     }
+
+    const events = await EventService.getEventsByOrg(identity);
+
+    return res.status(200).json({
+      status: true,
+      data: events,
+      message: EVENT_MESSAGES.EVENTS_FETCHED,
+    });
+
+  } catch (err: any) {
+
+    const safeErrors = [
+      EVENT_MESSAGES.ORG_ID_REQUIRED,
+      EVENT_MESSAGES.EVENTS_NOT_FOUND,
+    ];
+
+    // known / business errors → 200
+    if (safeErrors.includes(err.message)) {
+      return res.status(200).json({
+        status: false,
+        message: err.message,
+      });
+    }
+
+    // unknown / system errors → 500
+    return res.status(500).json({
+      status: false,
+      message: EVENT_MESSAGES.INTERNAL_ERROR,
+      error: err.message,
+    });
   }
+}
+
 
   static async getEventById(req: Request, res: Response) {
     try {

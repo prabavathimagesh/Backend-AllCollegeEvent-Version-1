@@ -101,7 +101,7 @@ export class AuthController {
         AUTH_MESSAGES.ORG_NOT_FOUND_BY_TOKEN,
       ];
 
-      // ✅ Known errors → 200
+      // Known errors → 200
       if (safeErrors.includes(err.message)) {
         return res.status(200).json({
           status: false,
@@ -109,7 +109,7 @@ export class AuthController {
         });
       }
 
-      // ❌ Unknown errors → 500
+      // Unknown errors → 500
       return res.status(500).json({
         status: false,
         message: AUTH_MESSAGES.INTERNAL_SERVER_ERROR,
