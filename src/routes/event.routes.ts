@@ -13,6 +13,7 @@ const router = Router();
  */
 router.get(
   "/organizations/:orgId/events",
+  authMiddleware,
   validate(eventValidation.getAll),
   EventController.getOrgEvents
 );
@@ -23,6 +24,7 @@ router.get(
  */
 router.get(
   "/organizations/:orgId/events/:eventId",
+  authMiddleware,
   validate(eventValidation.getSingle),
   EventController.getEventById
 );
@@ -33,6 +35,7 @@ router.get(
  */
 router.post(
   "/organizations/:orgId/events",
+  authMiddleware,
   validate(eventValidation.create),
   upload.single("image"),
   EventController.createEvent
@@ -44,6 +47,7 @@ router.post(
  */
 router.put(
   "/organizations/:orgId/events/:eventId",
+  authMiddleware,
   validate(eventValidation.update),
   upload.single("image"),
   EventController.updateEvent
@@ -55,6 +59,7 @@ router.put(
  */
 router.delete(
   "/organizations/:orgId/events/:eventId",
+  authMiddleware,
   validate(eventValidation.deleteEvent),
   EventController.deleteEvent
 );

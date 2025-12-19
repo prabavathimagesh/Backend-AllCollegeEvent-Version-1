@@ -3,6 +3,7 @@ import { AdminEventController } from "../../controllers/admin/admin.event.contro
 import upload from "../../middlewares/fileUpload";
 import { validate } from "../../utils/validate";
 import { eventValidation } from "../../validations/event.validation";
+import { authMiddleware } from "../../middlewares/authMiddleware";
 
 // Initialize router
 const router = Router();
@@ -15,12 +16,14 @@ const router = Router();
 // Get all events in the system
 router.get(
   "/events",
+  authMiddleware,
   AdminEventController.getAllEvents
 );
 
 // Get all events of a specific organization
 router.get(
   "/organizations/:orgId/events",
+  authMiddleware,
   validate(eventValidation.getAll),
   AdminEventController.getEventsByOrg
 );
@@ -28,6 +31,7 @@ router.get(
 // Get single event by organization and event ID
 router.get(
   "/organizations/:orgId/events/:eventId",
+  authMiddleware,
   validate(eventValidation.getSingle),
   AdminEventController.getEventById
 );
@@ -35,6 +39,7 @@ router.get(
 // Create a new event under an organization
 router.post(
   "/organizations/:orgId/events",
+  authMiddleware,
   validate(eventValidation.create),
   upload.single("image"),
   AdminEventController.createEvent
@@ -43,6 +48,7 @@ router.post(
 // Update an existing event
 router.put(
   "/organizations/:orgId/events/:eventId",
+  authMiddleware,
   validate(eventValidation.update),
   upload.single("image"),
   AdminEventController.updateEvent
@@ -51,6 +57,7 @@ router.put(
 // Delete an event
 router.delete(
   "/organizations/:orgId/events/:eventId",
+  authMiddleware,
   validate(eventValidation.deleteEvent),
   AdminEventController.deleteEvent
 );
@@ -58,6 +65,7 @@ router.delete(
 // Update event approval/status
 router.put(
   "/event/:eventId/status",
+  authMiddleware,
   AdminEventController.updateEventStatus
 );
 

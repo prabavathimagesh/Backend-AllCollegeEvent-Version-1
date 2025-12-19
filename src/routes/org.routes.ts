@@ -12,28 +12,44 @@ const router = Router();
  * @route GET /api/v1/organizations
  * @desc  Get list of all organizations
  */
-router.get("/organizations", OrgController.getAllOrgs);
+router.get("/organizations", authMiddleware, OrgController.getAllOrgs);
 
 /**
  * @route GET /api/v1/organizations/:orgId
  * @desc  Get details of a single organization by ID
  */
-router.get("/organizations/:orgId", validate(orgValidation.getSingle),OrgController.getOrgById);
+router.get(
+  "/organizations/:orgId",
+  authMiddleware,
+  validate(orgValidation.getSingle),
+  OrgController.getOrgById
+);
 
 /**
  * @route PUT /api/v1/organizations/:orgId
  * @desc  Update organization details
  */
-router.put("/organizations/:orgId", validate(orgValidation.update) ,OrgController.updateOrg);
+router.put(
+  "/organizations/:orgId",
+  authMiddleware,
+  validate(orgValidation.update),
+  OrgController.updateOrg
+);
 
 /**
  * @route DELETE /api/v1/organizations/:orgId
  * @desc  Delete an organization (soft delete or hard delete based on logic)
  */
-router.delete("/organizations/:orgId", validate(orgValidation.deleteOrg),OrgController.deleteOrg);
+router.delete(
+  "/organizations/:orgId",
+  authMiddleware,
+  validate(orgValidation.deleteOrg),
+  OrgController.deleteOrg
+);
 
 router.get(
   "/organization/:orgId/events",
+  authMiddleware,
   validate(eventValidation.getAll),
   OrgController.getOrgEvents
 );

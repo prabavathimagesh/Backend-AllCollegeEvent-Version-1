@@ -11,30 +11,45 @@ const router = Router();
  * @route GET /api/v1/organizations
  * @desc  Get list of all organizations
  */
-router.get("/organizations", AdminOrgController.listOrg);
+router.get("/organizations", authMiddleware, AdminOrgController.listOrg);
 
 /**
  * @route GET /api/v1/organizations/:orgId
  * @desc  Get details of a single organization by ID
  */
-router.get("/organizations/:orgId", validate(orgValidation.getSingle),AdminOrgController.getOrg);
+router.get(
+  "/organizations/:orgId",
+  authMiddleware,
+  validate(orgValidation.getSingle),
+  AdminOrgController.getOrg
+);
 
 /**
  * @route GET /api/v1/organizations/:orgId
  * @desc  Get details of a single organization by ID
  */
-router.post("/organization",AdminOrgController.createOrg);
+router.post("/organization", authMiddleware, AdminOrgController.createOrg);
 
 /**
  * @route PUT /api/v1/organizations/:orgId
  * @desc  Update organization details
  */
-router.put("/organizations/:orgId", validate(orgValidation.update) ,AdminOrgController.updateOrg);
+router.put(
+  "/organizations/:orgId",
+  authMiddleware,
+  validate(orgValidation.update),
+  AdminOrgController.updateOrg
+);
 
 /**
  * @route DELETE /api/v1/organizations/:orgId
  * @desc  Delete an organization (soft delete or hard delete based on logic)
  */
-router.delete("/organizations/:orgId", validate(orgValidation.deleteOrg),AdminOrgController.deleteOrg);
+router.delete(
+  "/organizations/:orgId",
+  authMiddleware,
+  validate(orgValidation.deleteOrg),
+  AdminOrgController.deleteOrg
+);
 
 export default router;
