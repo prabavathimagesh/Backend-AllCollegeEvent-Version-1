@@ -2,53 +2,51 @@ const prisma = require("../config/db.config");
 import { EventType } from "../types/type";
 import { EVENT_STATUS_LIST } from "../constants/event.status.message";
 import { EVENT_MESSAGES } from "../constants/event.message";
+import { getSignedUrl } from "../utils/s3SignedUrl";
 
 export class EventService {
-static async getEventsByOrg(identity: string): Promise<EventType[]> {
-  if (!identity) {
-    throw new Error(EVENT_MESSAGES.ORG_ID_REQUIRED);
-  }
+  static async getEventsByOrg(identity: string): Promise<EventType[]> {
+    if (!identity) {
+      throw new Error(EVENT_MESSAGES.ORG_ID_REQUIRED);
+    }
 
-  const BASE_URL = process.env.BASE_URL ?? "";
+    const BASE_URL = process.env.BASE_URL ?? "";
 
-  const events = await prisma.event.findMany({
-    where: {
-      orgIdentity: identity,
-      status: EVENT_MESSAGES.APPROVED,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      org: {
-        select: {
-          organizationName: true,
-          organizationCategory: true,
-          city: true,
-          state: true,
-          country: true,
-          profileImage: true,
-          whatsapp: true,
-          instagram: true,
-          linkedIn: true,
-          logoUrl: true,
+    const events = await prisma.event.findMany({
+      where: {
+        orgIdentity: identity,
+        status: EVENT_MESSAGES.APPROVED,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        org: {
+          select: {
+            organizationName: true,
+            organizationCategory: true,
+            city: true,
+            state: true,
+            country: true,
+            profileImage: true,
+            whatsapp: true,
+            instagram: true,
+            linkedIn: true,
+            logoUrl: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  if (!events.length) {
-    throw new Error(EVENT_MESSAGES.EVENTS_NOT_FOUND);
+    if (!events.length) {
+      throw new Error(EVENT_MESSAGES.EVENTS_NOT_FOUND);
+    }
+
+    return events.map((event: EventType) => ({
+      ...event,
+      bannerImage: event.bannerImage ? getSignedUrl(event.bannerImage) : null,
+    }));
   }
-
-  return events.map((event: EventType) => ({
-    ...event,
-    bannerImage: event.bannerImage
-      ? `${BASE_URL}${event.bannerImage}`
-      : null,
-  }));
-}
-
 
   static async createEventService(data: {
     org_id: String;
