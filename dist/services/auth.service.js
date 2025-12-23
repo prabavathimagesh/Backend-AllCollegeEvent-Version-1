@@ -10,29 +10,32 @@ const google_auth_library_1 = require("google-auth-library");
 const sendOtp_1 = require("../utils/sendOtp");
 // Auth-related constant messages
 const auth_message_1 = require("../constants/auth.message");
-/**
- * Send organization account verification email
- * Triggered after successful org signup
- */
-const sendVerificationMail = async (org) => {
-    // Frontend verification URL base
-    const URL = process.env.MAIL_SEND;
+const sendVerificationMail = async (org, platform = "web") => {
     // Generate verification token
     const token = (0, jwt_1.generateToken)({ identity: org.identity });
-    // Construct verification URL
-    const verifyUrl = `${URL}auth/email-verify?token=${token}`;
-    // Email HTML template
+    // Normalize platform (safety)
+    const safePlatform = platform === "mobile" ? "mobile" : "web";
+    let verifyUrl;
+    if (safePlatform === "mobile") {
+        // Mobile deep link
+        verifyUrl = `myapp://email-verify?token=${token}`;
+    }
+    else {
+        // Web URL
+        const WEB_URL = process.env.MAIL_SEND;
+        verifyUrl = `${WEB_URL}auth/email-verify?token=${token}`;
+    }
     const html = `
     <h2>Verify Your Organization Account</h2>
     <p>Hello <b>${org.organizationName}</b>,</p>
     <p>Your account was created successfully. Please click the link below to verify:</p>
-    <a href="${verifyUrl}" 
+    <a href="${verifyUrl}"
        style="padding:10px 15px; background:#4CAF50; color:white; border-radius:4px; text-decoration:none;">
       Verify Your Account
     </a>
+    <p>If the button doesn't work, copy and paste this link:</p>
     <p>After verification, you can login using the login page.</p>
   `;
-    // Send verification email
     await (0, mailer_1.sendEmail)({
         to: org.domainEmail,
         subject: "Verify your account",
@@ -47,7 +50,7 @@ class AuthService {
     /**
      * Signup user or organization
      */
-    static async signup(name, email, password, type, extra) {
+    static async signup(name, email, password, type, platform, extra) {
         // Fetch role based on type
         const role = await prisma.role.findFirst({
             where: { name: type },
@@ -91,7 +94,7 @@ class AuthService {
                 },
             });
             // Send verification email
-            await sendVerificationMail(org);
+            await sendVerificationMail(org, platform);
             return org;
         }
         throw new Error(auth_message_1.AUTH_MESSAGES.INVALID_TYPE);

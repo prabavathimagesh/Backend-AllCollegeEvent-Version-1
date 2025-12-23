@@ -17,6 +17,7 @@ model Role {
   users User[]
   orgs  Org[]
 
+  @@unique([name])
   @@map("ace_role")
 }
 
@@ -192,7 +193,7 @@ model AcePerk {
   identity String @id @default(uuid()) @map("identity")
   id       Int    @unique @default(autoincrement())
 
-  perkName String @map("perk_name")
+  perkName String @unique @map("perk_name")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -204,7 +205,7 @@ model AceCertification {
   identity String @id @default(uuid()) @map("identity")
   id       Int    @unique @default(autoincrement())
 
-  certName String @map("cert_name")
+  certName String @unique @map("cert_name")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -216,7 +217,7 @@ model AceCategoryType {
   identity String @id @default(uuid()) @map("identity")
   id       Int    @unique @default(autoincrement())
 
-  categoryName String @map("category_name")
+  categoryName String @unique @map("category_name")
 
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt @map("updated_at")
@@ -237,5 +238,6 @@ model AceEventTypes {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([name, categoryIdentity])
   @@map("ace_event_types")
 }

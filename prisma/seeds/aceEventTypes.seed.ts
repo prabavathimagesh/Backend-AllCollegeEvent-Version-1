@@ -3,11 +3,17 @@ import type { AceCategory } from "../../src/types/type";
 
 async function seedAceEventTypes() {
   try {
-    const categories: AceCategory[] =
-      await prisma.AceCategoryType.findMany();
+    const categories = await prisma.aceCategoryType.findMany();
+
+    if (!categories.length) {
+      throw new Error("AceCategoryType table is empty. Seed categories first.");
+    }
 
     const map = Object.fromEntries(
-      categories.map((c) => [c.category_name.toLowerCase(), c.identity])
+      categories.map((c: AceCategory) => [
+        c.categoryName.toLowerCase(),
+        c.identity,
+      ])
     );
 
     const data = [
@@ -61,9 +67,9 @@ async function seedAceEventTypes() {
       { name: "Awareness Campaigns", categoryIdentity: map["others"] },
       { name: "Civic Festivals", categoryIdentity: map["others"] },
       { name: "Food & Drink", categoryIdentity: map["others"] },
-    ];
+    ].filter((d) => d.categoryIdentity);
 
-    await prisma.ace_event_types.createMany({
+    await prisma.aceEventTypes.createMany({
       data,
       skipDuplicates: true,
     });

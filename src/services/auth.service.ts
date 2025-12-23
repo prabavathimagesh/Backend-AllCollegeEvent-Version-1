@@ -46,7 +46,6 @@ const sendVerificationMail = async (
       Verify Your Account
     </a>
     <p>If the button doesn't work, copy and paste this link:</p>
-    <p>${verifyUrl}</p>
     <p>After verification, you can login using the login page.</p>
   `;
 

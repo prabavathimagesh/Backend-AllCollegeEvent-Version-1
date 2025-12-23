@@ -23,6 +23,7 @@ export const authValidation = {
 
       // User or Organization
       type: Joi.string().valid("user", "org").required(),
+      platform:Joi.string().valid("mobile","web").required(),
 
       // Organization-only fields
       org_name: Joi.string().when("type", { is: "org", then: Joi.required() }),

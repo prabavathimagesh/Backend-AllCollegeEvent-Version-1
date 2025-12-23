@@ -113,7 +113,7 @@ export class EventService {
     // mapping image url to include base URL
     return {
       ...event,
-      bannerImage: event.bannerImage ? `${BASE_URL}${event.bannerImage}` : null,
+      bannerImage: getResolvedImageUrl(event.bannerImage),
     };
   }
 
@@ -175,7 +175,7 @@ export class EventService {
     // map full image path
     const events: EventType[] = rawEvents.map((e: EventType) => ({
       ...e,
-      bannerImage: e.bannerImage ? `${BASE_URL}${e.bannerImage}` : null,
+      bannerImage: getResolvedImageUrl(e.bannerImage),
     }));
 
     return events;
@@ -213,9 +213,7 @@ export class EventService {
     // adding absolute image path
     const event: EventType = {
       ...rawEvent,
-      bannerImage: rawEvent.bannerImage
-        ? `${BASE_URL}${rawEvent.bannerImage}`
-        : null,
+      bannerImage: getResolvedImageUrl(rawEvent.bannerImage),
     };
 
     return event;

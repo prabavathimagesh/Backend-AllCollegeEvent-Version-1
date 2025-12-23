@@ -60,5 +60,6 @@ export interface UserType {
 
 export interface AceCategory {
   identity: string;
-  category_name: string;
-};
+  categoryName: string;
+}
+

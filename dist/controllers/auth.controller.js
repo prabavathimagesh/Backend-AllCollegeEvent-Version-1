@@ -14,10 +14,9 @@ class AuthController {
     static async signup(req, res) {
         try {
             // Extract signup details from request body
-            const { name, email, password, type, ...rest } = req.body;
-            // Call signup service
-            const user = await auth_service_1.AuthService.signup(name, email, password, type, rest);
-            // Success response
+            const { name, email, password, type, platform = "web", ...rest } = req.body;
+            // Call signup service (6 args)
+            const user = await auth_service_1.AuthService.signup(name, email, password, type, platform, rest);
             return res.status(200).json({
                 status: true,
                 message: type === "user"
@@ -27,20 +26,17 @@ class AuthController {
             });
         }
         catch (err) {
-            // Known / business errors
             const safeErrors = [
                 auth_message_1.AUTH_MESSAGES.ROLE_NOT_FOUND,
                 auth_message_1.AUTH_MESSAGES.EMAIL_ALREADY_REGISTERED,
                 auth_message_1.AUTH_MESSAGES.INVALID_TYPE,
             ];
-            // Business errors → 200
             if (safeErrors.includes(err.message)) {
                 return res.status(200).json({
                     status: false,
                     message: err.message,
                 });
             }
-            // System errors → 500
             return res.status(500).json({
                 status: false,
                 message: auth_message_1.AUTH_MESSAGES.INTERNAL_SERVER_ERROR,
