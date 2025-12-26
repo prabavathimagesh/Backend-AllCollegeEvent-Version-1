@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "ace_event" ALTER COLUMN "title" SET DEFAULT '',
+ALTER COLUMN "mode" SET DEFAULT 'ONLINE';

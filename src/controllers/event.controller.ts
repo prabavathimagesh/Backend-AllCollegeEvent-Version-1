@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { EventService } from "../services/event.service";
 import { EVENT_MESSAGES } from "../constants/event.message";
 import { uploadToS3 } from "../utils/s3Upload";
+import { AuthRequest } from "../types/type";
 
 /**
  * Event Controller
@@ -96,43 +97,32 @@ export class EventController {
 
   static async createEvent(req: Request, res: Response) {
     try {
-      // Extract organization ID
       const { orgId } = req.params;
 
-      // Extract event details
-      const { event_title, description, event_date, event_time, mode, venue } =
-        req.body;
-
-      let image: string | null = null;
-
-      // Upload to S3 instead of local uploads
+      // Upload image (optional)
+      let bannerImages: string[] = [];
       if (req.file) {
-        console.log(req.file)
         const uploaded = await uploadToS3(req.file, "events");
-        image = uploaded.url; // S3 URL stored
+        bannerImages.push(uploaded.url);
       }
 
-      // Create event (NO SERVICE CHANGE)
-      const event = await EventService.createEventService({
-        org_id: orgId,
-        event_title,
-        description,
-        event_date,
-        event_time,
-        mode,
-        image, //  now S3 URL
-        venue,
-      });
+      const payload = {
+        ...req.body,
+        orgIdentity: orgId, 
+        bannerImages, 
+      };
 
-      res.status(200).json({
-        status: true,
+      const event = await EventService.createEvent(payload);
+
+      res.status(201).json({
+        success: true,
         data: event,
-        message: EVENT_MESSAGES.EVENT_CREATED,
+        message: "Event created successfully",
       });
-    } catch (err) {
+    } catch (error: any) {
       res.status(400).json({
-        status: false,
-        message: EVENT_MESSAGES.INTERNAL_ERROR,
+        success: false,
+        message: error.message || "Failed to create event",
       });
     }
   }
@@ -262,5 +252,32 @@ export class EventController {
         error: err.message,
       });
     }
+  }
+
+  // New Event and Draft Based Controllers
+
+  static async createDraft(req: Request, res: Response) {
+    if (!req.user || !(req.user as any).data) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const decoded = (req.user as any).data;
+
+    const userId = decoded.id; // number
+    const orgIdentity = decoded.identity; // UUID string
+
+    const event = await EventService.createDraftEvent(userId, orgIdentity);
+
+    res.status(201).json(event);
+  }
+
+  static async autoSave(req: Request, res: Response) {
+    await EventService.autoSaveEvent(req.params.id, req.body);
+    res.json({ success: true });
+  }
+
+  static async publishEvent(req: Request, res: Response) {
+    const event = await EventService.publishEvent(req.params.id, req.body);
+    res.json({ success: true, data: event });
   }
 }

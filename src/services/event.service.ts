@@ -3,6 +3,8 @@ import { EventType } from "../types/type";
 import { EVENT_STATUS_LIST } from "../constants/event.status.message";
 import { EVENT_MESSAGES } from "../constants/event.message";
 import { getResolvedImageUrl } from "../utils/s3SignedUrl";
+import { cleanPayload } from "../utils/cleanPayload";
+import { Prisma } from "@prisma/client";
 
 export class EventService {
   static async getEventsByOrg(identity: string): Promise<EventType[]> {
@@ -48,32 +50,97 @@ export class EventService {
     }));
   }
 
-  static async createEventService(data: {
-    org_id: String;
-    event_title: string;
-    description?: string;
-    event_date: string;
-    event_time: string;
-    mode: string;
-    image: string | null;
-    venue: string;
-  }) {
-    // creating new event record in database
-    const event = await prisma.event.create({
-      data: {
-        orgIdentity: data.org_id,
-        title: data.event_title,
-        description: data.description,
-        bannerImage: data.image,
-        eventDate: data.event_date,
-        eventTime: data.event_time,
-        mode: data.mode,
-        venue: data.venue,
-      },
-    });
+  static async createEvent(payload: any) {
+    return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      // 1. Create Event
+      const event = await tx.event.create({
+        data: {
+          orgIdentity: payload.orgIdentity,
+          createdBy: payload.createdBy,
 
-    // returning created event object
-    return event;
+          title: payload.title,
+          description: payload.description,
+          mode: payload.mode,
+          categoryIdentity: payload.categoryIdentity,
+          eventTypeIdentity: payload.eventTypeIdentity,
+
+          eligibleDeptIdentities: payload.eligibleDeptIdentities ?? [],
+          tags: payload.tags ?? [],
+
+          bannerImages: payload.bannerImages ?? [],
+          eventLink: payload.eventLink,
+          socialLinks: payload.socialLinks,
+          paymentLink: payload.paymentLink,
+        },
+      });
+
+      const eventId = event.identity;
+
+      // 2. Collaborators
+      if (payload.collaborators?.length) {
+        await tx.eventCollaborator.createMany({
+          data: payload.collaborators.map((c: any) => ({
+            ...c,
+            eventIdentity: eventId,
+          })),
+        });
+      }
+
+      // 3. Calendars
+      if (payload.calendars?.length) {
+        await tx.eventCalendar.createMany({
+          data: payload.calendars.map((c: any) => ({
+            ...c,
+            eventIdentity: eventId,
+          })),
+        });
+      }
+
+      // 4. Tickets
+      if (payload.tickets?.length) {
+        await tx.ticket.createMany({
+          data: payload.tickets.map((t: any) => ({
+            ...t,
+            eventIdentity: eventId,
+          })),
+        });
+      }
+
+      // 5. Perks
+      if (payload.perkIdentities?.length) {
+        await tx.eventPerk.createMany({
+          data: payload.perkIdentities.map((id: string) => ({
+            eventIdentity: eventId,
+            perkIdentity: id,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      // 6. Certifications
+      if (payload.certIdentities?.length) {
+        await tx.eventCertification.createMany({
+          data: payload.certIdentities.map((id: string) => ({
+            eventIdentity: eventId,
+            certIdentity: id,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      // 7. Accommodations
+      if (payload.accommodationIdentities?.length) {
+        await tx.eventAccommodation.createMany({
+          data: payload.accommodationIdentities.map((id: string) => ({
+            eventIdentity: eventId,
+            accommodationIdentity: id,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      return event;
+    });
   }
 
   static async getEventById(
@@ -221,5 +288,120 @@ export class EventService {
 
   static getAllStatuses() {
     return EVENT_STATUS_LIST;
+  }
+
+  // Event & Draft Based Servcies
+
+  static async createDraftEvent(userId: number, orgIdentity: string) {
+    const existingDraft = await prisma.event.findFirst({
+      where: {
+        createdBy: userId,
+        status: "DRAFT",
+      },
+    });
+
+    if (existingDraft) return existingDraft;
+
+    return prisma.event.create({
+      data: {
+        orgIdentity,
+        createdBy: userId,
+        status: "DRAFT",
+        org: {
+          connect: {
+            identity: orgIdentity,
+          },
+        },
+      },
+    });
+  }
+
+  static async autoSaveEvent(eventId: string, payload: any) {
+    const data = cleanPayload(payload);
+    if (!Object.keys(data).length) return;
+
+    await prisma.event.update({
+      where: { identity: eventId },
+      data,
+    });
+  }
+
+  static async publishEvent(eventId: string, payload: any) {
+    return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      const event = await tx.event.findUnique({
+        where: { identity: eventId },
+      });
+
+      if (!event) throw new Error("Event not found");
+      if (!event.title) throw new Error("Title is required");
+      if (!event.mode) throw new Error("Mode is required");
+
+      await tx.event.update({
+        where: { identity: eventId },
+        data: {
+          status: "PENDING",
+          publishedAt: new Date(),
+        },
+      });
+
+      if (payload.collaborators?.length) {
+        await tx.eventCollaborator.createMany({
+          data: payload.collaborators.map((c: any) => ({
+            ...c,
+            eventIdentity: eventId,
+          })),
+        });
+      }
+
+      if (payload.calendars?.length) {
+        await tx.eventCalendar.createMany({
+          data: payload.calendars.map((c: any) => ({
+            ...c,
+            eventIdentity: eventId,
+          })),
+        });
+      }
+
+      if (payload.tickets?.length) {
+        await tx.ticket.createMany({
+          data: payload.tickets.map((t: any) => ({
+            ...t,
+            eventIdentity: eventId,
+          })),
+        });
+      }
+
+      if (payload.perkIdentities?.length) {
+        await tx.eventPerk.createMany({
+          data: payload.perkIdentities.map((id: string) => ({
+            eventIdentity: eventId,
+            perkIdentity: id,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      if (payload.certIdentities?.length) {
+        await tx.eventCertification.createMany({
+          data: payload.certIdentities.map((id: string) => ({
+            eventIdentity: eventId,
+            certIdentity: id,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      if (payload.accommodationIdentities?.length) {
+        await tx.eventAccommodation.createMany({
+          data: payload.accommodationIdentities.map((id: string) => ({
+            eventIdentity: eventId,
+            accommodationIdentity: id,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      return eventId;
+    });
   }
 }

@@ -120,42 +120,13 @@ model OTP {
   @@map("ace_otp")
 }
 
+// ENUM FOR EVENT STATUS
 enum EventStatus {
   DRAFT
   PENDING
   APPROVED
   REJECTED
   PRIVATE
-}
-
-model Event {
-  identity String @id @default(uuid())
-  id       Int    @unique @default(autoincrement())
-
-  orgIdentity String
-  createdBy   Int?
-
-  title       String
-  slug        String?
-  description String?
-  bannerImage String?
-  venueName   String?
-  mode        String?
-  eventDate   String?
-  eventTime   String?
-  venue       String?
-
-  publishedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  status EventStatus @default(PENDING)
-
-  org          Org     @relation(fields: [orgIdentity], references: [identity])
-  User         User?   @relation(fields: [userIdentity], references: [identity])
-  userIdentity String?
-
-  @@map("ace_event")
 }
 
 model AuthProvider {
@@ -195,8 +166,9 @@ model AcePerk {
 
   perkName String @unique @map("perk_name")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  EventPerk EventPerk[]
 
   @@map("ace_perks")
 }
@@ -207,8 +179,9 @@ model AceCertification {
 
   certName String @unique @map("cert_name")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime             @updatedAt @map("updated_at")
+  EventCertification EventCertification[]
 
   @@map("ace_certification")
 }
@@ -240,4 +213,197 @@ model AceEventTypes {
 
   @@unique([name, categoryIdentity])
   @@map("ace_event_types")
+}
+
+model AceAccommodation {
+  identity String @id @default(uuid()) @map("identity")
+  id       Int    @unique @default(autoincrement())
+
+  accommodationName String @unique @map("accommodation_name")
+
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime             @updatedAt @map("updated_at")
+  EventAccommodation EventAccommodation[]
+
+  @@map("ace_accommodation")
+}
+
+model OrgCategory {
+  identity String @id @default(uuid()) @map("identity")
+  id       Int    @unique @default(autoincrement())
+
+  categoryName String @unique @map("category_name")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("ace_org_category")
+}
+
+model Event {
+  identity String @id @default(uuid())
+  id       Int    @unique @default(autoincrement())
+
+  // Organization
+  orgIdentity         String
+  orgCategoryIdentity String?
+  createdBy           Int?
+
+  // Core Event
+  title       String      @default("")
+  slug        String?
+  description String?
+  offers      String?
+  mode        EventMode   @default(ONLINE)
+  status      EventStatus @default(PENDING)
+
+  // Category & Type
+  categoryIdentity  String?
+  eventTypeIdentity String?
+
+  // Eligibility
+  eligibleDeptIdentities String[]
+
+  // Tags
+  tags String[]
+
+  // Media
+  bannerImages String[]
+  videoLink    String?
+  eventLink    String?
+  socialLinks  Json?
+
+  // Payment
+  paymentLink String?
+
+  // Relations
+  org Org @relation(fields: [orgIdentity], references: [identity])
+
+  calendars           EventCalendar[]
+  tickets             Ticket[]
+  collaborators       EventCollaborator[]
+  eventPerks          EventPerk[]
+  eventCertifications EventCertification[]
+  eventAccommodations EventAccommodation[]
+
+  publishedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  User         User?     @relation(fields: [userIdentity], references: [identity])
+  userIdentity String?
+
+  @@map("ace_event")
+}
+
+model EventCollaborator {
+  identity String @id @default(uuid())
+  id       Int    @unique @default(autoincrement())
+
+  eventIdentity String
+
+  // Hosting info
+  hostOrgIdentity          String?
+  orgCategoryIdentity      String?
+  organizationName         String?
+  organizationDeptIdentity String?
+  organizerName            String?
+  organizerNumber          String?
+  location                 String?
+
+  role String? // primary_host | co_host | speaker | organizer
+
+  event Event @relation(fields: [eventIdentity], references: [identity])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ace_event_collaborator")
+}
+
+model EventCalendar {
+  identity String @id @default(uuid())
+
+  eventIdentity String
+  timeZone      String
+
+  startDate DateTime
+  endDate   DateTime
+
+  event Event @relation(fields: [eventIdentity], references: [identity])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ace_event_calendar")
+}
+
+model Ticket {
+  identity String @id @default(uuid())
+  id       Int    @unique @default(autoincrement())
+
+  eventIdentity String
+
+  name          String
+  description   String?
+  sellingFrom   DateTime
+  sellingTo     DateTime
+  isPaid        Boolean  @default(false)
+  price         Float?
+  totalQuantity Int
+
+  event Event @relation(fields: [eventIdentity], references: [identity])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ace_event_ticket")
+}
+
+model EventPerk {
+  eventIdentity String
+  perkIdentity  String
+
+  event Event   @relation(fields: [eventIdentity], references: [identity])
+  perk  AcePerk @relation(fields: [perkIdentity], references: [identity])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([eventIdentity, perkIdentity])
+  @@map("ace_event_perk")
+}
+
+model EventCertification {
+  eventIdentity String
+  certIdentity  String
+
+  event Event            @relation(fields: [eventIdentity], references: [identity])
+  cert  AceCertification @relation(fields: [certIdentity], references: [identity])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([eventIdentity, certIdentity])
+  @@map("ace_event_certification")
+}
+
+model EventAccommodation {
+  eventIdentity         String
+  accommodationIdentity String
+
+  event         Event            @relation(fields: [eventIdentity], references: [identity])
+  accommodation AceAccommodation @relation(fields: [accommodationIdentity], references: [identity])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([eventIdentity, accommodationIdentity])
+  @@map("ace_event_accommodation")
+}
+
+// ENUM for EVENT MODE
+enum EventMode {
+  ONLINE
+  OFFLINE
+  HYBRID
 }

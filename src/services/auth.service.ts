@@ -21,7 +21,7 @@ const sendVerificationMail = async (
   platform: Platform = "web"
 ) => {
   // Generate verification token
-  const token = generateToken({ identity: org.identity });
+  const token = generateToken({ identity: org.identity, id:org.id });
 
   // Normalize platform (safety)
   const safePlatform: Platform = platform === "mobile" ? "mobile" : "web";
@@ -177,6 +177,7 @@ export class AuthService {
 
     // Generate JWT
     const token = generateToken({
+      id:user.id,
       identity: user.identity,
       email,
       roleId: roleUUID,
@@ -397,6 +398,7 @@ export class AuthService {
     }
 
     const token = generateToken({
+      id:user.id,
       identity: user.identity,
       email,
       roleId: roleUUID,

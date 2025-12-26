@@ -1,3 +1,5 @@
+import { Request } from "express";
+
 export interface EventType {
   identity: string;
   id: number;
@@ -63,3 +65,9 @@ export interface AceCategory {
   categoryName: string;
 }
 
+export interface AuthRequest extends Request {
+  user: {
+    id: number;
+    identity: string;
+  };
+}

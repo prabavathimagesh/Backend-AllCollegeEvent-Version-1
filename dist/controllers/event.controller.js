@@ -88,38 +88,29 @@ class EventController {
      */
     static async createEvent(req, res) {
         try {
-            // Extract organization ID
             const { orgId } = req.params;
-            // Extract event details
-            const { event_title, description, event_date, event_time, mode, venue } = req.body;
-            let image = null;
-            // Upload to S3 instead of local uploads
+            // Upload image (optional)
+            let bannerImages = [];
             if (req.file) {
-                console.log(req.file);
                 const uploaded = await (0, s3Upload_1.uploadToS3)(req.file, "events");
-                image = uploaded.url; // S3 URL stored
+                bannerImages.push(uploaded.url);
             }
-            // Create event (NO SERVICE CHANGE)
-            const event = await event_service_1.EventService.createEventService({
-                org_id: orgId,
-                event_title,
-                description,
-                event_date,
-                event_time,
-                mode,
-                image, //  now S3 URL
-                venue,
-            });
-            res.status(200).json({
-                status: true,
+            const payload = {
+                ...req.body,
+                orgIdentity: orgId,
+                bannerImages,
+            };
+            const event = await event_service_1.EventService.createEvent(payload);
+            res.status(201).json({
+                success: true,
                 data: event,
-                message: event_message_1.EVENT_MESSAGES.EVENT_CREATED,
+                message: "Event created successfully",
             });
         }
-        catch (err) {
+        catch (error) {
             res.status(400).json({
-                status: false,
-                message: event_message_1.EVENT_MESSAGES.INTERNAL_ERROR,
+                success: false,
+                message: error.message || "Failed to create event",
             });
         }
     }
@@ -240,6 +231,25 @@ class EventController {
                 error: err.message,
             });
         }
+    }
+    // New Event and Draft Based Controllers
+    static async createDraft(req, res) {
+        if (!req.user || !req.user.data) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        const decoded = req.user.data;
+        const userId = decoded.id; // number
+        const orgIdentity = decoded.identity; // UUID string
+        const event = await event_service_1.EventService.createDraftEvent(userId, orgIdentity);
+        res.status(201).json(event);
+    }
+    static async autoSave(req, res) {
+        await event_service_1.EventService.autoSaveEvent(req.params.id, req.body);
+        res.json({ success: true });
+    }
+    static async publishEvent(req, res) {
+        const event = await event_service_1.EventService.publishEvent(req.params.id, req.body);
+        res.json({ success: true, data: event });
     }
 }
 exports.EventController = EventController;

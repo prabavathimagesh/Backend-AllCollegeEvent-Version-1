@@ -12,7 +12,7 @@ const sendOtp_1 = require("../utils/sendOtp");
 const auth_message_1 = require("../constants/auth.message");
 const sendVerificationMail = async (org, platform = "web") => {
     // Generate verification token
-    const token = (0, jwt_1.generateToken)({ identity: org.identity });
+    const token = (0, jwt_1.generateToken)({ identity: org.identity, id: org.id });
     // Normalize platform (safety)
     const safePlatform = platform === "mobile" ? "mobile" : "web";
     let verifyUrl;
@@ -144,6 +144,7 @@ class AuthService {
         };
         // Generate JWT
         const token = (0, jwt_1.generateToken)({
+            id: user.id,
             identity: user.identity,
             email,
             roleId: roleUUID,
@@ -334,6 +335,7 @@ class AuthService {
             });
         }
         const token = (0, jwt_1.generateToken)({
+            id: user.id,
             identity: user.identity,
             email,
             roleId: roleUUID,

@@ -40,6 +40,7 @@ export default class AdminAuthService {
 
     // token generation
     const token = generateToken({
+      id:user.id,
       identity: user.identity,
       email: user.email,
       roleId: user.role ? user.role.idnty : null,

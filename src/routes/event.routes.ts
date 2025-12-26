@@ -82,4 +82,11 @@ router.get(
 
 router.get("/event/statuses", EventController.getStatuses);
 
+
+// ----------------------------------
+
+router.post("/events/draft", authMiddleware,EventController.createDraft);
+router.patch("/events/:id", authMiddleware,EventController.autoSave);
+router.post("/events/:id/publish", authMiddleware,EventController.publishEvent);
+
 export default router;
