@@ -7,9 +7,10 @@ import orgRoutes from "./routes/org.routes";
 import userRoutes from "./routes/user.routes";
 import eventRoutes from "./routes/event.routes";
 import adminEventRoutes from "./routes/admin/admin.event.routes";
-import adminUserRoutes from './routes/admin/admin.user.routes'
-import adminOrgRoutes from './routes/admin/admin.org.routes'
-import adminAuthRoutes from './routes/admin/admin.auth.routes'
+import adminUserRoutes from "./routes/admin/admin.user.routes";
+import adminOrgRoutes from "./routes/admin/admin.org.routes";
+import adminAuthRoutes from "./routes/admin/admin.auth.routes";
+import masterRoutes from "./routes/master.routes";
 import path from "path";
 
 dotenv.config();
@@ -38,7 +39,14 @@ app.use("/api/v1/auth", authRoutes); // authentication routes
 app.use("/api/v1", userRoutes); // user-related routes
 app.use("/api/v1", orgRoutes); // organization routes
 app.use("/api/v1", eventRoutes); // event routes
-app.use("/api/v1/admin", adminEventRoutes,adminOrgRoutes,adminUserRoutes,adminAuthRoutes); // admin API's
+app.use(
+  "/api/v1/admin",
+  adminEventRoutes,
+  adminOrgRoutes,
+  adminUserRoutes,
+  adminAuthRoutes
+); // admin API's
+app.use("/api/v1/master", masterRoutes);
 
 // testing root endpoint to check server status
 app.get("/", (req: any, res: any) => {

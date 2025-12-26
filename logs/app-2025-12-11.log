@@ -1,7 +1,0 @@
-[2025-12-11 20:58:39] [INFO] → Incoming → GET /api/v1/events
-[2025-12-11 20:58:40] [INFO] → Incoming → GET /favicon.ico
-[2025-12-11 22:06:16] [INFO] → Incoming → GET /api/v1/event/statuses
-[2025-12-11 22:31:21] [INFO] → Incoming → GET /api/v1/admin/event/f26efaa0-f447-4468-b0b9-83b660806723/status
-[2025-12-11 22:31:53] [INFO] → Incoming → GET /api/v1/admin/event/f26efaa0-f447-4468-b0b9-83b660806723/status
-[2025-12-11 22:32:08] [INFO] → Incoming → PUT /api/v1/admin/event/f26efaa0-f447-4468-b0b9-83b660806723/status
-[2025-12-11 22:34:08] [INFO] → Incoming → PUT /api/v1/admin/event/80cbd558-9ce8-481a-b988-5c325815618c/status

@@ -91,24 +91,46 @@ class EventController {
             const { orgId } = req.params;
             // Upload image (optional)
             let bannerImages = [];
-            if (req.file) {
-                const uploaded = await (0, s3Upload_1.uploadToS3)(req.file, "events");
-                bannerImages.push(uploaded.url);
+            if (req.files && Array.isArray(req.files)) {
+                for (const file of req.files) {
+                    const uploaded = await (0, s3Upload_1.uploadToS3)(file, "events");
+                    bannerImages.push(uploaded.url);
+                }
             }
+            console.log(req.body);
             const payload = {
-                ...req.body,
-                orgIdentity: orgId,
-                bannerImages,
+                orgIdentity: req.params.orgId,
+                // FIX 1: convert to number
+                createdBy: req.body.createdBy ? Number(req.body.createdBy) : null,
+                title: req.body.title,
+                description: req.body.description,
+                mode: req.body.mode,
+                categoryIdentity: req.body.categoryIdentity,
+                eventTypeIdentity: req.body.eventTypeIdentity,
+                // FIX 2: parse arrays correctly
+                eligibleDeptIdentities: JSON.parse(req.body.eligibleDeptIdentities || "[]"),
+                tags: JSON.parse(req.body.tags || "[]"),
+                collaborators: JSON.parse(req.body.collaborators || "[]"),
+                calendars: JSON.parse(req.body.calendars || "[]"),
+                tickets: JSON.parse(req.body.tickets || "[]"),
+                perkIdentities: JSON.parse(req.body.perkIdentities || "[]"),
+                certIdentities: JSON.parse(req.body.certIdentities || "[]"),
+                accommodationIdentities: JSON.parse(req.body.accommodationIdentities || "[]"),
+                bannerImages, // from multer + S3
+                eventLink: req.body.eventLink,
+                paymentLink: req.body.paymentLink,
+                socialLinks: JSON.parse(req.body.socialLinks || "{}"),
             };
+            console.log(payload);
             const event = await event_service_1.EventService.createEvent(payload);
-            res.status(201).json({
+            res.status(200).json({
                 success: true,
                 data: event,
                 message: "Event created successfully",
             });
         }
         catch (error) {
-            res.status(400).json({
+            res.status(500).json({
                 success: false,
                 message: error.message || "Failed to create event",
             });

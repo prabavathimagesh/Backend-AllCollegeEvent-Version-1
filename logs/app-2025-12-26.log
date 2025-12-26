@@ -1,0 +1,107 @@
+[2025-12-26 15:46:53] [INFO] → Incoming → GET /api/v1/master/perks
+[2025-12-26 15:48:21] [INFO] → Incoming → GET /api/v1/master/certifications
+[2025-12-26 15:51:41] [INFO] → Incoming → GET /api/v1/master/categories
+[2025-12-26 15:52:41] [INFO] → Incoming → GET /api/v1/master/event-types
+[2025-12-26 15:52:44] [INFO] → Incoming → GET /api/v1/master/event-type
+[2025-12-26 15:53:11] [INFO] → Incoming → GET /api/v1/master/event-types/9bad0d9d-2120-4828-a95e-60ac5d6ecb75
+[2025-12-26 15:54:24] [INFO] → Incoming → GET /api/v1/master/accommodation
+[2025-12-26 15:54:29] [INFO] → Incoming → GET /api/v1/master/accommodations
+[2025-12-26 15:55:25] [INFO] → Incoming → GET /api/v1/master/org-categories
+[2025-12-26 16:24:29] [INFO] → Incoming → GET /api/v1/master/perks
+[2025-12-26 16:25:09] [INFO] → Incoming → GET /api/v1/master/perks
+[2025-12-26 16:25:24] [INFO] → Incoming → GET /api/v1/master/perks
+[2025-12-26 16:34:29] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-26 16:34:29] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Unexpected non-whitespace character after JSON at position 23 (line 1 column 24)
+[2025-12-26 17:07:19] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-26 17:07:19] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Unexpected non-whitespace character after JSON at position 23 (line 1 column 24)
+[2025-12-26 17:10:33] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-26 17:10:33] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Unexpected non-whitespace character after JSON at position 23 (line 1 column 24)
+[2025-12-26 17:15:06] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-26 17:15:06] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Cannot read properties of undefined (reading 'createdBy')
+[2025-12-26 17:17:11] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-26 17:17:11] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Cannot read properties of undefined (reading 'createdBy')
+[2025-12-26 17:18:07] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-26 17:18:07] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Cannot read properties of undefined (reading 'createdBy')
+[2025-12-26 17:18:49] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-26 17:18:49] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Unexpected non-whitespace character after JSON at position 23 (line 1 column 24)
+[2025-12-26 17:19:54] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-26 17:19:54] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: 
+Invalid `tx.event.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event.service.js:51:42
+
+  48 static async createEvent(payload) {
+  49     return prisma.$transaction(async (tx) => {
+  50         // 1. Create Event
+→ 51         const event = await tx.event.create({
+               data: {
+                 orgIdentity: undefined,
+                 createdBy: "1",
+                 title: "AI Tech Conference 2025",
+                 description: "Annual AI and technology conference",
+                 mode: "OFFLINE",
+                 categoryIdentity: "cat_tech",
+                 eventTypeIdentity: "conference",
+                 eligibleDeptIdentities: [
+                   "[\"dept_cse\", \"dept_it\"]",
+                   "[\"dept_cse\",\"dept_it\"]"
+                 ],
+                 tags: "[\"ai\",\"tech\",\"conference\"]",
+                 bannerImages: [],
+                 eventLink: "https://ai-tech-conf.com",
+                 socialLinks: undefined,
+                 paymentLink: "https://payments.razorpay.com/ai-conf",
+             +   org: {
+             +     create: OrgCreateWithoutEventsInput | OrgUncheckedCreateWithoutEventsInput,
+             +     connectOrCreate: OrgCreateOrConnectWithoutEventsInput,
+             +     connect: OrgWhereUniqueInput
+             +   }
+               }
+             })
+
+Argument `org` is missing.
+[2025-12-26 17:20:05] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-26 17:20:06] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: 
+Invalid `tx.event.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event.service.js:51:42
+
+  48 static async createEvent(payload) {
+  49     return prisma.$transaction(async (tx) => {
+  50         // 1. Create Event
+→ 51         const event = await tx.event.create({
+               data: {
+                 orgIdentity: undefined,
+                 createdBy: undefined,
+                 title: undefined,
+                 description: undefined,
+                 mode: undefined,
+                 categoryIdentity: undefined,
+                 eventTypeIdentity: undefined,
+                 eligibleDeptIdentities: [],
+                 tags: [],
+                 bannerImages: [],
+                 eventLink: undefined,
+                 socialLinks: undefined,
+                 paymentLink: undefined,
+             +   org: {
+             +     create: OrgCreateWithoutEventsInput | OrgUncheckedCreateWithoutEventsInput,
+             +     connectOrCreate: OrgCreateOrConnectWithoutEventsInput,
+             +     connect: OrgWhereUniqueInput
+             +   }
+               }
+             })
+
+Argument `org` is missing.
+[2025-12-26 17:29:09] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-26 17:29:09] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Cannot read properties of undefined (reading 'createdBy')
+[2025-12-26 17:29:32] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-26 17:29:33] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Unexpected non-whitespace character after JSON at position 23 (line 1 column 24)
+[2025-12-26 17:44:35] [INFO] → Incoming → GET /api/v1/master/perks
+[2025-12-26 17:45:23] [INFO] → Incoming → GET /api/v1/master/perks
+[2025-12-26 17:45:30] [INFO] → Incoming → GET /api/v1/master/certifications
+[2025-12-26 17:45:37] [INFO] → Incoming → GET /api/v1/master/categories
+[2025-12-26 17:45:39] [INFO] → Incoming → GET /api/v1/master/categories
+[2025-12-26 17:45:40] [INFO] → Incoming → GET /api/v1/master/categories
+[2025-12-26 17:45:41] [INFO] → Incoming → GET /api/v1/master/categories
+[2025-12-26 17:45:43] [INFO] → Incoming → GET /api/v1/master/categories
+[2025-12-26 17:45:45] [INFO] → Incoming → GET /api/v1/master/categories
+[2025-12-26 17:45:47] [INFO] → Incoming → GET /api/v1/master/categories

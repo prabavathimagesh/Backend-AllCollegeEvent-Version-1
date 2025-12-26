@@ -35,7 +35,7 @@ router.get(
  */
 router.post(
   "/organizations/:orgId/events",
-  upload.single("image"),
+  upload.array("bannerImages",5),
   EventController.createEvent
 );
 

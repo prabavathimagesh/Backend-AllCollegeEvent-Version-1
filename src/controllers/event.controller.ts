@@ -101,26 +101,30 @@ export class EventController {
 
       // Upload image (optional)
       let bannerImages: string[] = [];
-      if (req.file) {
-        const uploaded = await uploadToS3(req.file, "events");
-        bannerImages.push(uploaded.url);
+      if (req.files && Array.isArray(req.files)) {
+        for (const file of req.files) {
+          const uploaded = await uploadToS3(file, "events");
+          bannerImages.push(uploaded.url);
+        }
       }
+
+      console.log(req.body);
 
       const payload = {
         ...req.body,
-        orgIdentity: orgId, 
-        bannerImages, 
+        orgIdentity: orgId,
+        bannerImages,
       };
 
       const event = await EventService.createEvent(payload);
 
-      res.status(201).json({
+      res.status(200).json({
         success: true,
         data: event,
         message: "Event created successfully",
       });
     } catch (error: any) {
-      res.status(400).json({
+      res.status(500).json({
         success: false,
         message: error.message || "Failed to create event",
       });

@@ -24,7 +24,7 @@ router.get("/organizations/:orgId/events/:eventId", authMiddleware_1.authMiddlew
  * @route POST /api/v1/organizations/:orgId/events
  * @desc  Create a new event (with image upload)
  */
-router.post("/organizations/:orgId/events", fileUpload_1.default.single("image"), event_controller_1.EventController.createEvent);
+router.post("/organizations/:orgId/events", fileUpload_1.default.array("image", 5), event_controller_1.EventController.createEvent);
 /**
  * @route PUT /api/v1/organizations/:orgId/events/:eventId
  * @desc  Update an event (with optional image upload)
