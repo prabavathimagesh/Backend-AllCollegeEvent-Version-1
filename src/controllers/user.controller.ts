@@ -17,7 +17,7 @@ export class UserController {
       const users = await UserService.getAllUsers();
 
       // Success response
-      res.json({
+      res.status(200).json({
         status: true,
         data: users,
         message: USER_MESSAGES.USERS_FETCHED,
@@ -51,7 +51,7 @@ export class UserController {
       }
 
       // Success response
-      res.json({
+      res.status(200).json({
         status: true,
         data: user,
         message: USER_MESSAGES.USER_FETCHED,
@@ -78,7 +78,7 @@ export class UserController {
       const updated = await UserService.updateUser(identity, body);
 
       // Success response
-      res.json({
+      res.status(200).json({
         status: true,
         data: updated,
         message: USER_MESSAGES.USER_UPDATED,
@@ -104,7 +104,7 @@ export class UserController {
       const deletedUser = await UserService.deleteUser(identity);
 
       // Success response
-      res.json({
+      res.status(200).json({
         status: true,
         data: deletedUser,
         message: USER_MESSAGES.USER_DELETED,

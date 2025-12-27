@@ -6,6 +6,26 @@ const event_status_message_1 = require("../constants/event.status.message");
 const event_message_1 = require("../constants/event.message");
 const s3SignedUrl_1 = require("../utils/s3SignedUrl");
 const cleanPayload_1 = require("../utils/cleanPayload");
+function validateLocation(mode, location) {
+    if (mode === "ONLINE") {
+        if (!location.onlineMeetLink) {
+            throw new Error("Online meet link is required");
+        }
+    }
+    if (mode === "OFFLINE") {
+        if (!location.country || !location.city || !location.mapLink) {
+            throw new Error("Offline location details are required");
+        }
+    }
+    if (mode === "HYBRID") {
+        if (!location.onlineMeetLink ||
+            !location.country ||
+            !location.city ||
+            !location.mapLink) {
+            throw new Error("Both online and offline details are required");
+        }
+    }
+}
 class EventService {
     static async getEventsByOrg(identity) {
         if (!identity) {
@@ -47,6 +67,7 @@ class EventService {
     }
     static async createEvent(payload) {
         return prisma.$transaction(async (tx) => {
+            validateLocation(payload.mode, payload.location);
             // 1. Create Event
             const event = await tx.event.create({
                 data: {
@@ -78,6 +99,16 @@ class EventService {
                     })),
                 });
             }
+            await tx.eventLocation.create({
+                data: {
+                    eventIdentity: event.identity,
+                    onlineMeetLink: payload.location?.onlineMeetLink,
+                    country: payload.location?.country,
+                    state: payload.location?.state,
+                    city: payload.location?.city,
+                    mapLink: payload.location?.mapLink,
+                },
+            });
             // 3. Calendars
             if (payload.calendars?.length) {
                 await tx.eventCalendar.createMany({

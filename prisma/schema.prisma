@@ -279,6 +279,8 @@ model Event {
   // Relations
   org Org @relation(fields: [orgIdentity], references: [identity])
 
+  location EventLocation?
+
   calendars           EventCalendar[]
   tickets             Ticket[]
   collaborators       EventCollaborator[]
@@ -293,6 +295,27 @@ model Event {
   userIdentity String?
 
   @@map("ace_event")
+}
+
+model EventLocation {
+  identity String @id @default(uuid())
+
+  eventIdentity String @unique
+  event         Event  @relation(fields: [eventIdentity], references: [identity], onDelete: Cascade)
+
+  // ONLINE
+  onlineMeetLink String?
+
+  // OFFLINE
+  country String?
+  state   String?
+  city    String?
+  mapLink String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ace_event_location")
 }
 
 model EventCollaborator {
@@ -328,6 +351,9 @@ model EventCalendar {
 
   startDate DateTime
   endDate   DateTime
+
+  startTime String?
+  endTime   String?
 
   event Event @relation(fields: [eventIdentity], references: [identity])
 

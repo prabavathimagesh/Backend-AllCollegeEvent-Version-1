@@ -5,6 +5,42 @@ import { EVENT_MESSAGES } from "../constants/event.message";
 import { getResolvedImageUrl } from "../utils/s3SignedUrl";
 import { cleanPayload } from "../utils/cleanPayload";
 import { Prisma } from "@prisma/client";
+import { EventMode } from "@prisma/client";
+
+function validateLocation(mode: EventMode, location: any) {
+  if (mode === "ONLINE") {
+    if (!location.onlineMeetLink) {
+      throw new Error("Online meet link is required");
+    }
+  }
+
+  if (mode === "OFFLINE") {
+    if (!location.country || !location.city || !location.mapLink) {
+      throw new Error("Offline location details are required");
+    }
+  }
+
+  if (mode === "HYBRID") {
+    if (
+      !location.onlineMeetLink ||
+      !location.country ||
+      !location.city ||
+      !location.mapLink
+    ) {
+      throw new Error("Both online and offline details are required");
+    }
+  }
+}
+
+function buildOrgSocialUpdate(socialLinks: any) {
+  const data: any = {};
+
+  if (socialLinks?.whatsapp) data.whatsapp = socialLinks.whatsapp;
+  if (socialLinks?.instagram) data.instagram = socialLinks.instagram;
+  if (socialLinks?.linkedIn) data.linkedIn = socialLinks.linkedIn;
+
+  return data;
+}
 
 export class EventService {
   static async getEventsByOrg(identity: string): Promise<EventType[]> {
@@ -52,6 +88,7 @@ export class EventService {
 
   static async createEvent(payload: any) {
     return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      validateLocation(payload.mode, payload.location);
       // 1. Create Event
       const event = await tx.event.create({
         data: {
@@ -60,18 +97,12 @@ export class EventService {
           mode: payload.mode,
           categoryIdentity: payload.categoryIdentity,
           eventTypeIdentity: payload.eventTypeIdentity,
-
           eligibleDeptIdentities: payload.eligibleDeptIdentities,
           tags: payload.tags,
           bannerImages: payload.bannerImages,
-
           eventLink: payload.eventLink,
           paymentLink: payload.paymentLink,
-          socialLinks: payload.socialLinks,
-
           createdBy: payload.createdBy,
-
-          // REQUIRED RELATION
           org: {
             connect: { identity: payload.orgIdentity },
           },
@@ -79,6 +110,15 @@ export class EventService {
       });
 
       const eventId = event.identity;
+
+      // ✅ 2. Update Org Social Links (SAFE)
+      const orgSocialUpdate = buildOrgSocialUpdate(payload.socialLinks);
+      if (Object.keys(orgSocialUpdate).length) {
+        await tx.org.update({
+          where: { identity: payload.orgIdentity },
+          data: orgSocialUpdate,
+        });
+      }
 
       // 2. Collaborators
       if (payload.collaborators?.length) {
@@ -90,12 +130,27 @@ export class EventService {
         });
       }
 
+      await tx.eventLocation.create({
+        data: {
+          eventIdentity: event.identity,
+          onlineMeetLink: payload.location?.onlineMeetLink,
+          country: payload.location?.country,
+          state: payload.location?.state,
+          city: payload.location?.city,
+          mapLink: payload.location?.mapLink,
+        },
+      });
+
       // 3. Calendars
       if (payload.calendars?.length) {
         await tx.eventCalendar.createMany({
           data: payload.calendars.map((c: any) => ({
-            ...c,
             eventIdentity: eventId,
+            timeZone: c.timeZone,
+            startDate: c.startDate,
+            endDate: c.endDate,
+            startTime: c.startTime,
+            endTime: c.endTime,
           })),
         });
       }
