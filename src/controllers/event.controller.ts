@@ -98,6 +98,7 @@ export class EventController {
   static async createEvent(req: Request, res: Response) {
     try {
       const orgIdentity = req.params.orgId;
+      console.log(req.body);
 
       if (!orgIdentity) {
         return res.status(400).json({
@@ -129,8 +130,6 @@ export class EventController {
       // ===== NORMALIZED PAYLOAD =====
       const payload = {
         orgIdentity,
-
-        // FIX 1: convert string → number
         createdBy: req.body.createdBy ? Number(req.body.createdBy) : null,
 
         title: req.body.title,
@@ -139,7 +138,6 @@ export class EventController {
         categoryIdentity: req.body.categoryIdentity,
         eventTypeIdentity: req.body.eventTypeIdentity,
 
-        // FIX 2: parse arrays
         eligibleDeptIdentities: parseJSON(req.body.eligibleDeptIdentities, []),
         tags: parseJSON(req.body.tags, []),
 
@@ -154,11 +152,14 @@ export class EventController {
           []
         ),
 
+        location: parseJSON(req.body.location, {}),
         bannerImages,
         eventLink: req.body.eventLink,
         paymentLink: req.body.paymentLink,
         socialLinks: parseJSON(req.body.socialLinks, {}),
       };
+
+      console.log(payload)
 
       const event = await EventService.createEvent(payload);
 

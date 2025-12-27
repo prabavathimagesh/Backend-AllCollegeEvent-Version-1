@@ -6,25 +6,44 @@ const event_status_message_1 = require("../constants/event.status.message");
 const event_message_1 = require("../constants/event.message");
 const s3SignedUrl_1 = require("../utils/s3SignedUrl");
 const cleanPayload_1 = require("../utils/cleanPayload");
+const client_1 = require("@prisma/client");
 function validateLocation(mode, location) {
-    if (mode === "ONLINE") {
-        if (!location.onlineMeetLink) {
-            throw new Error("Online meet link is required");
+    // Normalize empty values
+    if (!location || typeof location !== "object") {
+        location = null;
+    }
+    if (mode === client_1.EventMode.ONLINE) {
+        if (!location?.onlineMeetLink) {
+            throw new Error("Online meet link is required for ONLINE events");
         }
     }
-    if (mode === "OFFLINE") {
-        if (!location.country || !location.city || !location.mapLink) {
-            throw new Error("Offline location details are required");
+    if (mode === client_1.EventMode.OFFLINE) {
+        if (!location?.country ||
+            !location?.state ||
+            !location?.city ||
+            !location?.mapLink) {
+            throw new Error("Offline location (country, state, city, mapLink) is required");
         }
     }
-    if (mode === "HYBRID") {
-        if (!location.onlineMeetLink ||
-            !location.country ||
-            !location.city ||
-            !location.mapLink) {
-            throw new Error("Both online and offline details are required");
+    if (mode === client_1.EventMode.HYBRID) {
+        if (!location?.onlineMeetLink ||
+            !location?.country ||
+            !location?.state ||
+            !location?.city ||
+            !location?.mapLink) {
+            throw new Error("Both online and offline location details are required");
         }
     }
+}
+function buildOrgSocialUpdate(socialLinks) {
+    const data = {};
+    if (socialLinks?.whatsapp)
+        data.whatsapp = socialLinks.whatsapp;
+    if (socialLinks?.instagram)
+        data.instagram = socialLinks.instagram;
+    if (socialLinks?.linkedIn)
+        data.linkedIn = socialLinks.linkedIn;
+    return data;
 }
 class EventService {
     static async getEventsByOrg(identity) {
@@ -67,7 +86,12 @@ class EventService {
     }
     static async createEvent(payload) {
         return prisma.$transaction(async (tx) => {
-            validateLocation(payload.mode, payload.location);
+            // console.log(req.body);
+            console.log("Collaborators:", payload.collaborators);
+            console.log("Calendars:", payload.calendars);
+            console.log("Tickets:", payload.tickets);
+            console.log("Perks:", payload.perkIdentities);
+            // validateLocation(payload.mode, payload.location);
             // 1. Create Event
             const event = await tx.event.create({
                 data: {
@@ -81,15 +105,21 @@ class EventService {
                     bannerImages: payload.bannerImages,
                     eventLink: payload.eventLink,
                     paymentLink: payload.paymentLink,
-                    socialLinks: payload.socialLinks,
                     createdBy: payload.createdBy,
-                    // REQUIRED RELATION
                     org: {
                         connect: { identity: payload.orgIdentity },
                     },
                 },
             });
             const eventId = event.identity;
+            // 2. Update Org Social Links (SAFE)
+            const orgSocialUpdate = buildOrgSocialUpdate(payload.socialLinks);
+            if (Object.keys(orgSocialUpdate).length) {
+                await tx.org.update({
+                    where: { identity: payload.orgIdentity },
+                    data: orgSocialUpdate,
+                });
+            }
             // 2. Collaborators
             if (payload.collaborators?.length) {
                 await tx.eventCollaborator.createMany({
@@ -113,8 +143,12 @@ class EventService {
             if (payload.calendars?.length) {
                 await tx.eventCalendar.createMany({
                     data: payload.calendars.map((c) => ({
-                        ...c,
                         eventIdentity: eventId,
+                        timeZone: c.timeZone,
+                        startDate: c.startDate,
+                        endDate: c.endDate,
+                        startTime: c.startTime,
+                        endTime: c.endTime,
                     })),
                 });
             }

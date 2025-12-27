@@ -1,0 +1,78 @@
+[2025-12-27 08:25:18] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-27 08:25:18] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Cannot read properties of undefined (reading 'country')
+[2025-12-27 08:26:45] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-27 08:26:45] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Cannot read properties of undefined (reading 'country')
+[2025-12-27 08:27:11] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-27 08:27:11] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Cannot read properties of undefined (reading 'country')
+[2025-12-27 08:32:15] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-27 08:32:15] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Offline location (country, state, city, mapLink) is required
+[2025-12-27 08:33:38] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-27 08:33:38] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Offline location (country, state, city, mapLink) is required
+[2025-12-27 08:35:18] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-27 08:35:18] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Offline location (country, state, city, mapLink) is required
+[2025-12-27 08:35:52] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-27 08:35:52] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Offline location (country, state, city, mapLink) is required
+[2025-12-27 08:36:00] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-27 08:36:00] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Offline location (country, state, city, mapLink) is required
+[2025-12-27 08:36:24] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-27 08:36:24] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: Offline location (country, state, city, mapLink) is required
+[2025-12-27 08:36:48] [INFO] → Incoming → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events
+[2025-12-27 08:36:48] [ERROR] → Error → POST /api/v1/organizations/fb553772-fbff-42ce-a557-96b5146f01d3/events | Message: 
+Invalid `tx.event.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event.service.js:92:42
+
+  89 console.log(payload.location);
+  90 // validateLocation(payload.mode, payload.location);
+  91 // 1. Create Event
+→ 92 const event = await tx.event.create(
+An operation failed because it depends on one or more records that were required but not found. No 'Org' record(s) (needed to inline the relation on 'Event' record(s)) was found for a nested connect on one-to-many relation 'EventToOrg'.
+[2025-12-27 09:33:28] [INFO] → Incoming → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events
+[2025-12-27 09:33:29] [ERROR] → Error → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events | Message: 
+Invalid `tx.eventPerk.createMany()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event.service.js:162:36
+
+  159 }
+  160 // 5. Perks
+  161 if (payload.perkIdentities?.length) {
+→ 162     await tx.eventPerk.createMany(
+Foreign key constraint violated: `ace_event_perk_perkIdentity_fkey (index)`
+[2025-12-27 10:27:20] [INFO] → Incoming → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events
+[2025-12-27 10:33:35] [INFO] → Incoming → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events
+[2025-12-27 10:38:16] [INFO] → Incoming → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events
+[2025-12-27 10:48:17] [INFO] → Incoming → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events
+[2025-12-27 10:48:17] [ERROR] → Error → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events | Message: event is not defined
+[2025-12-27 11:15:06] [INFO] → Incoming → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events
+[2025-12-27 11:19:02] [INFO] → Incoming → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events
+[2025-12-27 11:22:10] [INFO] → Incoming → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events
+[2025-12-27 11:25:35] [INFO] → Incoming → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events
+[2025-12-27 11:28:27] [INFO] → Incoming → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events
+[2025-12-27 11:28:27] [ERROR] → Error → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events | Message: 
+Invalid `tx.eventPerk.createMany()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event.service.js:166:36
+
+  163 }
+  164 // 5. Perks
+  165 if (payload.perkIdentities?.length) {
+→ 166     await tx.eventPerk.createMany(
+Foreign key constraint violated: `ace_event_perk_perkIdentity_fkey (index)`
+[2025-12-27 11:32:20] [INFO] → Incoming → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events
+[2025-12-27 11:32:20] [ERROR] → Error → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events | Message: 
+Invalid `tx.eventCertification.createMany()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event.service.js:176:45
+
+  173 }
+  174 // 6. Certifications
+  175 if (payload.certIdentities?.length) {
+→ 176     await tx.eventCertification.createMany(
+Foreign key constraint violated: `ace_event_certification_certIdentity_fkey (index)`
+[2025-12-27 11:32:54] [INFO] → Incoming → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events
+[2025-12-27 11:32:54] [ERROR] → Error → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events | Message: 
+Invalid `tx.eventAccommodation.createMany()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event.service.js:186:45
+
+  183 }
+  184 // 7. Accommodations
+  185 if (payload.accommodationIdentities?.length) {
+→ 186     await tx.eventAccommodation.createMany(
+Foreign key constraint violated: `ace_event_accommodation_accommodationIdentity_fkey (index)`
+[2025-12-27 11:34:08] [INFO] → Incoming → POST /api/v1/organizations/a0004184-fa68-45af-af83-78553f8fe4e9/events

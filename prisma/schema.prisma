@@ -349,9 +349,8 @@ model EventCalendar {
   eventIdentity String
   timeZone      String
 
-  startDate DateTime
-  endDate   DateTime
-
+  startDate String
+  endDate   String
   startTime String?
   endTime   String?
 

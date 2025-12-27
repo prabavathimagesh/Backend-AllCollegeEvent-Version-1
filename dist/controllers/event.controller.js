@@ -89,6 +89,7 @@ class EventController {
     static async createEvent(req, res) {
         try {
             const orgIdentity = req.params.orgId;
+            console.log(req.body);
             if (!orgIdentity) {
                 return res.status(400).json({
                     success: false,
@@ -119,14 +120,12 @@ class EventController {
             // ===== NORMALIZED PAYLOAD =====
             const payload = {
                 orgIdentity,
-                // FIX 1: convert string → number
                 createdBy: req.body.createdBy ? Number(req.body.createdBy) : null,
                 title: req.body.title,
                 description: req.body.description,
                 mode: req.body.mode,
                 categoryIdentity: req.body.categoryIdentity,
                 eventTypeIdentity: req.body.eventTypeIdentity,
-                // FIX 2: parse arrays
                 eligibleDeptIdentities: parseJSON(req.body.eligibleDeptIdentities, []),
                 tags: parseJSON(req.body.tags, []),
                 collaborators: parseJSON(req.body.collaborators, []),
@@ -135,11 +134,13 @@ class EventController {
                 perkIdentities: parseJSON(req.body.perkIdentities, []),
                 certIdentities: parseJSON(req.body.certIdentities, []),
                 accommodationIdentities: parseJSON(req.body.accommodationIdentities, []),
+                location: parseJSON(req.body.location, {}),
                 bannerImages,
                 eventLink: req.body.eventLink,
                 paymentLink: req.body.paymentLink,
                 socialLinks: parseJSON(req.body.socialLinks, {}),
             };
+            console.log(payload);
             const event = await event_service_1.EventService.createEvent(payload);
             res.status(201).json({ success: true, data: event });
         }

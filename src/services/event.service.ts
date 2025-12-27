@@ -8,26 +8,39 @@ import { Prisma } from "@prisma/client";
 import { EventMode } from "@prisma/client";
 
 function validateLocation(mode: EventMode, location: any) {
-  if (mode === "ONLINE") {
-    if (!location.onlineMeetLink) {
-      throw new Error("Online meet link is required");
+  // Normalize empty values
+  if (!location || typeof location !== "object") {
+    location = null;
+  }
+
+  if (mode === EventMode.ONLINE) {
+    if (!location?.onlineMeetLink) {
+      throw new Error("Online meet link is required for ONLINE events");
     }
   }
 
-  if (mode === "OFFLINE") {
-    if (!location.country || !location.city || !location.mapLink) {
-      throw new Error("Offline location details are required");
-    }
-  }
-
-  if (mode === "HYBRID") {
+  if (mode === EventMode.OFFLINE) {
     if (
-      !location.onlineMeetLink ||
-      !location.country ||
-      !location.city ||
-      !location.mapLink
+      !location?.country ||
+      !location?.state ||
+      !location?.city ||
+      !location?.mapLink
     ) {
-      throw new Error("Both online and offline details are required");
+      throw new Error(
+        "Offline location (country, state, city, mapLink) is required"
+      );
+    }
+  }
+
+  if (mode === EventMode.HYBRID) {
+    if (
+      !location?.onlineMeetLink ||
+      !location?.country ||
+      !location?.state ||
+      !location?.city ||
+      !location?.mapLink
+    ) {
+      throw new Error("Both online and offline location details are required");
     }
   }
 }
@@ -88,7 +101,13 @@ export class EventService {
 
   static async createEvent(payload: any) {
     return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      validateLocation(payload.mode, payload.location);
+      // console.log(req.body);
+      console.log("Collaborators:", payload.collaborators);
+      console.log("Calendars:", payload.calendars);
+      console.log("Tickets:", payload.tickets);
+      console.log("Perks:", payload.perkIdentities);
+
+      // validateLocation(payload.mode, payload.location);
       // 1. Create Event
       const event = await tx.event.create({
         data: {
@@ -111,7 +130,7 @@ export class EventService {
 
       const eventId = event.identity;
 
-      // ✅ 2. Update Org Social Links (SAFE)
+      // 2. Update Org Social Links (SAFE)
       const orgSocialUpdate = buildOrgSocialUpdate(payload.socialLinks);
       if (Object.keys(orgSocialUpdate).length) {
         await tx.org.update({
