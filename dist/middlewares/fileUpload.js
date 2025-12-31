@@ -24,7 +24,7 @@ const upload = (0, multer_1.default)({
     storage,
     fileFilter,
     limits: {
-        fileSize: 10 * 1024 * 1024, // 10 MB (adjust if needed)
+        fileSize: 20 * 1024 * 1024, // 10 MB (adjust if needed)
     },
 });
 exports.default = upload;

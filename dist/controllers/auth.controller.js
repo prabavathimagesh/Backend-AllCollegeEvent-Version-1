@@ -101,7 +101,7 @@ class AuthController {
                 });
             }
             // Verify organization
-            const result = await auth_service_1.AuthService.verifyOrg(token);
+            const result = await auth_service_1.AuthService.verifyAccount(token);
             // Success response
             return res.status(200).json({
                 status: true,

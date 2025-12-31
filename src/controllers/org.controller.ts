@@ -124,23 +124,21 @@ export class OrgController {
    */
   static async getOrgEvents(req: Request, res: Response) {
     try {
-      // Extract organization ID
       const identity = String(req.params.orgId);
 
-      // Fetch events for organization
-      const events = await OrgService.getEventsByOrganization(identity);
+      const result = await OrgService.getEventsByOrganization(identity);
 
-      // Success response
-      res.json({
+      return res.status(200).json({
         status: true,
-        data: events,
+        count: result.count, // ✅ total events
+        data: result.events,
         message: EVENT_MESSAGES.EVENTS_FETCHED,
       });
     } catch (err) {
-      // Internal server error
-      res
-        .status(500)
-        .json({ status: false, message: EVENT_MESSAGES.INTERNAL_ERROR });
+      return res.status(500).json({
+        status: false,
+        message: EVENT_MESSAGES.INTERNAL_ERROR,
+      });
     }
   }
 }

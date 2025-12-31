@@ -86,7 +86,7 @@ class AuthService {
             await sendVerificationMail({
                 email: user.email,
                 identity: user.identity,
-                id: user.id
+                id: user.id,
             }, platform);
             return user;
         }
@@ -182,9 +182,10 @@ class AuthService {
     /**
      * Verify organization account using token
      */
-    static async verifyOrg(token) {
-        if (!token)
+    static async verifyAccount(token) {
+        if (!token) {
             throw new Error(auth_message_1.AUTH_MESSAGES.TOKEN_MISSING);
+        }
         let decoded;
         try {
             decoded = (0, jwt_1.verifyToken)(token);
@@ -192,21 +193,52 @@ class AuthService {
         catch {
             throw new Error(auth_message_1.AUTH_MESSAGES.INVALID_OR_EXPIRED_TOKEN);
         }
-        const orgIdnty = decoded.data.identity;
+        const identity = decoded.data.identity;
+        if (!identity) {
+            throw new Error(auth_message_1.AUTH_MESSAGES.INVALID_OR_EXPIRED_TOKEN);
+        }
+        /* ================= CHECK ORG ================= */
         const org = await prisma.org.findUnique({
-            where: { identity: orgIdnty },
+            where: { identity },
         });
-        if (!org)
-            throw new Error(auth_message_1.AUTH_MESSAGES.ORG_NOT_FOUND_BY_TOKEN);
-        // Mark org as verified
-        await prisma.org.update({
-            where: { identity: orgIdnty },
-            data: { isVerified: true },
+        if (org) {
+            if (org.isVerified) {
+                return {
+                    success: true,
+                    message: auth_message_1.AUTH_MESSAGES.ORG_ALREADY_VERIFIED,
+                };
+            }
+            await prisma.org.update({
+                where: { identity },
+                data: { isVerified: true },
+            });
+            return {
+                success: true,
+                message: auth_message_1.AUTH_MESSAGES.ORG_VERIFIED_SUCCESS,
+            };
+        }
+        /* ================= CHECK USER ================= */
+        const user = await prisma.user.findUnique({
+            where: { identity },
         });
-        return {
-            success: true,
-            message: auth_message_1.AUTH_MESSAGES.ORG_VERIFIED_SUCCESS,
-        };
+        if (user) {
+            if (user.isActive) {
+                return {
+                    success: true,
+                    message: auth_message_1.AUTH_MESSAGES.USER_ALREADY_VERIFIED,
+                };
+            }
+            await prisma.user.update({
+                where: { identity },
+                data: { isActive: true },
+            });
+            return {
+                success: true,
+                message: auth_message_1.AUTH_MESSAGES.USER_VERIFIED_SUCCESS,
+            };
+        }
+        /* ================= NOT FOUND ================= */
+        throw new Error(auth_message_1.AUTH_MESSAGES.ACCOUNT_NOT_FOUND_BY_TOKEN);
     }
     /**
      * Forgot password - send OTP
@@ -340,35 +372,79 @@ class AuthService {
             audience: process.env.GOOGLE_CLIENT_ID,
         });
         const payload = ticket.getPayload();
-        if (!payload)
+        if (!payload) {
             throw new Error(auth_message_1.AUTH_MESSAGES.GOOGLE_LOGIN_FAILED);
-        const { email, name, picture } = payload;
+        }
+        const { email, name, picture, sub: providerUserId, // Google unique user ID
+         } = payload;
+        if (!email || !providerUserId) {
+            throw new Error(auth_message_1.AUTH_MESSAGES.GOOGLE_LOGIN_FAILED);
+        }
+        /* ================= ROLE ================= */
         const role = await prisma.role.findFirst({
             where: { name: "user" },
         });
-        if (!role)
+        if (!role) {
             throw new Error(auth_message_1.AUTH_MESSAGES.DEFAULT_ROLE_NOT_FOUND);
-        const roleUUID = role.idnty;
-        let user = await prisma.user.findUnique({ where: { email } });
+        }
+        /* ================= AUTH PROVIDER ================= */
+        let provider = await prisma.authProvider.findFirst({
+            where: { providerName: "google" },
+        });
+        if (!provider) {
+            provider = await prisma.authProvider.create({
+                data: {
+                    providerName: "google",
+                    displayName: "Google",
+                    status: true,
+                },
+            });
+        }
+        /* ================= USER ================= */
+        let user = await prisma.user.findUnique({
+            where: { email },
+        });
         if (!user) {
             user = await prisma.user.create({
                 data: {
                     name: name || "Google User",
                     email,
-                    password: "",
-                    profileImage: picture || null,
+                    password: "", // social login
+                    profileImage: picture ?? null,
                     roleId: role.id,
+                    isActive: true, // auto-verified
                 },
             });
         }
+        /* ================= SOCIAL ACCOUNT ================= */
+        const existingSocial = await prisma.socialAccount.findFirst({
+            where: {
+                userId: user.identity,
+                providerId: provider.identity,
+            },
+        });
+        if (!existingSocial) {
+            await prisma.socialAccount.create({
+                data: {
+                    userId: user.identity,
+                    providerId: provider.identity,
+                    providerUserId,
+                    providerEmail: email,
+                },
+            });
+        }
+        /* ================= TOKEN ================= */
         const token = (0, jwt_1.generateToken)({
             id: user.id,
             identity: user.identity,
             email,
-            roleId: roleUUID,
+            roleId: role.idnty,
             type: "user",
         });
-        return { user, token };
+        return {
+            user,
+            token,
+        };
     }
 }
 exports.AuthService = AuthService;

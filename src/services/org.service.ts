@@ -1,5 +1,31 @@
 const prisma = require("../config/db.config");
 import { EventType } from "../types/type";
+import { Prisma } from "@prisma/client";
+
+/**
+ * Event with required relations (NEW SCHEMA)
+ */
+type EventWithRelations = Prisma.EventGetPayload<{
+  include: {
+    org: true;
+    cert: true;
+    location: true;
+    calendars: true;
+    tickets: true;
+    eventPerks: {
+      include: { perk: true };
+    };
+    eventAccommodations: {
+      include: { accommodation: true };
+    };
+    Collaborator: {
+      include: {
+        member: true;
+        org: true;
+      };
+    };
+  };
+}>;
 
 export class OrgService {
   static async getAllOrgs() {
@@ -75,30 +101,122 @@ export class OrgService {
     }));
   }
 
-  static async getEventsByOrganization(identity: string): Promise<EventType[]> {
-    const BASE_URL = process.env.BASE_URL ?? "";
+  static async getEventsByOrganization(identity: string) {
+    if (!identity) {
+      throw new Error("Organization ID is required");
+    }
 
-    // fetching all events created by a specific organization
-    const events = await prisma.event.findMany({
-      where: {
-        orgIdentity: identity,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      include: {
-        org: {
-          select: {
-            organizationName: true,
+    // ✅ Fetch events + count together
+    const [events, count] = await prisma.$transaction([
+      prisma.event.findMany({
+        where: {
+          orgIdentity: identity, // NO status filter
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          org: {
+            select: {
+              identity: true,
+              organizationName: true,
+              organizationCategory: true,
+              city: true,
+              state: true,
+              country: true,
+              profileImage: true,
+              whatsapp: true,
+              instagram: true,
+              linkedIn: true,
+              logoUrl: true,
+            },
+          },
+
+          cert: {
+            select: {
+              identity: true,
+              certName: true,
+            },
+          },
+
+          location: true,
+          calendars: true,
+          tickets: true,
+
+          eventPerks: {
+            include: {
+              perk: true,
+            },
+          },
+
+          eventAccommodations: {
+            include: {
+              accommodation: true,
+            },
+          },
+
+          Collaborator: {
+            include: {
+              member: {
+                select: {
+                  identity: true,
+                  name: true,
+                  email: true,
+                  mobile: true,
+                },
+              },
+              org: {
+                select: {
+                  identity: true,
+                  organizationName: true,
+                  logoUrl: true,
+                },
+              },
+            },
           },
         },
-      },
-    });
+      }),
 
-    // mapping image URLs to include full base URL
-    return events.map((event: EventType) => ({
-      ...event,
-      bannerImage: event.bannerImage ? `${BASE_URL}${event.bannerImage}` : null,
-    }));
+      prisma.event.count({
+        where: {
+          orgIdentity: identity,
+        },
+      }),
+    ]);
+
+    const typedEvents: EventWithRelations[] = events;
+
+    return {
+      count,
+      events: typedEvents.map((event) => ({
+        identity: event.identity,
+        title: event.title,
+        slug: event.slug,
+        description: event.description,
+        mode: event.mode,
+        status: event.status,
+        createdAt: event.createdAt,
+
+        bannerImages: event.bannerImages,
+
+        eventLink: event.eventLink,
+        paymentLink: event.paymentLink,
+
+        org: event.org,
+        cert: event.cert,
+        location: event.location,
+        calendars: event.calendars,
+        tickets: event.tickets,
+
+        perks: event.eventPerks.map((p) => p.perk),
+        accommodations: event.eventAccommodations.map((a) => a.accommodation),
+
+        collaborators: event.Collaborator.map((c) => ({
+          role: c.role,
+          member: c.member,
+          organization: c.org,
+        })),
+      })),
+    };
   }
 }

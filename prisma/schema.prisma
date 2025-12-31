@@ -89,8 +89,9 @@ model Org {
 
   createdAt DateTime @default(now())
 
-  otps   OTP[]
-  events Event[]
+  otps         OTP[]
+  events       Event[]
+  Collaborator Collaborator[]
 
   @@map("ace_org")
 }
@@ -182,6 +183,7 @@ model AceCertification {
   createdAt          DateTime             @default(now()) @map("created_at")
   updatedAt          DateTime             @updatedAt @map("updated_at")
   EventCertification EventCertification[]
+  Event              Event[]
 
   @@map("ace_certification")
 }
@@ -261,6 +263,9 @@ model Event {
   categoryIdentity  String?
   eventTypeIdentity String?
 
+  // Certification (NEW)
+  certIdentity String? // FK to AceCertification
+
   // Eligibility
   eligibleDeptIdentities String[]
 
@@ -277,22 +282,24 @@ model Event {
   paymentLink String?
 
   // Relations
-  org Org @relation(fields: [orgIdentity], references: [identity])
+  org  Org               @relation(fields: [orgIdentity], references: [identity])
+  cert AceCertification? @relation(fields: [certIdentity], references: [identity])
 
   location EventLocation?
 
   calendars           EventCalendar[]
   tickets             Ticket[]
-  collaborators       EventCollaborator[]
   eventPerks          EventPerk[]
-  eventCertifications EventCertification[]
   eventAccommodations EventAccommodation[]
 
-  publishedAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  User         User?     @relation(fields: [userIdentity], references: [identity])
-  userIdentity String?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  userIdentity       String?
+  User               User?                @relation(fields: [userIdentity], references: [identity])
+  Collaborator       Collaborator[]
+  EventCertification EventCertification[]
 
   @@map("ace_event")
 }
@@ -318,29 +325,41 @@ model EventLocation {
   @@map("ace_event_location")
 }
 
-model EventCollaborator {
+model CollaboratorMember {
   identity String @id @default(uuid())
   id       Int    @unique @default(autoincrement())
 
-  eventIdentity String
-
-  // Hosting info
-  hostOrgIdentity          String?
-  orgCategoryIdentity      String?
-  organizationName         String?
-  organizationDeptIdentity String?
-  organizerName            String?
-  organizerNumber          String?
-  location                 String?
-
-  role String? // primary_host | co_host | speaker | organizer
-
-  event Event @relation(fields: [eventIdentity], references: [identity])
+  email  String  @unique
+  mobile String  @unique
+  name   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("ace_event_collaborator")
+  collaborations Collaborator[]
+
+  @@map("ace_collaborator_members")
+}
+
+model Collaborator {
+  identity String @id @default(uuid())
+  id       Int    @unique @default(autoincrement())
+
+  collaboratorMemberId String
+  collabOrgIdentity    String? // existing collaborator org
+  orgIdentity          String // event creator org
+  eventIdentity        String
+
+  role String? // primary_host | co_host | speaker | organizer
+
+  member CollaboratorMember @relation(fields: [collaboratorMemberId], references: [identity])
+  event  Event              @relation(fields: [eventIdentity], references: [identity])
+  org    Org                @relation(fields: [orgIdentity], references: [identity])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ace_collaborator")
 }
 
 model EventCalendar {

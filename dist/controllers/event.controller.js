@@ -14,38 +14,32 @@ class EventController {
      */
     static async getOrgEvents(req, res) {
         try {
-            // Extract organization ID from params
             const identity = String(req.params.orgId);
-            // Validate organization ID
             if (!identity) {
                 return res.status(200).json({
                     status: false,
                     message: event_message_1.EVENT_MESSAGES.ORG_ID_REQUIRED,
                 });
             }
-            // Fetch events for organization
-            const events = await event_service_1.EventService.getEventsByOrg(identity);
-            // Success response
+            const result = await event_service_1.EventService.getEventsByOrg(identity);
             return res.status(200).json({
                 status: true,
-                data: events,
+                count: result.count, // ✅ total events
+                data: result.events, // ✅ events list
                 message: event_message_1.EVENT_MESSAGES.EVENTS_FETCHED,
             });
         }
         catch (err) {
-            // Known / business-level errors
             const safeErrors = [
                 event_message_1.EVENT_MESSAGES.ORG_ID_REQUIRED,
                 event_message_1.EVENT_MESSAGES.EVENTS_NOT_FOUND,
             ];
-            // Known errors → return 200
             if (safeErrors.includes(err.message)) {
                 return res.status(200).json({
                     status: false,
                     message: err.message,
                 });
             }
-            // Unknown / system errors → return 500
             return res.status(500).json({
                 status: false,
                 message: event_message_1.EVENT_MESSAGES.INTERNAL_ERROR,
@@ -89,7 +83,6 @@ class EventController {
     static async createEvent(req, res) {
         try {
             const orgIdentity = req.params.orgId;
-            console.log(req.body);
             if (!orgIdentity) {
                 return res.status(400).json({
                     success: false,
@@ -126,13 +119,13 @@ class EventController {
                 mode: req.body.mode,
                 categoryIdentity: req.body.categoryIdentity,
                 eventTypeIdentity: req.body.eventTypeIdentity,
+                certIdentity: req.body.certIdentity || null,
                 eligibleDeptIdentities: parseJSON(req.body.eligibleDeptIdentities, []),
                 tags: parseJSON(req.body.tags, []),
-                collaborators: parseJSON(req.body.collaborators, []),
+                collaborators: parseJSON(req.body.collaborators, []), // NEW STRUCTURE
                 calendars: parseJSON(req.body.calendars, []),
                 tickets: parseJSON(req.body.tickets, []),
                 perkIdentities: parseJSON(req.body.perkIdentities, []),
-                certIdentities: parseJSON(req.body.certIdentities, []),
                 accommodationIdentities: parseJSON(req.body.accommodationIdentities, []),
                 location: parseJSON(req.body.location, {}),
                 bannerImages,
@@ -140,7 +133,6 @@ class EventController {
                 paymentLink: req.body.paymentLink,
                 socialLinks: parseJSON(req.body.socialLinks, {}),
             };
-            console.log(payload);
             const event = await event_service_1.EventService.createEvent(payload);
             res.status(201).json({ success: true, data: event });
         }

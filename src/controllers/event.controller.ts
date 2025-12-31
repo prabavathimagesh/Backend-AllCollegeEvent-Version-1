@@ -12,51 +12,46 @@ export class EventController {
   /**
    * Get all events of a specific organization (Public / Org view)
    */
-  static async getOrgEvents(req: Request, res: Response) {
-    try {
-      // Extract organization ID from params
-      const identity = String(req.params.orgId);
+static async getOrgEvents(req: Request, res: Response) {
+  try {
+    const identity = String(req.params.orgId);
 
-      // Validate organization ID
-      if (!identity) {
-        return res.status(200).json({
-          status: false,
-          message: EVENT_MESSAGES.ORG_ID_REQUIRED,
-        });
-      }
-
-      // Fetch events for organization
-      const events = await EventService.getEventsByOrg(identity);
-
-      // Success response
+    if (!identity) {
       return res.status(200).json({
-        status: true,
-        data: events,
-        message: EVENT_MESSAGES.EVENTS_FETCHED,
-      });
-    } catch (err: any) {
-      // Known / business-level errors
-      const safeErrors = [
-        EVENT_MESSAGES.ORG_ID_REQUIRED,
-        EVENT_MESSAGES.EVENTS_NOT_FOUND,
-      ];
-
-      // Known errors → return 200
-      if (safeErrors.includes(err.message)) {
-        return res.status(200).json({
-          status: false,
-          message: err.message,
-        });
-      }
-
-      // Unknown / system errors → return 500
-      return res.status(500).json({
         status: false,
-        message: EVENT_MESSAGES.INTERNAL_ERROR,
-        error: err.message,
+        message: EVENT_MESSAGES.ORG_ID_REQUIRED,
       });
     }
+
+    const result = await EventService.getEventsByOrg(identity);
+
+    return res.status(200).json({
+      status: true,
+      count: result.count,      // ✅ total events
+      data: result.events,      // ✅ events list
+      message: EVENT_MESSAGES.EVENTS_FETCHED,
+    });
+  } catch (err: any) {
+    const safeErrors = [
+      EVENT_MESSAGES.ORG_ID_REQUIRED,
+      EVENT_MESSAGES.EVENTS_NOT_FOUND,
+    ];
+
+    if (safeErrors.includes(err.message)) {
+      return res.status(200).json({
+        status: false,
+        message: err.message,
+      });
+    }
+
+    return res.status(500).json({
+      status: false,
+      message: EVENT_MESSAGES.INTERNAL_ERROR,
+      error: err.message,
+    });
   }
+}
+
 
   /**
    * Get a single event by organization and event ID
@@ -98,7 +93,6 @@ export class EventController {
   static async createEvent(req: Request, res: Response) {
     try {
       const orgIdentity = req.params.orgId;
-      console.log(req.body);
 
       if (!orgIdentity) {
         return res.status(400).json({
@@ -138,15 +132,16 @@ export class EventController {
         categoryIdentity: req.body.categoryIdentity,
         eventTypeIdentity: req.body.eventTypeIdentity,
 
+        certIdentity: req.body.certIdentity || null,
+
         eligibleDeptIdentities: parseJSON(req.body.eligibleDeptIdentities, []),
         tags: parseJSON(req.body.tags, []),
 
-        collaborators: parseJSON(req.body.collaborators, []),
+        collaborators: parseJSON(req.body.collaborators, []), // NEW STRUCTURE
         calendars: parseJSON(req.body.calendars, []),
         tickets: parseJSON(req.body.tickets, []),
 
         perkIdentities: parseJSON(req.body.perkIdentities, []),
-        certIdentities: parseJSON(req.body.certIdentities, []),
         accommodationIdentities: parseJSON(
           req.body.accommodationIdentities,
           []
@@ -158,8 +153,6 @@ export class EventController {
         paymentLink: req.body.paymentLink,
         socialLinks: parseJSON(req.body.socialLinks, {}),
       };
-
-      console.log(payload)
 
       const event = await EventService.createEvent(payload);
 

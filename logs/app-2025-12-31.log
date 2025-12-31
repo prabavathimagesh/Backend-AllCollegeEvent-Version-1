@@ -1,0 +1,123 @@
+[2025-12-31 12:31:42] [INFO] → Incoming → POST /api/v1/organizations/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events
+[2025-12-31 12:31:42] [ERROR] → Error → POST /api/v1/organizations/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events | Message: 
+Invalid `tx.event.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event.service.js:97:42
+
+  94 // console.log("Perks:", payload.perkIdentities);
+  95 // validateLocation(payload.mode, payload.location);
+  96 // 1. Create Event
+→ 97 const event = await tx.event.create({
+       data: {
+         title: "New year 2026 Celebration - Sherlock's Coimbatore",
+         slug: "new-year-2026-celebration-sherlocks-coimbatore-20251231-123142-84917",
+         description: "Ring in the New Year with joy, laughter, and unforgettable memories! Join us for an evening filled with live DJ, dazzling lights, imported liquors, cocktails, wine, delicious food, and a midnight countdown that will light up the sky. Whether you’re dancing to the beats or enjoying a toast with friends, this is the perfect way to welcome 2026 with positivity and excitement.Premium Elite Couple Pass Includes - VIP Lounge Seating, Unlimited Imported Liquors, Kingfisher Beer, Wine, Cocktails, Mocktails, Starters & Buffet.Standing Couple Pass Includes - Unlimited Domestic Liquors, Kingfisher Beer & Starters only. No Seating Space...",
+         mode: "REJECTED",
+               ~~~~~~~~~~
+         categoryIdentity: "cat_tech",
+         eventTypeIdentity: "conference",
+         eligibleDeptIdentities: [],
+         tags: [],
+         bannerImages: [],
+         eventLink: "https://ai-tech-conf.com",
+         paymentLink: "https://payments.razorpay.com/ai-conf",
+         createdBy: 1,
+         org: {
+           connect: {
+             identity: "fa0e5396-c931-4c41-b456-5a3ef5828bc7"
+           }
+         }
+       }
+     })
+
+Invalid value for argument `mode`. Expected EventMode.
+[2025-12-31 12:33:27] [INFO] → Incoming → POST /api/v1/organizations/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events
+[2025-12-31 20:42:13] [INFO] → Incoming → POST /api/v1/organizations/org_123/events
+[2025-12-31 20:53:24] [INFO] → Incoming → POST /api/v1/organizations/org_123/events
+[2025-12-31 20:53:33] [ERROR] → Error → POST /api/v1/organizations/org_123/events | Message: Missing credentials in config, if using AWS_CONFIG_FILE, set AWS_SDK_LOAD_CONFIG=1
+[2025-12-31 21:22:02] [INFO] → Incoming → POST /api/v1/organizations/org_123/events
+[2025-12-31 21:22:02] [ERROR] → Error → POST /api/v1/organizations/org_123/events | Message: Failed to upload file to S3
+[2025-12-31 21:23:41] [INFO] → Incoming → POST /api/v1/organizations/org_123/events
+[2025-12-31 21:24:50] [ERROR] → Error → POST /api/v1/organizations/org_123/events | Message: 
+Invalid `tx.event.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event.service.js:91:42
+
+  88 static async createEvent(payload) {
+  89     return prisma.$transaction(async (tx) => {
+  90         // Create Event
+→ 91         const event = await tx.event.create({
+               data: {
+                 title: "AI Tech Conference 2026",
+                 slug: "ai-tech-conference-2026-20251231-212450-97865",
+                 description: "Annual AI and emerging technology conference",
+                 mode: "OFFLINE",
+                 categoryIdentity: "cat_tech",
+                 eventTypeIdentity: "conference",
+                 certIdentity: "4a6a9ef0-4859-4b12-82b0-58ea94298815",
+                 ~~~~~~~~~~~~
+                 eligibleDeptIdentities: [
+                   "dept_cse",
+                   "dept_it"
+                 ],
+                 tags: [
+                   "ai",
+                   "machine-learning",
+                   "tech"
+                 ],
+                 bannerImages: [
+                   "https://ace-web-qa.s3.ap-south-1.amazonaws.com/events/b759d42b-04e4-4c71-9c63-29393872185d-register-now-application-information-concept.jpg",
+                   "https://ace-web-qa.s3.ap-south-1.amazonaws.com/events/98b8a555-b6fa-4889-b635-442e68b948be-RSP-Happy-Birthday-Card-2025-%281%29.png"
+                 ],
+                 eventLink: "https://ai-tech-conf.com",
+                 paymentLink: "https://payments.razorpay.com/ai-conf",
+                 createdBy: null,
+                 org: {
+                   connect: {
+                     identity: "org_123"
+                   }
+                 },
+             ?   identity?: String,
+             ?   id?: Int,
+             ?   orgCategoryIdentity?: String | Null,
+             ?   offers?: String | Null,
+             ?   status?: EventStatus,
+             ?   videoLink?: String | Null,
+             ?   socialLinks?: NullableJsonNullValueInput | Json,
+             ?   publishedAt?: DateTime | Null,
+             ?   createdAt?: DateTime,
+             ?   updatedAt?: DateTime,
+             ?   cert?: AceCertificationCreateNestedOneWithoutEventInput,
+             ?   location?: EventLocationCreateNestedOneWithoutEventInput,
+             ?   calendars?: EventCalendarCreateNestedManyWithoutEventInput,
+             ?   tickets?: TicketCreateNestedManyWithoutEventInput,
+             ?   eventPerks?: EventPerkCreateNestedManyWithoutEventInput,
+             ?   eventAccommodations?: EventAccommodationCreateNestedManyWithoutEventInput,
+             ?   User?: UserCreateNestedOneWithoutEventsInput,
+             ?   Collaborator?: CollaboratorCreateNestedManyWithoutEventInput,
+             ?   EventCertification?: EventCertificationCreateNestedManyWithoutEventInput
+               }
+             })
+
+Unknown argument `certIdentity`. Available options are marked with ?.
+[2025-12-31 21:26:54] [INFO] → Incoming → POST /api/v1/organizations/org_123/events
+[2025-12-31 21:28:21] [ERROR] → Error → POST /api/v1/organizations/org_123/events | Message: 
+Invalid `tx.event.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event.service.js:91:42
+
+  88 static async createEvent(payload) {
+  89     return prisma.$transaction(async (tx) => {
+  90         // Create Event
+→ 91         const event = await tx.event.create(
+An operation failed because it depends on one or more records that were required but not found. No 'Org' record(s) (needed to inline the relation on 'Event' record(s)) was found for a nested connect on one-to-many relation 'EventToOrg'.
+[2025-12-31 21:29:09] [INFO] → Incoming → POST /api/v1/organizations/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events
+[2025-12-31 22:02:06] [INFO] → Incoming → GET /api/v1/organizations/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events
+[2025-12-31 22:02:06] [ERROR] → Error → GET /api/v1/organizations/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events | Message: Authorization header missing
+[2025-12-31 22:03:23] [INFO] → Incoming → POST /api/v1/auth/signup
+[2025-12-31 22:03:33] [INFO] → Incoming → POST /api/v1/auth/login
+[2025-12-31 22:04:04] [INFO] → Incoming → POST /api/v1/auth/login
+[2025-12-31 22:04:31] [INFO] → Incoming → POST /api/v1/auth/login
+[2025-12-31 22:04:53] [INFO] → Incoming → GET /api/v1/organizations/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events
+[2025-12-31 22:06:39] [INFO] → Incoming → GET /api/v1/organizations/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events
+[2025-12-31 22:07:33] [INFO] → Incoming → GET /api/v1/organizations/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events
+[2025-12-31 22:15:01] [INFO] → Incoming → GET /api/v1/organization/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events
+[2025-12-31 22:15:17] [INFO] → Incoming → GET /api/v1/organization/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events
+[2025-12-31 22:19:37] [INFO] → Incoming → GET /api/v1/organization/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events
