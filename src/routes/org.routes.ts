@@ -53,4 +53,5 @@ router.get(
   validate(eventValidation.getAll),
   OrgController.getOrgEvents
 );
+
 export default router;

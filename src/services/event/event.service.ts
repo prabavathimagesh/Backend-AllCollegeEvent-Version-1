@@ -1,12 +1,14 @@
-const prisma = require("../config/db.config");
-import { EventType, EventWithRelations } from "../types/type";
-import { EVENT_STATUS_LIST } from "../constants/event.status.message";
-import { EVENT_MESSAGES } from "../constants/event.message";
-import { getResolvedImageUrl } from "../utils/s3SignedUrl";
-import { cleanPayload } from "../utils/cleanPayload";
+const prisma = require("../../config/db.config");
+import { EventType, EventWithRelations } from "../../types/type";
+import { EVENT_STATUS_LIST } from "../../constants/event.status.message";
+import { EVENT_MESSAGES } from "../../constants/event.message";
+import { getResolvedImageUrl } from "../../utils/s3SignedUrl";
+import { cleanPayload } from "../../utils/cleanPayload";
 import { Prisma } from "@prisma/client";
 import { EventMode } from "@prisma/client";
-import { generateSlug } from "../utils/slug";
+import { generateSlug } from "../../utils/slug";
+import { EVENT_FULL_INCLUDE } from "./event.include";
+import { enrichEvents } from "./event.enricher";
 
 function validateLocation(mode: EventMode, location: any) {
   // Normalize empty values
@@ -56,140 +58,19 @@ function buildOrgSocialUpdate(socialLinks: any) {
 
 export class EventService {
   static async getEventsByOrg(identity: string) {
-    if (!identity) {
-      throw new Error(EVENT_MESSAGES.ORG_ID_REQUIRED);
-    }
+    const events = await prisma.event.findMany({
+      where: { orgIdentity: identity, status: "APPROVED" },
+      orderBy: { createdAt: "desc" },
+      include: EVENT_FULL_INCLUDE,
+    });
 
-    // Fetch events + count in one transaction
-    const [events, count] = await prisma.$transaction([
-      prisma.event.findMany({
-        where: {
-          orgIdentity: identity,
-          status: EVENT_MESSAGES.APPROVED,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-        include: {
-          // Organization
-          org: {
-            select: {
-              identity: true,
-              organizationName: true,
-              organizationCategory: true,
-              city: true,
-              state: true,
-              country: true,
-              profileImage: true,
-              whatsapp: true,
-              instagram: true,
-              linkedIn: true,
-              logoUrl: true,
-            },
-          },
+    const count = await prisma.event.count({
+      where: { orgIdentity: identity, status: "APPROVED" },
+    });
 
-          // Certification (single)
-          cert: {
-            select: {
-              identity: true,
-              certName: true,
-            },
-          },
-
-          // Location
-          location: true,
-
-          // Calendars
-          calendars: true,
-
-          // Tickets
-          tickets: true,
-
-          // Perks
-          eventPerks: {
-            include: {
-              perk: true,
-            },
-          },
-
-          // Accommodations
-          eventAccommodations: {
-            include: {
-              accommodation: true,
-            },
-          },
-
-          // Collaborators (NEW STRUCTURE)
-          Collaborator: {
-            include: {
-              member: {
-                select: {
-                  identity: true,
-                  name: true,
-                  email: true,
-                  mobile: true,
-                },
-              },
-              org: {
-                select: {
-                  identity: true,
-                  organizationName: true,
-                  logoUrl: true,
-                },
-              },
-            },
-          },
-        },
-      }),
-
-      prisma.event.count({
-        where: {
-          orgIdentity: identity,
-          status: EVENT_MESSAGES.APPROVED,
-        },
-      }),
-    ]);
-
-    // Explicit typing (THIS FIXES ALL implicit `any` ERRORS)
-    const typedEvents: EventWithRelations[] = events;
-
-    if (!typedEvents.length) {
-      throw new Error(EVENT_MESSAGES.EVENTS_NOT_FOUND);
-    }
-
-    // Final shaped response
     return {
       count,
-      events: typedEvents.map((event) => ({
-        identity: event.identity,
-        title: event.title,
-        slug: event.slug,
-        description: event.description,
-        mode: event.mode,
-        status: event.status,
-        createdAt: event.createdAt,
-
-        // Already full S3 URLs
-        bannerImages: event.bannerImages,
-
-        eventLink: event.eventLink,
-        paymentLink: event.paymentLink,
-
-        org: event.org,
-        cert: event.cert,
-        location: event.location,
-        calendars: event.calendars,
-        tickets: event.tickets,
-
-        perks: event.eventPerks.map((p) => p.perk),
-        accommodations: event.eventAccommodations.map((a) => a.accommodation),
-
-        collaborators: event.Collaborator.map((c) => ({
-          role: c.role,
-          member: c.member,
-          organization: c.org,
-        })),
-      })),
+      events: await enrichEvents(events),
     };
   }
 
@@ -378,118 +259,123 @@ export class EventService {
       throw new Error(EVENT_MESSAGES.ORG_AND_EVENT_ID_REQ);
     }
 
+    /* ---------- 1. Fetch event ---------- */
     const event = await prisma.event.findFirst({
       where: {
         identity: eventId,
         orgIdentity: orgId,
       },
       include: {
-        // Organization
-        org: {
-          select: {
-            identity: true,
-            organizationName: true,
-            organizationCategory: true,
-            city: true,
-            state: true,
-            country: true,
-            profileImage: true,
-            whatsapp: true,
-            instagram: true,
-            linkedIn: true,
-            logoUrl: true,
-          },
-        },
-
-        // Certification
-        cert: {
-          select: {
-            identity: true,
-            certName: true,
-          },
-        },
-
-        // Location
+        org: true,
+        cert: true,
         location: true,
-
-        // Calendars
         calendars: true,
-
-        // Tickets
         tickets: true,
-
-        // Perks
-        eventPerks: {
-          include: {
-            perk: true,
-          },
-        },
-
-        // Accommodations
-        eventAccommodations: {
-          include: {
-            accommodation: true,
-          },
-        },
-
-        // Collaborators
-        Collaborator: {
-          include: {
-            member: {
-              select: {
-                identity: true,
-                name: true,
-                email: true,
-                mobile: true,
-              },
-            },
-            org: {
-              select: {
-                identity: true,
-                organizationName: true,
-                logoUrl: true,
-              },
-            },
-          },
-        },
+        eventPerks: { include: { perk: true } },
+        eventAccommodations: { include: { accommodation: true } },
+        Collaborator: { include: { member: true } },
       },
     });
 
     if (!event) return null;
 
-    const typedEvent: EventWithRelations = event;
+    /* ---------- 2. Resolve host categories ---------- */
+    const hostIds: string[] = [];
 
-    // Final shaped response (same pattern as other APIs)
+    for (const col of event.Collaborator) {
+      if (col.member.hostIdentity) {
+        hostIds.push(col.member.hostIdentity);
+      }
+    }
+
+    const categories = await prisma.orgCategory.findMany({
+      where: { identity: { in: hostIds } },
+      select: { identity: true, categoryName: true },
+    });
+
+    const hostCategoryMap: Record<string, string> = {};
+    for (const c of categories) {
+      hostCategoryMap[c.identity] = c.categoryName;
+    }
+
+    /* ---------- 3. Resolve Event Category ---------- */
+    let categoryName: string | null = null;
+
+    if (event.categoryIdentity) {
+      const category = await prisma.AceCategoryType.findUnique({
+        where: { identity: event.categoryIdentity },
+        select: { categoryName: true },
+      });
+
+      categoryName = category ? category.categoryName : null;
+    }
+
+    /* ---------- 4. Resolve Event Type ---------- */
+    let eventTypeName: string | null = null;
+
+    if (event.eventTypeIdentity) {
+      const eventType = await prisma.AceEventTypes.findUnique({
+        where: { identity: event.eventTypeIdentity },
+        select: { name: true },
+      });
+
+      eventTypeName = eventType ? eventType.name : null;
+    }
+
+    /* ---------- 5. Build collaborators ---------- */
+    const collaborators: any[] = [];
+
+    for (const col of event.Collaborator) {
+      collaborators.push({
+        role: col.role,
+        member: {
+          identity: col.member.identity,
+          organizerName: col.member.organizerName,
+          organizerNumber: col.member.organizerNumber,
+          organizationName: col.member.organizationName,
+          orgDept: col.member.orgDept,
+          location: col.member.location,
+          hostIdentity: col.member.hostIdentity,
+          hostCategoryName: col.member.hostIdentity
+            ? hostCategoryMap[col.member.hostIdentity] ?? null
+            : null,
+        },
+      });
+    }
+
+    /* ---------- 6. Final response ---------- */
     return {
-      identity: typedEvent.identity,
-      title: typedEvent.title,
-      slug: typedEvent.slug,
-      description: typedEvent.description,
-      mode: typedEvent.mode,
-      status: typedEvent.status,
-      createdAt: typedEvent.createdAt,
+      identity: event.identity,
+      title: event.title,
+      slug: event.slug,
+      description: event.description,
+      mode: event.mode,
+      status: event.status,
+      createdAt: event.createdAt,
 
-      bannerImages: typedEvent.bannerImages, // S3 URLs directly
+      // NEW FIELDS
+      categoryIdentity: event.categoryIdentity,
+      categoryName,
+      eventTypeIdentity: event.eventTypeIdentity,
+      eventTypeName,
+      eligibleDeptIdentities: event.eligibleDeptIdentities,
 
-      eventLink: typedEvent.eventLink,
-      paymentLink: typedEvent.paymentLink,
+      bannerImages: event.bannerImages,
+      eventLink: event.eventLink,
+      paymentLink: event.paymentLink,
 
-      org: typedEvent.org,
-      cert: typedEvent.cert,
-      location: typedEvent.location,
-      calendars: typedEvent.calendars,
-      tickets: typedEvent.tickets,
+      org: event.org,
+      cert: event.cert,
+      location: event.location,
+      calendars: event.calendars,
+      tickets: event.tickets,
 
-      perks: typedEvent.eventPerks.map((p) => p.perk),
-      accommodations: typedEvent.eventAccommodations.map(
-        (a) => a.accommodation
+      perks: event.eventPerks.map((p: any) => p.perk),
+      accommodations: event.eventAccommodations.map(
+        (a: any) => a.accommodation
       ),
 
-      collaborators: typedEvent.Collaborator.map((c) => ({
-        role: c.role,
-        member: c.member,
-        organization: c.org,
-      })),
+      collaborators,
     };
   }
 
@@ -523,233 +409,23 @@ export class EventService {
 
   static async getAllEventsService() {
     const events = await prisma.event.findMany({
-      // NO status condition (fetch all)
-      orderBy: {
-        createdAt: "desc",
-      },
-      include: {
-        // Organization
-        org: {
-          select: {
-            identity: true,
-            organizationName: true,
-            organizationCategory: true,
-            city: true,
-            state: true,
-            country: true,
-            profileImage: true,
-            whatsapp: true,
-            instagram: true,
-            linkedIn: true,
-            logoUrl: true,
-          },
-        },
-
-        // Certification
-        cert: {
-          select: {
-            identity: true,
-            certName: true,
-          },
-        },
-
-        // Location
-        location: true,
-
-        // Calendars
-        calendars: true,
-
-        // Tickets
-        tickets: true,
-
-        // Perks
-        eventPerks: {
-          include: {
-            perk: true,
-          },
-        },
-
-        // Accommodations
-        eventAccommodations: {
-          include: {
-            accommodation: true,
-          },
-        },
-
-        // Collaborators
-        Collaborator: {
-          include: {
-            member: {
-              select: {
-                identity: true,
-                name: true,
-                email: true,
-                mobile: true,
-              },
-            },
-            org: {
-              select: {
-                identity: true,
-                organizationName: true,
-                logoUrl: true,
-              },
-            },
-          },
-        },
-      },
+      orderBy: { createdAt: "desc" },
+      include: EVENT_FULL_INCLUDE,
     });
 
-    const typedEvents: EventWithRelations[] = events;
-
-    // Final shaped response
-    return typedEvents.map((event) => ({
-      identity: event.identity,
-      title: event.title,
-      slug: event.slug,
-      description: event.description,
-      mode: event.mode,
-      status: event.status,
-      createdAt: event.createdAt,
-
-      bannerImages: event.bannerImages, // S3 URLs directly
-
-      eventLink: event.eventLink,
-      paymentLink: event.paymentLink,
-
-      org: event.org,
-      cert: event.cert,
-      location: event.location,
-      calendars: event.calendars,
-      tickets: event.tickets,
-
-      perks: event.eventPerks.map((p) => p.perk),
-      accommodations: event.eventAccommodations.map((a) => a.accommodation),
-
-      collaborators: event.Collaborator.map((c) => ({
-        role: c.role,
-        member: c.member,
-        organization: c.org,
-      })),
-    }));
+    return enrichEvents(events);
   }
 
   static async getSingleEventsService(eventId: string) {
-    if (!eventId) {
-      throw new Error(EVENT_MESSAGES.EVENT_ID_REQUIRED);
-    }
-
     const event = await prisma.event.findUnique({
-      where: {
-        identity: eventId,
-      },
-      include: {
-        // Organization
-        org: {
-          select: {
-            identity: true,
-            organizationName: true,
-            organizationCategory: true,
-            city: true,
-            state: true,
-            country: true,
-            profileImage: true,
-            whatsapp: true,
-            instagram: true,
-            linkedIn: true,
-            logoUrl: true,
-          },
-        },
-
-        // Certification
-        cert: {
-          select: {
-            identity: true,
-            certName: true,
-          },
-        },
-
-        // Location
-        location: true,
-
-        // Calendars
-        calendars: true,
-
-        // Tickets
-        tickets: true,
-
-        // Perks
-        eventPerks: {
-          include: {
-            perk: true,
-          },
-        },
-
-        // Accommodations
-        eventAccommodations: {
-          include: {
-            accommodation: true,
-          },
-        },
-
-        // Collaborators
-        Collaborator: {
-          include: {
-            member: {
-              select: {
-                identity: true,
-                name: true,
-                email: true,
-                mobile: true,
-              },
-            },
-            org: {
-              select: {
-                identity: true,
-                organizationName: true,
-                logoUrl: true,
-              },
-            },
-          },
-        },
-      },
+      where: { identity: eventId },
+      include: EVENT_FULL_INCLUDE,
     });
 
     if (!event) return null;
 
-    const typedEvent: EventWithRelations = event;
-
-    // Final shaped response (same as other APIs)
-    return {
-      identity: typedEvent.identity,
-      title: typedEvent.title,
-      slug: typedEvent.slug,
-      description: typedEvent.description,
-      mode: typedEvent.mode,
-      status: typedEvent.status,
-      createdAt: typedEvent.createdAt,
-
-      bannerImages: typedEvent.bannerImages, // S3 URLs directly
-
-      eventLink: typedEvent.eventLink,
-      paymentLink: typedEvent.paymentLink,
-
-      org: typedEvent.org,
-      cert: typedEvent.cert,
-      location: typedEvent.location,
-      calendars: typedEvent.calendars,
-      tickets: typedEvent.tickets,
-
-      perks: typedEvent.eventPerks.map((p) => p.perk),
-      accommodations: typedEvent.eventAccommodations.map(
-        (a) => a.accommodation
-      ),
-
-      collaborators: typedEvent.Collaborator.map((c) => ({
-        role: c.role,
-        member: c.member,
-        organization: c.org,
-      })),
-    };
+    const [enriched] = await enrichEvents([event]);
+    return enriched;
   }
 
   static getAllStatuses() {

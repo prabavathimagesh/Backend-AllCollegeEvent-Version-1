@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { EventService } from "../services/event.service";
+import { EventService } from "../services/event/event.service";
 import { EVENT_MESSAGES } from "../constants/event.message";
 import { uploadToS3 } from "../utils/s3Upload";
 import { AuthRequest } from "../types/type";
@@ -151,7 +151,7 @@ export class EventController {
 
       const event = await EventService.createEvent(payload);
 
-      res.status(201).json({ success: true, data: event });
+      res.status(200).json({ success: true, data: event });
     } catch (err: any) {
       console.error(err);
       res.status(400).json({
