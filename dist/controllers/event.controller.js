@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EventController = void 0;
-const event_service_1 = require("../services/event.service");
+const event_service_1 = require("../services/event/event.service");
 const event_message_1 = require("../constants/event.message");
 const s3Upload_1 = require("../utils/s3Upload");
 /**
@@ -24,8 +24,8 @@ class EventController {
             const result = await event_service_1.EventService.getEventsByOrg(identity);
             return res.status(200).json({
                 status: true,
-                count: result.count, // ✅ total events
-                data: result.events, // ✅ events list
+                count: result.count, // total events
+                data: result.events, // events list
                 message: event_message_1.EVENT_MESSAGES.EVENTS_FETCHED,
             });
         }
@@ -130,7 +130,7 @@ class EventController {
                 socialLinks: parseJSON(req.body.socialLinks, {}),
             };
             const event = await event_service_1.EventService.createEvent(payload);
-            res.status(201).json({ success: true, data: event });
+            res.status(200).json({ success: true, data: event });
         }
         catch (err) {
             console.error(err);

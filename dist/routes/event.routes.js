@@ -47,7 +47,7 @@ router.get("/events", event_controller_1.EventController.getAllEvents);
  */
 router.get("/events/:eventId", (0, validate_1.validate)(event_validation_1.eventValidation.getSinglePublicEvent), event_controller_1.EventController.getSingleEvent);
 router.get("/event/statuses", event_controller_1.EventController.getStatuses);
-// ----------------------------------
+// ---------------------------------- Draft Work
 router.post("/events/draft", authMiddleware_1.authMiddleware, event_controller_1.EventController.createDraft);
 router.patch("/events/:id", authMiddleware_1.authMiddleware, event_controller_1.EventController.autoSave);
 router.post("/events/:id/publish", authMiddleware_1.authMiddleware, event_controller_1.EventController.publishEvent);

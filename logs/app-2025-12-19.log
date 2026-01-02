@@ -1,4 +1,0 @@
-[2025-12-19 18:10:33] [INFO] → Incoming → POST /api/v1/organizations/1d4c6018-384b-4763-b415-d4abf4e8376a/events
-[2025-12-19 18:10:33] [ERROR] → Error → POST /api/v1/organizations/1d4c6018-384b-4763-b415-d4abf4e8376a/events | Message: Authorization header missing
-[2025-12-19 18:13:32] [INFO] → Incoming → POST /api/v1/organizations/1d4c6018-384b-4763-b415-d4abf4e8376a/events
-[2025-12-19 18:20:04] [INFO] → Incoming → POST /api/v1/organizations/1d4c6018-384b-4763-b415-d4abf4e8376a/events

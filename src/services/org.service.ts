@@ -1,31 +1,8 @@
 const prisma = require("../config/db.config");
-import { EventType } from "../types/type";
+import { EventType, EventWithRelations } from "../types/type";
 import { Prisma } from "@prisma/client";
-
-/**
- * Event with required relations (NEW SCHEMA)
- */
-type EventWithRelations = Prisma.EventGetPayload<{
-  include: {
-    org: true;
-    cert: true;
-    location: true;
-    calendars: true;
-    tickets: true;
-    eventPerks: {
-      include: { perk: true };
-    };
-    eventAccommodations: {
-      include: { accommodation: true };
-    };
-    Collaborator: {
-      include: {
-        member: true;
-        org: true;
-      };
-    };
-  };
-}>;
+import { EVENT_FULL_INCLUDE } from "../services/event/event.include";
+import { enrichEvents } from "../services/event/event.enricher";
 
 export class OrgService {
   static async getAllOrgs() {
@@ -106,7 +83,7 @@ export class OrgService {
       throw new Error("Organization ID is required");
     }
 
-    // ✅ Fetch events + count together
+    // Fetch events + count together
     const [events, count] = await prisma.$transaction([
       prisma.event.findMany({
         where: {
@@ -115,66 +92,7 @@ export class OrgService {
         orderBy: {
           createdAt: "desc",
         },
-        include: {
-          org: {
-            select: {
-              identity: true,
-              organizationName: true,
-              organizationCategory: true,
-              city: true,
-              state: true,
-              country: true,
-              profileImage: true,
-              whatsapp: true,
-              instagram: true,
-              linkedIn: true,
-              logoUrl: true,
-            },
-          },
-
-          cert: {
-            select: {
-              identity: true,
-              certName: true,
-            },
-          },
-
-          location: true,
-          calendars: true,
-          tickets: true,
-
-          eventPerks: {
-            include: {
-              perk: true,
-            },
-          },
-
-          eventAccommodations: {
-            include: {
-              accommodation: true,
-            },
-          },
-
-          Collaborator: {
-            include: {
-              member: {
-                select: {
-                  identity: true,
-                  name: true,
-                  email: true,
-                  mobile: true,
-                },
-              },
-              org: {
-                select: {
-                  identity: true,
-                  organizationName: true,
-                  logoUrl: true,
-                },
-              },
-            },
-          },
-        },
+        include: EVENT_FULL_INCLUDE,
       }),
 
       prisma.event.count({
@@ -184,39 +102,12 @@ export class OrgService {
       }),
     ]);
 
-    const typedEvents: EventWithRelations[] = events;
+    // Enrich using shared helper
+    const enrichedEvents = await enrichEvents(events);
 
     return {
       count,
-      events: typedEvents.map((event) => ({
-        identity: event.identity,
-        title: event.title,
-        slug: event.slug,
-        description: event.description,
-        mode: event.mode,
-        status: event.status,
-        createdAt: event.createdAt,
-
-        bannerImages: event.bannerImages,
-
-        eventLink: event.eventLink,
-        paymentLink: event.paymentLink,
-
-        org: event.org,
-        cert: event.cert,
-        location: event.location,
-        calendars: event.calendars,
-        tickets: event.tickets,
-
-        perks: event.eventPerks.map((p) => p.perk),
-        accommodations: event.eventAccommodations.map((a) => a.accommodation),
-
-        collaborators: event.Collaborator.map((c) => ({
-          role: c.role,
-          member: c.member,
-          organization: c.org,
-        })),
-      })),
+      events: enrichedEvents,
     };
   }
 }

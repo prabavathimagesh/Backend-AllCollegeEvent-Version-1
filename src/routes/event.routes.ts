@@ -83,7 +83,7 @@ router.get(
 router.get("/event/statuses", EventController.getStatuses);
 
 
-// ----------------------------------
+// ---------------------------------- Draft Work
 
 router.post("/events/draft", authMiddleware,EventController.createDraft);
 router.patch("/events/:id", authMiddleware,EventController.autoSave);
