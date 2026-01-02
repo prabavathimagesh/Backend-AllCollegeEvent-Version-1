@@ -54,7 +54,6 @@ function buildOrgSocialUpdate(socialLinks: any) {
   return data;
 }
 
-
 export class EventService {
   static async getEventsByOrg(identity: string) {
     if (!identity) {
@@ -196,7 +195,9 @@ export class EventService {
 
   static async createEvent(payload: any) {
     return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      // Create Event
+      /* ---------------------------------------------------
+       1. Create Event (UNCHANGED)
+    --------------------------------------------------- */
       const event = await tx.event.create({
         data: {
           title: payload.title,
@@ -206,7 +207,6 @@ export class EventService {
           categoryIdentity: payload.categoryIdentity,
           eventTypeIdentity: payload.eventTypeIdentity,
 
-          // CORRECT WAY
           cert: payload.certIdentity
             ? {
                 connect: { identity: payload.certIdentity },
@@ -228,7 +228,9 @@ export class EventService {
 
       const eventId = event.identity;
 
-      // Update Org Social Links (SAFE)
+      /* ---------------------------------------------------
+       2. Update Org Social Links (UNCHANGED)
+    --------------------------------------------------- */
       const orgSocialUpdate = buildOrgSocialUpdate(payload.socialLinks);
       if (Object.keys(orgSocialUpdate).length) {
         await tx.org.update({
@@ -237,51 +239,79 @@ export class EventService {
         });
       }
 
-      // Collaborators (NEW FLOW)
+      /* ---------------------------------------------------
+       3. Collaborators (UPDATED BASED ON NEW TABLE DESIGN)
+    --------------------------------------------------- */
       if (payload.collaborators?.length) {
         for (const c of payload.collaborators) {
-          // 3.1 Upsert collaborator member
+          /**
+           * Expected collaborator payload:
+           * {
+           *   hostIdentity,
+           *   organizerName,
+           *   organizerNumber,
+           *   organizationName,
+           *   orgDept?,
+           *   location?,
+           *   role?
+           * }
+           */
+
+          // 3.1 Upsert CollaboratorMember
           const member = await tx.collaboratorMember.upsert({
             where: {
-              email: c.email,
+              organizerNumber_hostIdentity: {
+                organizerNumber: c.organizerNumber,
+                hostIdentity: c.hostIdentity,
+              },
             },
             update: {
-              mobile: c.mobile,
-              name: c.name,
+              organizerName: c.organizerName,
+              organizationName: c.organizationName,
+              orgDept: c.orgDept ?? null,
+              location: c.location ?? null,
             },
             create: {
-              email: c.email,
-              mobile: c.mobile,
-              name: c.name,
+              hostIdentity: c.hostIdentity,
+              organizerName: c.organizerName,
+              organizerNumber: c.organizerNumber,
+              organizationName: c.organizationName,
+              orgDept: c.orgDept ?? null,
+              location: c.location ?? null,
             },
           });
 
-          // 3.2 Create collaborator mapping
+          // 3.2 Create Collaborator mapping (Event ↔ Member)
           await tx.collaborator.create({
             data: {
               collaboratorMemberId: member.identity,
-              collabOrgIdentity: c.collabOrgIdentity || null,
-              orgIdentity: payload.orgIdentity,
               eventIdentity: eventId,
-              role: c.role,
+              orgIdentity: payload.orgIdentity,
+              role: c.role ?? null,
             },
           });
         }
       }
 
-      // Location
-      await tx.eventLocation.create({
-        data: {
-          eventIdentity: eventId,
-          onlineMeetLink: payload.location?.onlineMeetLink,
-          country: payload.location?.country,
-          state: payload.location?.state,
-          city: payload.location?.city,
-          mapLink: payload.location?.mapLink,
-        },
-      });
+      /* ---------------------------------------------------
+       4. Location (UNCHANGED)
+    --------------------------------------------------- */
+      if (payload.location) {
+        await tx.eventLocation.create({
+          data: {
+            eventIdentity: eventId,
+            onlineMeetLink: payload.location.onlineMeetLink ?? null,
+            country: payload.location.country ?? null,
+            state: payload.location.state ?? null,
+            city: payload.location.city ?? null,
+            mapLink: payload.location.mapLink ?? null,
+          },
+        });
+      }
 
-      // Calendars
+      /* ---------------------------------------------------
+       5. Calendars (UNCHANGED)
+    --------------------------------------------------- */
       if (payload.calendars?.length) {
         await tx.eventCalendar.createMany({
           data: payload.calendars.map((c: any) => ({
@@ -289,23 +319,33 @@ export class EventService {
             timeZone: c.timeZone,
             startDate: c.startDate,
             endDate: c.endDate,
-            startTime: c.startTime,
-            endTime: c.endTime,
+            startTime: c.startTime ?? null,
+            endTime: c.endTime ?? null,
           })),
         });
       }
 
-      // Tickets
+      /* ---------------------------------------------------
+       6. Tickets (UNCHANGED, DateTime SAFE)
+    --------------------------------------------------- */
       if (payload.tickets?.length) {
         await tx.ticket.createMany({
           data: payload.tickets.map((t: any) => ({
-            ...t,
+            name: t.name,
+            description: t.description ?? null,
+            sellingFrom: new Date(t.sellingFrom),
+            sellingTo: new Date(t.sellingTo),
+            isPaid: t.isPaid ?? false,
+            price: t.price ?? null,
+            totalQuantity: t.totalQuantity,
             eventIdentity: eventId,
           })),
         });
       }
 
-      // Perks
+      /* ---------------------------------------------------
+       7. Perks (UNCHANGED)
+    --------------------------------------------------- */
       if (payload.perkIdentities?.length) {
         await tx.eventPerk.createMany({
           data: payload.perkIdentities.map((id: string) => ({
@@ -316,7 +356,9 @@ export class EventService {
         });
       }
 
-      // Accommodations
+      /* ---------------------------------------------------
+       8. Accommodations (UNCHANGED)
+    --------------------------------------------------- */
       if (payload.accommodationIdentities?.length) {
         await tx.eventAccommodation.createMany({
           data: payload.accommodationIdentities.map((id: string) => ({

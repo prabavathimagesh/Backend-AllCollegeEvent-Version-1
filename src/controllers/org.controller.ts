@@ -130,7 +130,7 @@ export class OrgController {
 
       return res.status(200).json({
         status: true,
-        count: result.count, // ✅ total events
+        count: result.count, // total events
         data: result.events,
         message: EVENT_MESSAGES.EVENTS_FETCHED,
       });

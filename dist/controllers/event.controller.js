@@ -24,8 +24,8 @@ class EventController {
             const result = await event_service_1.EventService.getEventsByOrg(identity);
             return res.status(200).json({
                 status: true,
-                count: result.count, // ✅ total events
-                data: result.events, // ✅ events list
+                count: result.count, // total events
+                data: result.events, // events list
                 message: event_message_1.EVENT_MESSAGES.EVENTS_FETCHED,
             });
         }

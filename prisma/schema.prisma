@@ -236,8 +236,9 @@ model OrgCategory {
 
   categoryName String @unique @map("category_name")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime             @updatedAt @map("updated_at")
+  CollaboratorMember CollaboratorMember[]
 
   @@map("ace_org_category")
 }
@@ -329,15 +330,21 @@ model CollaboratorMember {
   identity String @id @default(uuid())
   id       Int    @unique @default(autoincrement())
 
-  email  String  @unique
-  mobile String  @unique
-  name   String?
+  hostIdentity     String? // TEMP nullable
+  organizerName    String? // TEMP nullable
+  organizerNumber  String? // TEMP nullable
+  organizationName String? // TEMP nullable
+  orgDept          String?
+  location         String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   collaborations Collaborator[]
 
+  host OrgCategory? @relation(fields: [hostIdentity], references: [identity])
+
+  @@unique([organizerNumber, hostIdentity])
   @@map("ace_collaborator_members")
 }
 
@@ -346,19 +353,21 @@ model Collaborator {
   id       Int    @unique @default(autoincrement())
 
   collaboratorMemberId String
-  collabOrgIdentity    String? // existing collaborator org
-  orgIdentity          String // event creator org
   eventIdentity        String
+  orgIdentity          String // event creator org
 
   role String? // primary_host | co_host | speaker | organizer
-
-  member CollaboratorMember @relation(fields: [collaboratorMemberId], references: [identity])
-  event  Event              @relation(fields: [eventIdentity], references: [identity])
-  org    Org                @relation(fields: [orgIdentity], references: [identity])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Relations
+  member CollaboratorMember @relation(fields: [collaboratorMemberId], references: [identity])
+  event  Event              @relation(fields: [eventIdentity], references: [identity])
+  org    Org                @relation(fields: [orgIdentity], references: [identity])
+
+  // Prevent duplicate collaborator per event
+  @@unique([collaboratorMemberId, eventIdentity])
   @@map("ace_collaborator")
 }
 

@@ -17,3 +17,8 @@
 [2026-01-01 20:39:23] [INFO] → Incoming → GET /api/v1/events/58cb6bc9-d45a-404d-9e27-9ac3cc9af90a
 [2026-01-01 20:39:55] [INFO] → Incoming → GET /api/v1/organizations/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events/bd7f2f10-ff4e-4ad1-bbd7-074f96ec4dc2
 [2026-01-01 20:40:02] [INFO] → Incoming → GET /api/v1/organizations/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events/58cb6bc9-d45a-404d-9e27-9ac3cc9af90a
+[2026-01-01 21:44:31] [INFO] → Incoming → GET /api/v1/organizations/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events/58cb6bc9-d45a-404d-9e27-9ac3cc9af90a
+[2026-01-01 21:45:00] [INFO] → Incoming → GET /api/v1/events
+[2026-01-01 21:45:17] [INFO] → Incoming → GET /api/v1/events/58cb6bc9-d45a-404d-9e27-9ac3cc9af90a
+[2026-01-01 21:46:32] [INFO] → Incoming → GET /api/v1/organization/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events
+[2026-01-01 22:03:35] [INFO] → Incoming → GET /api/v1/organization/fa0e5396-c931-4c41-b456-5a3ef5828bc7/events

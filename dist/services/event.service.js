@@ -14,7 +14,7 @@ function validateLocation(mode, location) {
     }
     if (mode === client_1.EventMode.ONLINE) {
         if (!location?.onlineMeetLink) {
-            throw new Error("Online meet link is required for ONLINE events");
+            throw new Error(event_message_1.EVENT_MESSAGES.ONLINE_MEET_LINK_REQ);
         }
     }
     if (mode === client_1.EventMode.OFFLINE) {
@@ -22,7 +22,7 @@ function validateLocation(mode, location) {
             !location?.state ||
             !location?.city ||
             !location?.mapLink) {
-            throw new Error("Offline location (country, state, city, mapLink) is required");
+            throw new Error(event_message_1.EVENT_MESSAGES.OFFLINE_VALIDATION);
         }
     }
     if (mode === client_1.EventMode.HYBRID) {
@@ -31,7 +31,7 @@ function validateLocation(mode, location) {
             !location?.state ||
             !location?.city ||
             !location?.mapLink) {
-            throw new Error("Both online and offline location details are required");
+            throw new Error(event_message_1.EVENT_MESSAGES.ONLINE_OFFLINE_VALIDATION);
         }
     }
 }
@@ -50,7 +50,7 @@ class EventService {
         if (!identity) {
             throw new Error(event_message_1.EVENT_MESSAGES.ORG_ID_REQUIRED);
         }
-        // ✅ Fetch events + count in one transaction
+        // Fetch events + count in one transaction
         const [events, count] = await prisma.$transaction([
             prisma.event.findMany({
                 where: {
@@ -131,12 +131,12 @@ class EventService {
                 },
             }),
         ]);
-        // ✅ Explicit typing (THIS FIXES ALL implicit `any` ERRORS)
+        // Explicit typing (THIS FIXES ALL implicit `any` ERRORS)
         const typedEvents = events;
         if (!typedEvents.length) {
             throw new Error(event_message_1.EVENT_MESSAGES.EVENTS_NOT_FOUND);
         }
-        // ✅ Final shaped response
+        // Final shaped response
         return {
             count,
             events: typedEvents.map((event) => ({
@@ -168,7 +168,9 @@ class EventService {
     }
     static async createEvent(payload) {
         return prisma.$transaction(async (tx) => {
-            // Create Event
+            /* ---------------------------------------------------
+             1. Create Event (UNCHANGED)
+          --------------------------------------------------- */
             const event = await tx.event.create({
                 data: {
                     title: payload.title,
@@ -177,7 +179,6 @@ class EventService {
                     mode: payload.mode,
                     categoryIdentity: payload.categoryIdentity,
                     eventTypeIdentity: payload.eventTypeIdentity,
-                    // CORRECT WAY
                     cert: payload.certIdentity
                         ? {
                             connect: { identity: payload.certIdentity },
@@ -195,7 +196,9 @@ class EventService {
                 },
             });
             const eventId = event.identity;
-            // Update Org Social Links (SAFE)
+            /* ---------------------------------------------------
+             2. Update Org Social Links (UNCHANGED)
+          --------------------------------------------------- */
             const orgSocialUpdate = buildOrgSocialUpdate(payload.socialLinks);
             if (Object.keys(orgSocialUpdate).length) {
                 await tx.org.update({
@@ -203,48 +206,75 @@ class EventService {
                     data: orgSocialUpdate,
                 });
             }
-            // Collaborators (NEW FLOW)
+            /* ---------------------------------------------------
+             3. Collaborators (UPDATED BASED ON NEW TABLE DESIGN)
+          --------------------------------------------------- */
             if (payload.collaborators?.length) {
                 for (const c of payload.collaborators) {
-                    // 3.1 Upsert collaborator member
+                    /**
+                     * Expected collaborator payload:
+                     * {
+                     *   hostIdentity,
+                     *   organizerName,
+                     *   organizerNumber,
+                     *   organizationName,
+                     *   orgDept?,
+                     *   location?,
+                     *   role?
+                     * }
+                     */
+                    // 3.1 Upsert CollaboratorMember
                     const member = await tx.collaboratorMember.upsert({
                         where: {
-                            email: c.email,
+                            organizerNumber_hostIdentity: {
+                                organizerNumber: c.organizerNumber,
+                                hostIdentity: c.hostIdentity,
+                            },
                         },
                         update: {
-                            mobile: c.mobile,
-                            name: c.name,
+                            organizerName: c.organizerName,
+                            organizationName: c.organizationName,
+                            orgDept: c.orgDept ?? null,
+                            location: c.location ?? null,
                         },
                         create: {
-                            email: c.email,
-                            mobile: c.mobile,
-                            name: c.name,
+                            hostIdentity: c.hostIdentity,
+                            organizerName: c.organizerName,
+                            organizerNumber: c.organizerNumber,
+                            organizationName: c.organizationName,
+                            orgDept: c.orgDept ?? null,
+                            location: c.location ?? null,
                         },
                     });
-                    // 3.2 Create collaborator mapping
+                    // 3.2 Create Collaborator mapping (Event ↔ Member)
                     await tx.collaborator.create({
                         data: {
                             collaboratorMemberId: member.identity,
-                            collabOrgIdentity: c.collabOrgIdentity || null,
-                            orgIdentity: payload.orgIdentity,
                             eventIdentity: eventId,
-                            role: c.role,
+                            orgIdentity: payload.orgIdentity,
+                            role: c.role ?? null,
                         },
                     });
                 }
             }
-            // Location
-            await tx.eventLocation.create({
-                data: {
-                    eventIdentity: eventId,
-                    onlineMeetLink: payload.location?.onlineMeetLink,
-                    country: payload.location?.country,
-                    state: payload.location?.state,
-                    city: payload.location?.city,
-                    mapLink: payload.location?.mapLink,
-                },
-            });
-            // Calendars
+            /* ---------------------------------------------------
+             4. Location (UNCHANGED)
+          --------------------------------------------------- */
+            if (payload.location) {
+                await tx.eventLocation.create({
+                    data: {
+                        eventIdentity: eventId,
+                        onlineMeetLink: payload.location.onlineMeetLink ?? null,
+                        country: payload.location.country ?? null,
+                        state: payload.location.state ?? null,
+                        city: payload.location.city ?? null,
+                        mapLink: payload.location.mapLink ?? null,
+                    },
+                });
+            }
+            /* ---------------------------------------------------
+             5. Calendars (UNCHANGED)
+          --------------------------------------------------- */
             if (payload.calendars?.length) {
                 await tx.eventCalendar.createMany({
                     data: payload.calendars.map((c) => ({
@@ -252,21 +282,31 @@ class EventService {
                         timeZone: c.timeZone,
                         startDate: c.startDate,
                         endDate: c.endDate,
-                        startTime: c.startTime,
-                        endTime: c.endTime,
+                        startTime: c.startTime ?? null,
+                        endTime: c.endTime ?? null,
                     })),
                 });
             }
-            // Tickets
+            /* ---------------------------------------------------
+             6. Tickets (UNCHANGED, DateTime SAFE)
+          --------------------------------------------------- */
             if (payload.tickets?.length) {
                 await tx.ticket.createMany({
                     data: payload.tickets.map((t) => ({
-                        ...t,
+                        name: t.name,
+                        description: t.description ?? null,
+                        sellingFrom: new Date(t.sellingFrom),
+                        sellingTo: new Date(t.sellingTo),
+                        isPaid: t.isPaid ?? false,
+                        price: t.price ?? null,
+                        totalQuantity: t.totalQuantity,
                         eventIdentity: eventId,
                     })),
                 });
             }
-            // Perks
+            /* ---------------------------------------------------
+             7. Perks (UNCHANGED)
+          --------------------------------------------------- */
             if (payload.perkIdentities?.length) {
                 await tx.eventPerk.createMany({
                     data: payload.perkIdentities.map((id) => ({
@@ -276,7 +316,9 @@ class EventService {
                     skipDuplicates: true,
                 });
             }
-            // Accommodations
+            /* ---------------------------------------------------
+             8. Accommodations (UNCHANGED)
+          --------------------------------------------------- */
             if (payload.accommodationIdentities?.length) {
                 await tx.eventAccommodation.createMany({
                     data: payload.accommodationIdentities.map((id) => ({
@@ -291,7 +333,7 @@ class EventService {
     }
     static async getEventById(orgId, eventId) {
         if (!orgId || !eventId) {
-            throw new Error("Organization ID and Event ID are required");
+            throw new Error(event_message_1.EVENT_MESSAGES.ORG_AND_EVENT_ID_REQ);
         }
         const event = await prisma.event.findFirst({
             where: {
@@ -365,7 +407,7 @@ class EventService {
         if (!event)
             return null;
         const typedEvent = event;
-        // ✅ Final shaped response (same pattern as other APIs)
+        // Final shaped response (same pattern as other APIs)
         return {
             identity: typedEvent.identity,
             title: typedEvent.title,
@@ -374,7 +416,7 @@ class EventService {
             mode: typedEvent.mode,
             status: typedEvent.status,
             createdAt: typedEvent.createdAt,
-            bannerImages: typedEvent.bannerImages, // ✅ S3 URLs directly
+            bannerImages: typedEvent.bannerImages, // S3 URLs directly
             eventLink: typedEvent.eventLink,
             paymentLink: typedEvent.paymentLink,
             org: typedEvent.org,
@@ -419,7 +461,7 @@ class EventService {
     }
     static async getAllEventsService() {
         const events = await prisma.event.findMany({
-            // ✅ NO status condition (fetch all)
+            // NO status condition (fetch all)
             orderBy: {
                 createdAt: "desc",
             },
@@ -488,7 +530,7 @@ class EventService {
             },
         });
         const typedEvents = events;
-        // ✅ Final shaped response
+        // Final shaped response
         return typedEvents.map((event) => ({
             identity: event.identity,
             title: event.title,
@@ -516,7 +558,7 @@ class EventService {
     }
     static async getSingleEventsService(eventId) {
         if (!eventId) {
-            throw new Error("Event ID is required");
+            throw new Error(event_message_1.EVENT_MESSAGES.EVENT_ID_REQUIRED);
         }
         const event = await prisma.event.findUnique({
             where: {
@@ -589,7 +631,7 @@ class EventService {
         if (!event)
             return null;
         const typedEvent = event;
-        // ✅ Final shaped response (same as other APIs)
+        // Final shaped response (same as other APIs)
         return {
             identity: typedEvent.identity,
             title: typedEvent.title,

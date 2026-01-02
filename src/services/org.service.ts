@@ -1,31 +1,6 @@
 const prisma = require("../config/db.config");
-import { EventType } from "../types/type";
+import { EventType, EventWithRelations } from "../types/type";
 import { Prisma } from "@prisma/client";
-
-/**
- * Event with required relations (NEW SCHEMA)
- */
-type EventWithRelations = Prisma.EventGetPayload<{
-  include: {
-    org: true;
-    cert: true;
-    location: true;
-    calendars: true;
-    tickets: true;
-    eventPerks: {
-      include: { perk: true };
-    };
-    eventAccommodations: {
-      include: { accommodation: true };
-    };
-    Collaborator: {
-      include: {
-        member: true;
-        org: true;
-      };
-    };
-  };
-}>;
 
 export class OrgService {
   static async getAllOrgs() {
@@ -106,7 +81,7 @@ export class OrgService {
       throw new Error("Organization ID is required");
     }
 
-    // ✅ Fetch events + count together
+    // Fetch events + count together
     const [events, count] = await prisma.$transaction([
       prisma.event.findMany({
         where: {
