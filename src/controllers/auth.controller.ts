@@ -18,7 +18,7 @@ export class AuthController {
         email,
         password,
         type,
-        platform = "web", 
+        platform = "web",
         ...rest
       } = req.body;
 
@@ -111,63 +111,52 @@ export class AuthController {
   /**
    * Verify organization account using email token
    */
-static async verifyOrg(req: Request, res: Response) {
-  try {
-    const { token } = req.query;
+  static async verifyOrg(req: Request, res: Response) {
+    try {
+      // Extract token from query params
+      const { token } = req.query;
 
-    if (!token) {
+      // Token missing
+      if (!token) {
+        return res.status(200).json({
+          status: false,
+          message: AUTH_MESSAGES.TOKEN_MISSING,
+        });
+      }
+
+      // Verify organization
+      const result = await AuthService.verifyAccount(token as string);
+
+      // Success response
       return res.status(200).json({
+        status: true,
+        data: result,
+        message: AUTH_MESSAGES.ORG_VERIFIED_SUCCESS,
+      });
+    } catch (err: any) {
+      // Known / business errors
+      const safeErrors = [
+        AUTH_MESSAGES.TOKEN_MISSING,
+        AUTH_MESSAGES.INVALID_OR_EXPIRED_TOKEN,
+        AUTH_MESSAGES.ORG_NOT_FOUND_BY_TOKEN,
+      ];
+
+      // Business errors → 200
+      if (safeErrors.includes(err.message)) {
+        return res.status(200).json({
+          status: false,
+          message: err.message,
+        });
+      }
+
+      // System errors → 500
+      return res.status(500).json({
         status: false,
-        message: AUTH_MESSAGES.TOKEN_MISSING,
+        message: AUTH_MESSAGES.INTERNAL_SERVER_ERROR,
+        error: err.message,
       });
     }
-
-    // EXISTING VERIFICATION LOGIC
-    const result = await AuthService.verifyAccount(token as string);
-    
-    console.log(req.headers)
-    // Detect user agent
-    const userAgent = req.headers["user-agent"] || "";
-    console.log(userAgent)
-    const isMobile = /android|iphone|ipad|ipod/i.test(userAgent);
-    console.log(userAgent)
-
-    // MOBILE → redirect to app
-    if (isMobile) {
-      return res.redirect(
-        `myapp://email-verify?status=success&message=${encodeURIComponent(
-          result.message
-        )}`
-      );
-    }
-
-    // WEB → JSON RESPONSE ONLY
-    return res.status(200).json({
-      status: true,
-      data: result,
-      message: result.message,
-    });
-  } catch (err: any) {
-    const userAgent = req.headers["user-agent"] || "";
-    const isMobile = /android|iphone|ipad|ipod/i.test(userAgent);
-
-    // MOBILE → redirect error
-    if (isMobile) {
-      return res.redirect(
-        `myapp://email-verify?status=error&message=${encodeURIComponent(
-          err.message
-        )}`
-      );
-    }
-
-    // WEB → JSON error
-    return res.status(500).json({
-      status: false,
-      message: err.message || AUTH_MESSAGES.INTERNAL_SERVER_ERROR,
-    });
   }
-}
-
 
   /**
    * Forgot password - send OTP
