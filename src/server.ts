@@ -23,8 +23,14 @@ app.use(express.json());
 // enabling cross-origin access for allowed domains
 app.use(
   cors({
-    origin: [process.env.DOMAIN, process.env.DOMAIN1],
+    origin: [
+      "https://www.allcollegeevent.com",
+      "https://allcollegeevent.com",
+      "https://aces-projects-cd688f2e.vercel.app",
+      "http://localhost:3000"
+    ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
 

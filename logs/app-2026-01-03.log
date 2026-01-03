@@ -1,2 +1,6 @@
 [2026-01-03 00:20:13] [INFO] → Incoming → GET /api/v1/events/06da6152-6273-4931-9be0-087c2d038d6c
 [2026-01-03 00:20:33] [INFO] → Incoming → GET /api/v1/events
+[2026-01-03 11:59:06] [INFO] → Incoming → GET /api/v1/events
+[2026-01-03 11:59:07] [INFO] → Incoming → GET /favicon.ico
+[2026-01-03 13:20:00] [INFO] → Incoming → POST /api/v1/auth/signup
+[2026-01-03 13:20:18] [INFO] → Incoming → POST /api/v1/auth/login

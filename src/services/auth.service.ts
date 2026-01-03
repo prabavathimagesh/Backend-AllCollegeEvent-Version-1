@@ -117,18 +117,19 @@ export class AuthService {
           email,
           password: hashedPassword,
           roleId: role.id,
+          isActive: true
         },
       });
-      console.log(user);
+      // console.log(user);
 
-      await sendVerificationMail(
-        {
-          email: user.email,
-          identity: user.identity,
-          id: user.id,
-        },
-        platform
-      );
+      // await sendVerificationMail(
+      //   {
+      //     email: user.email,
+      //     identity: user.identity,
+      //     id: user.id,
+      //   },
+      //   platform
+      // );
 
       return user;
     }

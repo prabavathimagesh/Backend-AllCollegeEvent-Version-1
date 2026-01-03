@@ -23,8 +23,14 @@ const app = (0, express_1.default)();
 app.use(express_1.default.json());
 // enabling cross-origin access for allowed domains
 app.use(cors({
-    origin: [process.env.DOMAIN, process.env.DOMAIN1],
+    origin: [
+        "https://www.allcollegeevent.com",
+        "https://allcollegeevent.com",
+        "https://aces-projects-cd688f2e.vercel.app",
+        "http://localhost:3000"
+    ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 }));
 // exposing uploaded images/files publicly
 app.use("/uploads", express_1.default.static(path_1.default.join(__dirname, "../uploads")));

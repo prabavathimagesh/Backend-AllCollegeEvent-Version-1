@@ -80,14 +80,18 @@ class AuthService {
                     email,
                     password: hashedPassword,
                     roleId: role.id,
+                    isActive: true
                 },
             });
-            console.log(user);
-            await sendVerificationMail({
-                email: user.email,
-                identity: user.identity,
-                id: user.id,
-            }, platform);
+            // console.log(user);
+            // await sendVerificationMail(
+            //   {
+            //     email: user.email,
+            //     identity: user.identity,
+            //     id: user.id,
+            //   },
+            //   platform
+            // );
             return user;
         }
         /* ================= ORG SIGNUP ================= */
