@@ -343,10 +343,10 @@ model CollaboratorMember {
   identity String @id @default(uuid())
   id       Int    @unique @default(autoincrement())
 
-  hostIdentity     String? // TEMP nullable
-  organizerName    String? // TEMP nullable
-  organizerNumber  String? // TEMP nullable
-  organizationName String? // TEMP nullable
+  organizerNumber  String 
+  hostIdentity     String?  
+  organizerName    String?
+  organizationName String?
   orgDept          String?
   location         String?
 
@@ -357,9 +357,9 @@ model CollaboratorMember {
 
   host OrgCategory? @relation(fields: [hostIdentity], references: [identity])
 
-  @@unique([organizerNumber, hostIdentity])
   @@map("ace_collaborator_members")
 }
+
 
 model Collaborator {
   identity String @id @default(uuid())

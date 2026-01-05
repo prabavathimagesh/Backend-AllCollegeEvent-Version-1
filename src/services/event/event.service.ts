@@ -10,16 +10,6 @@ import { generateSlug } from "../../utils/slug";
 import { EVENT_FULL_INCLUDE } from "./event.include";
 import { enrichEvents } from "./event.enricher";
 
-function buildOrgSocialUpdate(socialLinks: any) {
-  const data: any = {};
-
-  if (socialLinks?.whatsapp) data.whatsapp = socialLinks.whatsapp;
-  if (socialLinks?.instagram) data.instagram = socialLinks.instagram;
-  if (socialLinks?.linkedIn) data.linkedIn = socialLinks.linkedIn;
-
-  return data;
-}
-
 export class EventService {
   static async getEventsByOrg(identity: string) {
     const events = await prisma.event.findMany({
@@ -53,14 +43,15 @@ export class EventService {
           eventTypeIdentity: payload.eventTypeIdentity,
 
           cert: payload.certIdentity
-            ? {
-                connect: { identity: payload.certIdentity },
-              }
+            ? { connect: { identity: payload.certIdentity } }
             : undefined,
 
           eligibleDeptIdentities: payload.eligibleDeptIdentities,
           tags: payload.tags,
           bannerImages: payload.bannerImages,
+
+          socialLinks: payload.socialLinks ?? {},
+
           eventLink: payload.eventLink,
           paymentLink: payload.paymentLink,
           createdBy: payload.createdBy,
@@ -72,17 +63,6 @@ export class EventService {
       });
 
       const eventId = event.identity;
-
-      /* ---------------------------------------------------
-       2. Update Org Social Links (UNCHANGED)
-    --------------------------------------------------- */
-      const orgSocialUpdate = buildOrgSocialUpdate(payload.socialLinks);
-      if (Object.keys(orgSocialUpdate).length) {
-        await tx.org.update({
-          where: { identity: payload.orgIdentity },
-          data: orgSocialUpdate,
-        });
-      }
 
       /* ---------------------------------------------------
        3. Collaborators (UPDATED BASED ON NEW TABLE DESIGN)
@@ -103,37 +83,25 @@ export class EventService {
            */
 
           // 3.1 Upsert CollaboratorMember
-          const member = await tx.collaboratorMember.upsert({
-            where: {
-              organizerNumber_hostIdentity: {
-                organizerNumber: c.organizerNumber,
-                hostIdentity: c.hostIdentity,
-              },
-            },
-            update: {
-              organizerName: c.organizerName,
-              organizationName: c.organizationName,
-              orgDept: c.orgDept ?? null,
-              location: c.location ?? null,
-            },
-            create: {
-              hostIdentity: c.hostIdentity,
-              organizerName: c.organizerName,
-              organizerNumber: c.organizerNumber,
-              organizationName: c.organizationName,
+          const member = await tx.collaboratorMember.create({
+            data: {
+              hostIdentity: c.hostIdentity ?? null,
+              organizerName: c.organizerName ?? null,
+              organizerNumber: c.organizerNumber ?? null,
+              organizationName: c.organizationName ?? null,
               orgDept: c.orgDept ?? null,
               location: c.location ?? null,
             },
           });
 
           // 3.2 Create Collaborator mapping (Event ↔ Member)
-          await tx.collaborator.create({
-            data: {
+          await tx.collaborator.createMany({
+            data: payload.collaborators.map(() => ({
               collaboratorMemberId: member.identity,
               eventIdentity: eventId,
               orgIdentity: payload.orgIdentity,
-              role: c.role ?? null,
-            },
+            })),
+            skipDuplicates: true,
           });
         }
       }
@@ -374,7 +342,7 @@ export class EventService {
   static async getAllEventsService() {
     const events = await prisma.event.findMany({
       where: {
-        status: "APPROVED", 
+        status: "APPROVED",
       },
       orderBy: {
         createdAt: "desc",
