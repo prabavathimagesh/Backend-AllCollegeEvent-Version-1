@@ -1,2 +1,7 @@
 [2026-01-05 13:01:29] [INFO] → Incoming → GET /api/v1/events
 [2026-01-05 13:01:55] [INFO] → Incoming → GET /api/v1/events
+[2026-01-05 15:19:36] [INFO] → Incoming → POST /api/v1/auth/signup
+[2026-01-05 15:19:58] [INFO] → Incoming → POST /api/v1/auth/signup
+[2026-01-05 15:20:59] [INFO] → Incoming → POST /api/v1/auth/login
+[2026-01-05 15:21:18] [INFO] → Incoming → POST /api/v1/auth/login
+[2026-01-05 15:21:32] [INFO] → Incoming → POST /api/v1/auth/login

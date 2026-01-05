@@ -68,9 +68,6 @@ model Org {
   state                String
   country              String
   profileImage         String?
-  whatsapp             String?
-  instagram            String?
-  linkedIn             String?
 
   eventCount Int     @default(0)
   isDeleted  Boolean @default(false)
@@ -93,7 +90,25 @@ model Org {
   events       Event[]
   Collaborator Collaborator[]
 
+  socialLinks  OrgSocialLink[]  
+
   @@map("ace_org")
+}
+
+model OrgSocialLink {
+  identity String @id @default(uuid())
+
+  orgIdentity String
+  platform    String   // facebook, instagram, youtube, x, telegram, whatsapp
+  url         String
+
+  org Org @relation(fields: [orgIdentity], references: [identity], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([orgIdentity, platform])
+  @@map("ace_org_social_link")
 }
 
 model OTP {

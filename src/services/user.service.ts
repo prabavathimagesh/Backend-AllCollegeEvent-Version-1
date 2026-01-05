@@ -11,6 +11,7 @@ class UserService {
     });
   }
 
+  
   static async getUserById(identity: string): Promise<UserType | null> {
     // fetching a single user by identity (unique id)
     return prisma.user.findUnique({
