@@ -15,6 +15,7 @@ import {
   isPublicEmail,
 } from "../utils/helperFunction";
 import { Platform } from "../types/type";
+import { Prisma } from "@prisma/client";
 
 /**
  * Send organization account verification email
@@ -80,10 +81,9 @@ const sendVerificationMail = async (
     to: recipient.email,
     subject: "Verify your account",
     html,
-    text: `Verify your account: ${verifyUrl}`
+    text: `Verify your account: ${verifyUrl}`,
   });
 };
-
 
 /**
  * Authentication service
@@ -143,7 +143,7 @@ export class AuthService {
           email,
           password: hashedPassword,
           roleId: role.id,
-          isActive: true
+          isActive: true,
         },
       });
       // console.log(user);
@@ -576,5 +576,62 @@ export class AuthService {
       user,
       token,
     };
+  }
+
+  // Profile Update
+  static async updateProfile(payload: any) {
+    const { type, identity } = payload;
+
+    return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      /* ================= USER PROFILE ================= */
+      if (type === "user") {
+        return tx.user.update({
+          where: { identity },
+          data: {
+            name: payload.name,
+            profileImage: payload.profileImage,
+          },
+        });
+      }
+
+      /* ================= ORG PROFILE ================= */
+      if (type === "org") {
+        const org = await tx.org.update({
+          where: { identity },
+          data: {
+            organizationName: payload.organizationName,
+            profileImage: payload.profileImage,
+          },
+        });
+
+        /* ---------- ORG SOCIAL LINKS ---------- */
+        if (payload.socialLinks && Object.keys(payload.socialLinks).length) {
+          for (const [platform, url] of Object.entries(payload.socialLinks)) {
+            if (!url) continue;
+
+            await tx.orgSocialLink.upsert({
+              where: {
+                orgIdentity_platform: {
+                  orgIdentity: identity,
+                  platform,
+                },
+              },
+              update: {
+                url: url as string,
+              },
+              create: {
+                orgIdentity: identity,
+                platform,
+                url: url as string,
+              },
+            });
+          }
+        }
+
+        return org;
+      }
+
+      throw new Error(AUTH_MESSAGES.INVALID_PROFILE_TYPE);
+    });
   }
 }

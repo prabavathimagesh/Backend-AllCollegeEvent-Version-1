@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const auth_service_1 = require("../services/auth.service");
 const auth_message_1 = require("../constants/auth.message");
+const s3Upload_1 = require("../utils/s3Upload");
 /**
  * Auth Controller
  * Handles authentication & authorization related APIs
@@ -32,7 +33,7 @@ class AuthController {
                 auth_message_1.AUTH_MESSAGES.INVALID_TYPE,
                 auth_message_1.AUTH_MESSAGES.EMAIL_ALREADY_USER,
                 auth_message_1.AUTH_MESSAGES.EMAIL_ALREADY_ORG,
-                auth_message_1.AUTH_MESSAGES.PUBLIC_EMAIL_MSG
+                auth_message_1.AUTH_MESSAGES.PUBLIC_EMAIL_MSG,
             ];
             if (safeErrors.includes(err.message)) {
                 return res.status(200).json({
@@ -120,7 +121,7 @@ class AuthController {
                 auth_message_1.AUTH_MESSAGES.ORG_NOT_FOUND_BY_TOKEN,
                 auth_message_1.AUTH_MESSAGES.ORG_ALREADY_VERIFIED,
                 auth_message_1.AUTH_MESSAGES.USER_ALREADY_VERIFIED,
-                auth_message_1.AUTH_MESSAGES.ACCOUNT_NOT_FOUND_BY_TOKEN
+                auth_message_1.AUTH_MESSAGES.ACCOUNT_NOT_FOUND_BY_TOKEN,
             ];
             // Business errors → 200
             if (safeErrors.includes(err.message)) {
@@ -164,7 +165,7 @@ class AuthController {
             // Known / business errors
             const safeErrors = [
                 auth_message_1.AUTH_MESSAGES.EMAIL_REQUIRED,
-                auth_message_1.AUTH_MESSAGES.EMAIL_NOT_FOUND
+                auth_message_1.AUTH_MESSAGES.EMAIL_NOT_FOUND,
             ];
             // Business errors → 200
             if (safeErrors.includes(err.message)) {
@@ -208,7 +209,7 @@ class AuthController {
             // Known / business errors
             const safeErrors = [
                 auth_message_1.AUTH_MESSAGES.EMAIL_REQUIRED,
-                auth_message_1.AUTH_MESSAGES.ACCOUNT_NOT_FOUND
+                auth_message_1.AUTH_MESSAGES.ACCOUNT_NOT_FOUND,
             ];
             // Business errors → 200
             if (safeErrors.includes(err.message)) {
@@ -294,7 +295,7 @@ class AuthController {
             const safeErrors = [
                 auth_message_1.AUTH_MESSAGES.EMAIL_REQUIRED,
                 auth_message_1.AUTH_MESSAGES.PASSWORD_REQUIRED,
-                auth_message_1.AUTH_MESSAGES.EMAIL_NOT_FOUND
+                auth_message_1.AUTH_MESSAGES.EMAIL_NOT_FOUND,
             ];
             // Business errors → 200
             if (safeErrors.includes(err.message)) {
@@ -361,6 +362,71 @@ class AuthController {
                 status: false,
                 message: auth_message_1.AUTH_MESSAGES.INTERNAL_SERVER_ERROR,
                 error: err.message,
+            });
+        }
+    }
+    /**
+     * Profile Update
+     */
+    static async updateProfile(req, res) {
+        try {
+            const { type, identity } = req.body;
+            if (!type || !identity) {
+                return res.status(200).json({
+                    success: false,
+                    message: auth_message_1.AUTH_MESSAGES.TYPE_AND_ID_REQUIRED,
+                });
+            }
+            /* ---------- S3 IMAGE UPLOAD ---------- */
+            let profileImage;
+            if (req.file) {
+                const uploaded = await (0, s3Upload_1.uploadToS3)(req.file, "profiles");
+                profileImage = uploaded.url;
+            }
+            /* ---------- PARSE SOCIAL LINKS ---------- */
+            let socialLinks;
+            if (req.body.socialLinks) {
+                try {
+                    socialLinks = JSON.parse(req.body.socialLinks);
+                }
+                catch {
+                    throw new Error(auth_message_1.AUTH_MESSAGES.IVALID_SOCIAL_LINK_FORMAT);
+                }
+            }
+            const payload = {
+                type,
+                identity,
+                name: req.body.name,
+                organizationName: req.body.organizationName,
+                profileImage,
+                socialLinks,
+            };
+            const data = await auth_service_1.AuthService.updateProfile(payload);
+            return res.status(200).json({
+                success: true,
+                data,
+            });
+        }
+        catch (err) {
+            const message = err.message || auth_message_1.AUTH_MESSAGES.SOMETHING_WENT_WRONG;
+            const safeErrors = [
+                // Controller-level
+                auth_message_1.AUTH_MESSAGES.TYPE_AND_ID_REQUIRED,
+                auth_message_1.AUTH_MESSAGES.IVALID_SOCIAL_LINK_FORMAT,
+                // Service-level
+                auth_message_1.AUTH_MESSAGES.INVALID_PROFILE_TYPE,
+            ];
+            /* ---------- SAFE ERRORS (EXPECTED) ---------- */
+            if (safeErrors.includes(message)) {
+                return res.status(200).json({
+                    success: false,
+                    message,
+                });
+            }
+            /* ---------- UNEXPECTED / SYSTEM ERRORS ---------- */
+            return res.status(500).json({
+                success: false,
+                message,
             });
         }
     }

@@ -55,6 +55,13 @@ export const AUTH_MESSAGES = {
 
   // General
   INTERNAL_SERVER_ERROR: "Internal server error",
+
+  // Update Profile
+  TYPE_AND_ID_REQUIRED: "type and identity are required",
+  IVALID_SOCIAL_LINK_FORMAT: "Invalid socialLinks format",
+  INVALID_PROFILE_TYPE: "Invalid profile type",
+
+  SOMETHING_WENT_WRONG: "Something went wrong",
 };
 
 export const PUBLIC_EMAIL_DOMAINS = [

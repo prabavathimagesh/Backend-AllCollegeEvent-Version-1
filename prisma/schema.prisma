@@ -65,7 +65,7 @@ model Org {
   organizationName     String
   organizationCategory String
   city                 String
-  state                String
+  state                 String
   country              String
   profileImage         String?
 

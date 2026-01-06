@@ -16,7 +16,7 @@ if (!SECRET) {
  * @returns signed JWT token
  */
 const generateToken = (payload) => {
-    return jwt.sign({ data: payload }, SECRET, { expiresIn: "1d" });
+    return jwt.sign({ data: payload }, SECRET, { expiresIn: "7d" });
 };
 exports.generateToken = generateToken;
 /**

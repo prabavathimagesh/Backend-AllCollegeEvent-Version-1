@@ -1,0 +1,21 @@
+[2026-01-06 09:58:08] [INFO] → Incoming → POST /api/v1/auth/update-profile
+[2026-01-06 10:11:02] [INFO] → Incoming → POST /api/v1/auth/update-profile
+[2026-01-06 10:11:02] [ERROR] → Error → POST /api/v1/auth/update-profile | Message: type and identity are required
+[2026-01-06 10:11:17] [INFO] → Incoming → POST /api/v1/auth/update-profile
+[2026-01-06 10:13:08] [INFO] → Incoming → GET /api/v1/users/76b9acce-04a3-49da-8136-e3a34dc0ca75
+[2026-01-06 10:13:08] [ERROR] → Error → GET /api/v1/users/76b9acce-04a3-49da-8136-e3a34dc0ca75 | Message: Invalid or expired token
+[2026-01-06 10:15:08] [INFO] → Incoming → POST /api/v1/auth/update-profile
+[2026-01-06 10:17:23] [INFO] → Incoming → POST /api/v1/auth/update-profile
+[2026-01-06 10:17:23] [ERROR] → Error → POST /api/v1/auth/update-profile | Message: 
+Invalid `tx.user.update()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\auth.service.js:486:32
+
+  483 return prisma.$transaction(async (tx) => {
+  484     /* ================= USER PROFILE ================= */
+  485     if (type === "user") {
+→ 486         return tx.user.update(
+An operation failed because it depends on one or more records that were required but not found. Record to update not found.
+[2026-01-06 10:18:13] [INFO] → Incoming → POST /api/v1/auth/update-profile
+[2026-01-06 10:18:36] [INFO] → Incoming → POST /api/v1/auth/update-profile
+[2026-01-06 10:19:23] [INFO] → Incoming → POST /api/v1/auth/update-profile
+[2026-01-06 10:20:15] [INFO] → Incoming → POST /api/v1/auth/update-profile

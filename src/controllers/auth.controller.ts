@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthService } from "../services/auth.service";
 import { AUTH_MESSAGES } from "../constants/auth.message";
+import { uploadToS3 } from "../utils/s3Upload";
 
 /**
  * Auth Controller
@@ -18,7 +19,7 @@ export class AuthController {
         email,
         password,
         type,
-        platform = "web", 
+        platform = "web",
         ...rest
       } = req.body;
 
@@ -47,7 +48,7 @@ export class AuthController {
         AUTH_MESSAGES.INVALID_TYPE,
         AUTH_MESSAGES.EMAIL_ALREADY_USER,
         AUTH_MESSAGES.EMAIL_ALREADY_ORG,
-        AUTH_MESSAGES.PUBLIC_EMAIL_MSG
+        AUTH_MESSAGES.PUBLIC_EMAIL_MSG,
       ];
 
       if (safeErrors.includes(err.message)) {
@@ -144,7 +145,7 @@ export class AuthController {
         AUTH_MESSAGES.ORG_NOT_FOUND_BY_TOKEN,
         AUTH_MESSAGES.ORG_ALREADY_VERIFIED,
         AUTH_MESSAGES.USER_ALREADY_VERIFIED,
-        AUTH_MESSAGES.ACCOUNT_NOT_FOUND_BY_TOKEN
+        AUTH_MESSAGES.ACCOUNT_NOT_FOUND_BY_TOKEN,
       ];
 
       // Business errors → 200
@@ -193,7 +194,7 @@ export class AuthController {
       // Known / business errors
       const safeErrors = [
         AUTH_MESSAGES.EMAIL_REQUIRED,
-        AUTH_MESSAGES.EMAIL_NOT_FOUND
+        AUTH_MESSAGES.EMAIL_NOT_FOUND,
       ];
 
       // Business errors → 200
@@ -242,7 +243,7 @@ export class AuthController {
       // Known / business errors
       const safeErrors = [
         AUTH_MESSAGES.EMAIL_REQUIRED,
-        AUTH_MESSAGES.ACCOUNT_NOT_FOUND
+        AUTH_MESSAGES.ACCOUNT_NOT_FOUND,
       ];
 
       // Business errors → 200
@@ -338,7 +339,7 @@ export class AuthController {
       const safeErrors = [
         AUTH_MESSAGES.EMAIL_REQUIRED,
         AUTH_MESSAGES.PASSWORD_REQUIRED,
-        AUTH_MESSAGES.EMAIL_NOT_FOUND
+        AUTH_MESSAGES.EMAIL_NOT_FOUND,
       ];
 
       // Business errors → 200
@@ -413,6 +414,81 @@ export class AuthController {
         status: false,
         message: AUTH_MESSAGES.INTERNAL_SERVER_ERROR,
         error: err.message,
+      });
+    }
+  }
+
+  /**
+   * Profile Update
+   */
+  static async updateProfile(req: Request, res: Response) {
+    try {
+      const { type, identity } = req.body;
+
+      if (!type || !identity) {
+        return res.status(200).json({
+          success: false,
+          message: AUTH_MESSAGES.TYPE_AND_ID_REQUIRED,
+        });
+      }
+
+      /* ---------- S3 IMAGE UPLOAD ---------- */
+      let profileImage: string | undefined;
+
+      if (req.file) {
+        const uploaded = await uploadToS3(req.file, "profiles");
+        profileImage = uploaded.url;
+      }
+
+      /* ---------- PARSE SOCIAL LINKS ---------- */
+      let socialLinks;
+      if (req.body.socialLinks) {
+        try {
+          socialLinks = JSON.parse(req.body.socialLinks);
+        } catch {
+          throw new Error(AUTH_MESSAGES.IVALID_SOCIAL_LINK_FORMAT);
+        }
+      }
+
+      const payload = {
+        type,
+        identity,
+        name: req.body.name,
+        organizationName: req.body.organizationName,
+        profileImage,
+        socialLinks,
+      };
+
+      const data = await AuthService.updateProfile(payload);
+
+      return res.status(200).json({
+        success: true,
+        data,
+      });
+    } catch (err: any) {
+      const message = err.message || AUTH_MESSAGES.SOMETHING_WENT_WRONG;
+
+      const safeErrors = [
+        // Controller-level
+        AUTH_MESSAGES.TYPE_AND_ID_REQUIRED,
+        AUTH_MESSAGES.IVALID_SOCIAL_LINK_FORMAT,
+
+        // Service-level
+        AUTH_MESSAGES.INVALID_PROFILE_TYPE,
+      ];
+
+      /* ---------- SAFE ERRORS (EXPECTED) ---------- */
+      if (safeErrors.includes(message)) {
+        return res.status(200).json({
+          success: false,
+          message,
+        });
+      }
+
+      /* ---------- UNEXPECTED / SYSTEM ERRORS ---------- */
+      return res.status(500).json({
+        success: false,
+        message,
       });
     }
   }

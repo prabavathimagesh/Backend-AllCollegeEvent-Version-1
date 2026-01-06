@@ -35,4 +35,6 @@ export const EVENT_MESSAGES = {
     "Both online and offline location details are required",
 
   ORG_AND_EVENT_ID_REQ: "Organization ID and Event ID are required",
+
+  ORGANIZER_NUMBER_REQUIRED:"organizerNumber is required for collaborator"
 };

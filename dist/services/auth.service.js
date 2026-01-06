@@ -61,7 +61,7 @@ const sendVerificationMail = async (recipient, platform = "web") => {
         to: recipient.email,
         subject: "Verify your account",
         html,
-        text: `Verify your account: ${verifyUrl}`
+        text: `Verify your account: ${verifyUrl}`,
     });
 };
 /**
@@ -107,7 +107,7 @@ class AuthService {
                     email,
                     password: hashedPassword,
                     roleId: role.id,
-                    isActive: true
+                    isActive: true,
                 },
             });
             // console.log(user);
@@ -476,6 +476,57 @@ class AuthService {
             user,
             token,
         };
+    }
+    // Profile Update
+    static async updateProfile(payload) {
+        const { type, identity } = payload;
+        return prisma.$transaction(async (tx) => {
+            /* ================= USER PROFILE ================= */
+            if (type === "user") {
+                return tx.user.update({
+                    where: { identity },
+                    data: {
+                        name: payload.name,
+                        profileImage: payload.profileImage,
+                    },
+                });
+            }
+            /* ================= ORG PROFILE ================= */
+            if (type === "org") {
+                const org = await tx.org.update({
+                    where: { identity },
+                    data: {
+                        organizationName: payload.organizationName,
+                        profileImage: payload.profileImage,
+                    },
+                });
+                /* ---------- ORG SOCIAL LINKS ---------- */
+                if (payload.socialLinks && Object.keys(payload.socialLinks).length) {
+                    for (const [platform, url] of Object.entries(payload.socialLinks)) {
+                        if (!url)
+                            continue;
+                        await tx.orgSocialLink.upsert({
+                            where: {
+                                orgIdentity_platform: {
+                                    orgIdentity: identity,
+                                    platform,
+                                },
+                            },
+                            update: {
+                                url: url,
+                            },
+                            create: {
+                                orgIdentity: identity,
+                                platform,
+                                url: url,
+                            },
+                        });
+                    }
+                }
+                return org;
+            }
+            throw new Error(auth_message_1.AUTH_MESSAGES.INVALID_PROFILE_TYPE);
+        });
     }
 }
 exports.AuthService = AuthService;

@@ -69,12 +69,12 @@ export class EventService {
     --------------------------------------------------- */
       if (payload.collaborators?.length) {
         for (const c of payload.collaborators) {
-          // 🔒 Guard (required field)
+          //  Guard (required field)
           if (!c.organizerNumber) {
-            throw new Error("organizerNumber is required for collaborator");
+            throw new Error(EVENT_MESSAGES.ORGANIZER_NUMBER_REQUIRED);
           }
 
-          // 1️⃣ Create a NEW collaborator member for EACH payload item
+          // Create a NEW collaborator member for EACH payload item
           const member = await tx.collaboratorMember.create({
             data: {
               organizerNumber: c.organizerNumber,
@@ -86,7 +86,7 @@ export class EventService {
             },
           });
 
-          // 2️⃣ Create mapping (ONE row per member)
+          // Create mapping (ONE row per member)
           await tx.collaborator.create({
             data: {
               collaboratorMemberId: member.identity,
@@ -362,7 +362,6 @@ export class EventService {
   }
 
   // Event & Draft Based Servcies
-
   static async createDraftEvent(userId: number, orgIdentity: string) {
     const existingDraft = await prisma.event.findFirst({
       where: {

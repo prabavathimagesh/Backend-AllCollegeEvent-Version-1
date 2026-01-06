@@ -21,7 +21,7 @@ export const generateToken = (payload: unknown): string => {
   return jwt.sign(
     { data: payload },
     SECRET,
-    { expiresIn: "1d" }
+    { expiresIn: "7d" }
   );
 };
 

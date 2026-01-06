@@ -133,7 +133,13 @@ class EventController {
             res.status(200).json({ success: true, data: event });
         }
         catch (err) {
-            console.error(err);
+            const safeErrors = [event_message_1.EVENT_MESSAGES.ORGANIZER_NUMBER_REQUIRED];
+            if (safeErrors.includes(err.message)) {
+                return res.status(200).json({
+                    status: false,
+                    message: err.message,
+                });
+            }
             res.status(400).json({
                 success: false,
                 message: err.message,
