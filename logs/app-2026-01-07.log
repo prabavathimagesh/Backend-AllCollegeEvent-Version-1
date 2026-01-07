@@ -63,3 +63,186 @@ Foreign key constraint violated: `ace_event_accommodation_accommodationIdentity_
 [2026-01-07 14:13:18] [INFO] → Incoming → PUT /api/v1/events/29ea3a67-275f-4965-ab4c-32054d0e5788
 [2026-01-07 14:13:46] [INFO] → Incoming → PUT /api/v1/events/29ea3a67-275f-4965-ab4c-32054d0e5788
 [2026-01-07 14:14:20] [INFO] → Incoming → PUT /api/v1/events/29ea3a67-275f-4965-ab4c-32054d0e5788
+[2026-01-07 14:59:23] [INFO] → Incoming → POST /api/v1/auth/signup
+[2026-01-07 15:04:07] [INFO] → Incoming → POST /api/v1/auth/signup
+[2026-01-07 15:05:12] [INFO] → Incoming → POST /api/v1/auth/login
+[2026-01-07 15:05:21] [INFO] → Incoming → POST /api/v1/auth/login
+[2026-01-07 15:06:31] [INFO] → Incoming → POST /api/v1/auth/signup
+[2026-01-07 15:07:00] [INFO] → Incoming → POST /api/v1/auth/login
+[2026-01-07 15:07:23] [INFO] → Incoming → GET /api/v1/organizations/
+[2026-01-07 15:07:29] [INFO] → Incoming → GET /api/v1/organizations
+[2026-01-07 15:08:21] [INFO] → Incoming → GET /api/v1/organizations
+[2026-01-07 15:10:57] [INFO] → Incoming → GET /api/v1/organizations
+[2026-01-07 15:13:59] [INFO] → Incoming → GET /api/v1/organizations
+[2026-01-07 15:15:32] [INFO] → Incoming → GET /api/v1/organizations
+[2026-01-07 15:18:38] [INFO] → Incoming → GET /api/v1/organizations
+[2026-01-07 15:21:25] [INFO] → Incoming → POST /api/v1/organizations/d625d009-ca06-4a18-af9d-8b383234ce68/events
+[2026-01-07 15:22:15] [INFO] → Incoming → GET /api/v1/organizations
+[2026-01-07 15:22:30] [INFO] → Incoming → GET /api/v1/organizations
+[2026-01-07 15:50:58] [INFO] → Incoming → PUT /api/v1/events/b251a352-fc66-4286-90c0-bb8fb5a12e75
+[2026-01-07 15:50:58] [ERROR] → Error → PUT /api/v1/events/b251a352-fc66-4286-90c0-bb8fb5a12e75 | Message: Expected double-quoted property name in JSON at position 407 (line 15 column 3)
+[2026-01-07 15:53:12] [INFO] → Incoming → PUT /api/v1/events/b251a352-fc66-4286-90c0-bb8fb5a12e75
+[2026-01-07 15:53:12] [ERROR] → Error → PUT /api/v1/events/b251a352-fc66-4286-90c0-bb8fb5a12e75 | Message: 
+Invalid `tx.collaborator.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:393:43
+
+  390         hostIdentity: collab.hostIdentity ?? null,
+  391     },
+  392 });
+→ 393 await tx.collaborator.create({
+        data: {
+          collaboratorMemberId: "ee266392-5b24-4f59-9ca4-d672acc1e2c4",
+          eventIdentity: "b251a352-fc66-4286-90c0-bb8fb5a12e75",
+          orgIdentity: undefined,
+          role: "primary_host",
+      +   member: {
+      +     create: CollaboratorMemberCreateWithoutCollaborationsInput | CollaboratorMemberUncheckedCreateWithoutCollaborationsInput,
+      +     connectOrCreate: CollaboratorMemberCreateOrConnectWithoutCollaborationsInput,
+      +     connect: CollaboratorMemberWhereUniqueInput
+      +   }
+        }
+      })
+
+Argument `member` is missing.
+[2026-01-07 15:59:43] [INFO] → Incoming → PUT /api/v1/events/b251a352-fc66-4286-90c0-bb8fb5a12e75
+[2026-01-07 16:00:56] [INFO] → Incoming → PUT /api/v1/events/b251a352-fc66-4286-90c0-bb8fb5a12e75
+[2026-01-07 16:27:24] [INFO] → Incoming → PUT /api/v1/events/b251a352-fc66-4286-90c0-bb8fb5a12e75
+[2026-01-07 16:28:24] [INFO] → Incoming → PUT /api/v1/events/b251a352-fc66-4286-90c0-bb8fb5a12e75
+[2026-01-07 16:28:32] [INFO] → Incoming → PUT /api/v1/events/b251a352-fc66-4286-90c0-bb8fb5a12e75
+[2026-01-07 16:41:56] [INFO] → Incoming → POST /api/v1/auth/signup
+[2026-01-07 16:42:20] [INFO] → Incoming → POST /api/v1/auth/signup
+[2026-01-07 16:43:10] [INFO] → Incoming → GET /api/v1/organizations
+[2026-01-07 16:45:04] [INFO] → Incoming → POST /api/v1/organizations/a8ddb630-be56-4ef5-881f-6788dba0e41b/events
+[2026-01-07 16:45:04] [ERROR] → Error → POST /api/v1/organizations/a8ddb630-be56-4ef5-881f-6788dba0e41b/events | Message: 
+Invalid `tx.event.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:31:42
+
+  28   /* ---------------------------------------------------
+  29    1. Create Event (UNCHANGED)
+  30 --------------------------------------------------- */
+→ 31   const event = await tx.event.create(
+An operation failed because it depends on one or more records that were required but not found. No 'AceCertification' record(s) (needed to inline the relation on 'Event' record(s)) was found for a nested connect on one-to-many relation 'AceCertificationToEvent'.
+[2026-01-07 16:47:33] [INFO] → Incoming → POST /api/v1/organizations/a8ddb630-be56-4ef5-881f-6788dba0e41b/events
+[2026-01-07 16:47:33] [ERROR] → Error → POST /api/v1/organizations/a8ddb630-be56-4ef5-881f-6788dba0e41b/events | Message: Missing required key 'Bucket' in params
+[2026-01-07 16:48:15] [INFO] → Incoming → POST /api/v1/organizations/a8ddb630-be56-4ef5-881f-6788dba0e41b/events
+[2026-01-07 16:48:16] [ERROR] → Error → POST /api/v1/organizations/a8ddb630-be56-4ef5-881f-6788dba0e41b/events | Message: 
+Invalid `tx.collaboratorMember.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:65:64
+
+  62     throw new Error(event_message_1.EVENT_MESSAGES.ORGANIZER_NUMBER_REQUIRED);
+  63 }
+  64 // Create a NEW collaborator member for EACH payload item
+→ 65 const member = await tx.collaboratorMember.create(
+Unique constraint failed on the fields: (`organizerNumber`)
+[2026-01-07 16:48:42] [INFO] → Incoming → POST /api/v1/organizations/a8ddb630-be56-4ef5-881f-6788dba0e41b/events
+[2026-01-07 16:51:23] [INFO] → Incoming → PUT /api/v1/events/2c43c645-74ca-4c83-a991-69b9d56aedb2
+[2026-01-07 16:51:23] [ERROR] → Error → PUT /api/v1/events/2c43c645-74ca-4c83-a991-69b9d56aedb2 | Message: 
+Invalid `tx.collaboratorMember.update()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:366:62
+
+  363 let member;
+  364 /* ===== EXISTING COLLABORATOR (ID PROVIDED) ===== */
+  365 if (collab.collaboratorMemberId) {
+→ 366     member = await tx.collaboratorMember.update(
+Unique constraint failed on the fields: (`organizerNumber`)
+[2026-01-07 16:53:16] [INFO] → Incoming → PUT /api/v1/events/2c43c645-74ca-4c83-a991-69b9d56aedb2
+[2026-01-07 16:53:16] [ERROR] → Error → PUT /api/v1/events/2c43c645-74ca-4c83-a991-69b9d56aedb2 | Message: 
+Invalid `tx.collaboratorMember.update()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:366:62
+
+  363 let member;
+  364 /* ===== EXISTING COLLABORATOR (ID PROVIDED) ===== */
+  365 if (collab.collaboratorMemberId) {
+→ 366     member = await tx.collaboratorMember.update(
+Unique constraint failed on the fields: (`organizerNumber`)
+[2026-01-07 16:54:45] [INFO] → Incoming → PUT /api/v1/events/2c43c645-74ca-4c83-a991-69b9d56aedb2
+[2026-01-07 16:56:22] [INFO] → Incoming → PUT /api/v1/events/2c43c645-74ca-4c83-a991-69b9d56aedb2
+[2026-01-07 16:57:54] [INFO] → Incoming → GET /api/v1/organizations/a8ddb630-be56-4ef5-881f-6788dba0e41b/events/2c43c645-74ca-4c83-a991-69b9d56aedb2
+[2026-01-07 16:58:50] [INFO] → Incoming → POST /api/v1/organizations/a8ddb630-be56-4ef5-881f-6788dba0e41b/events
+[2026-01-07 16:58:51] [ERROR] → Error → POST /api/v1/organizations/a8ddb630-be56-4ef5-881f-6788dba0e41b/events | Message: 
+Invalid `tx.collaboratorMember.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:65:64
+
+  62     throw new Error(event_message_1.EVENT_MESSAGES.ORGANIZER_NUMBER_REQUIRED);
+  63 }
+  64 // Create a NEW collaborator member for EACH payload item
+→ 65 const member = await tx.collaboratorMember.create(
+Unique constraint failed on the fields: (`organizerNumber`)
+[2026-01-07 16:59:22] [INFO] → Incoming → POST /api/v1/organizations/a8ddb630-be56-4ef5-881f-6788dba0e41b/events
+[2026-01-07 16:59:23] [ERROR] → Error → POST /api/v1/organizations/a8ddb630-be56-4ef5-881f-6788dba0e41b/events | Message: 
+Invalid `tx.collaboratorMember.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:65:64
+
+  62     throw new Error(event_message_1.EVENT_MESSAGES.ORGANIZER_NUMBER_REQUIRED);
+  63 }
+  64 // Create a NEW collaborator member for EACH payload item
+→ 65 const member = await tx.collaboratorMember.create(
+Unique constraint failed on the fields: (`organizerNumber`)
+[2026-01-07 17:03:53] [INFO] → Incoming → POST /api/v1/organizations/a8ddb630-be56-4ef5-881f-6788dba0e41b/events
+[2026-01-07 17:10:44] [INFO] → Incoming → POST /api/v1/auth/signup
+[2026-01-07 17:12:37] [INFO] → Incoming → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events
+[2026-01-07 17:16:04] [INFO] → Incoming → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events
+[2026-01-07 17:52:55] [INFO] → Incoming → GET /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events/38710414-8154-4a01-874c-eeaf8f9f3590
+[2026-01-07 17:54:20] [INFO] → Incoming → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events
+[2026-01-07 17:54:35] [INFO] → Incoming → GET /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events/365a0eea-e09a-4006-a1ec-3012e4aae2bc
+[2026-01-07 18:50:21] [INFO] → Incoming → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events
+[2026-01-07 18:56:59] [INFO] → Incoming → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events
+[2026-01-07 18:58:14] [INFO] → Incoming → GET /api/v1/organization/2687f503-b278-4a59-822f-4817d6ff8980/events
+[2026-01-07 19:03:07] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:04:50] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:04:50] [ERROR] → Error → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289 | Message: Unexpected token ']', ..."ost"
+  },
+]" is not valid JSON
+[2026-01-07 19:07:01] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:08:03] [INFO] → Incoming → GET /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:10:30] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:22:21] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:23:23] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:23:38] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:24:00] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:24:07] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:27:12] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:27:12] [ERROR] → Error → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289 | Message: 
+Invalid `tx.ticket.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:377:41
+
+  374 }
+  375 else {
+  376     /* ===== CREATE NEW TICKET ===== */
+→ 377     await tx.ticket.create({
+            data: {
+              eventIdentity: "72b27d4f-2e26-491d-939c-fb9cfcf0a289",
+              name: "New testing Pass",
+              sellingFrom: "2026-02-01T00:00:00.000Z",
+              sellingTo: "2026-03-05T23:59:59.000Z",
+              price: 499,
+          +   totalQuantity: Int
+            }
+          })
+
+Argument `totalQuantity` is missing.
+[2026-01-07 19:27:48] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:28:08] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:28:08] [ERROR] → Error → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289 | Message: 
+Invalid `tx.ticket.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:377:41
+
+  374 }
+  375 else {
+  376     /* ===== CREATE NEW TICKET ===== */
+→ 377     await tx.ticket.create({
+            data: {
+              eventIdentity: "72b27d4f-2e26-491d-939c-fb9cfcf0a289",
+              name: "New testing Pass",
+              sellingFrom: "2026-02-01T00:00:00.000Z",
+              sellingTo: "2026-03-05T23:59:59.000Z",
+              price: 499,
+          +   totalQuantity: Int
+            }
+          })
+
+Argument `totalQuantity` is missing.
+[2026-01-07 19:29:36] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:29:59] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:38:15] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-07 19:41:55] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289

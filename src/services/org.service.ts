@@ -6,9 +6,36 @@ import { enrichEvents } from "../services/event/event.enricher";
 
 export class OrgService {
   static async getAllOrgs() {
-    // fetching all organizations that are not deleted
     return prisma.org.findMany({
       orderBy: { createdAt: "desc" },
+      select: {
+        identity: true,
+        organizationName: true,
+        domainEmail: true, // FIXED
+        createdAt: true,
+        id: true,
+        organizationCategory: true,
+        city: true,
+        state: true,
+        country: true,
+        profileImage: true,
+        isVerified: true,
+        updatedAt: true,
+        isActive: true,
+        website: true,
+        isAdminCreated: true,
+        adminCreatedBy: true,
+        socialLinks: true,
+        _count: {
+          select: {
+            events: {
+              where: {
+                status: "APPROVED",
+              },
+            },
+          },
+        },
+      },
     });
   }
 

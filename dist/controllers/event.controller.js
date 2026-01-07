@@ -155,7 +155,7 @@ class EventController {
             if (!eventIdentity) {
                 return res.status(200).json({
                     success: false,
-                    message: "Event identity required",
+                    message: event_message_1.EVENT_MESSAGES.EVENT_ID_REQUIRED,
                 });
             }
             /* ---------- PARSE JSON FIELDS ---------- */
@@ -188,10 +188,10 @@ class EventController {
                 collaborators,
             };
             const data = await event_service_1.EventService.updateEvent(eventIdentity, payload);
-            return res.json({ success: true, data });
+            return res.status(200).json({ success: true, data });
         }
         catch (err) {
-            return res.status(400).json({
+            return res.status(500).json({
                 success: false,
                 message: err.message,
             });

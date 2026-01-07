@@ -67,16 +67,28 @@ export class EventService {
       /* ---------------------------------------------------
        3. Collaborators (UPDATED BASED ON NEW TABLE DESIGN)
     --------------------------------------------------- */
-      if (payload.collaborators?.length) {
+      if (
+        Array.isArray(payload.collaborators) &&
+        payload.collaborators.length > 0
+      ) {
         for (const c of payload.collaborators) {
-          //  Guard (required field)
+          /* ---------- GUARD ---------- */
           if (!c.organizerNumber) {
             throw new Error(EVENT_MESSAGES.ORGANIZER_NUMBER_REQUIRED);
           }
 
-          // Create a NEW collaborator member for EACH payload item
-          const member = await tx.collaboratorMember.create({
-            data: {
+          /* ---------- UPSERT COLLABORATOR MEMBER ---------- */
+          const member = await tx.collaboratorMember.upsert({
+            where: {
+              organizerNumber: c.organizerNumber, // @unique
+            },
+            update: {
+              organizerName: c.organizerName ?? null,
+              organizationName: c.organizationName ?? null,
+              orgDept: c.orgDept ?? null,
+              location: c.location ?? null,
+            },
+            create: {
               organizerNumber: c.organizerNumber,
               hostIdentity: c.hostIdentity ?? null,
               organizerName: c.organizerName ?? null,
@@ -86,12 +98,21 @@ export class EventService {
             },
           });
 
-          // Create mapping (ONE row per member)
-          await tx.collaborator.create({
-            data: {
+          /* ---------- CREATE EVENT COLLABORATOR (NO DUPLICATES) ---------- */
+          await tx.collaborator.upsert({
+            where: {
+              collaboratorMemberId_eventIdentity: {
+                collaboratorMemberId: member.identity,
+                eventIdentity: eventId,
+              },
+            },
+            update: {
+              role: c.role ?? null,
+            },
+            create: {
               collaboratorMemberId: member.identity,
               eventIdentity: eventId,
-              orgIdentity: payload.orgIdentity,
+              orgIdentity: payload.orgIdentity, // event creator org
               role: c.role ?? null,
             },
           });
@@ -356,46 +377,156 @@ export class EventService {
       }
 
       /* ================= TICKETS ================= */
-
       let tickets = payload.tickets;
 
+      /* ---------- NORMALIZE PAYLOAD ---------- */
       if (typeof tickets === "string") {
-        tickets = JSON.parse(tickets);
+        try {
+          tickets = JSON.parse(tickets);
+        } catch {
+          throw new Error("Invalid tickets payload");
+        }
       }
-      if (tickets?.length) {
+
+      if (Array.isArray(tickets)) {
+        /* ---------- COLLECT INCOMING TICKET IDENTITIES ---------- */
+        const incomingTicketIds = tickets
+          .filter((t: any) => typeof t.identity === "string")
+          .map((t: any) => t.identity);
+
+        /* ---------- DELETE REMOVED TICKETS ---------- */
+        await tx.ticket.deleteMany({
+          where: {
+            eventIdentity,
+            ...(incomingTicketIds.length > 0
+              ? { identity: { notIn: incomingTicketIds } }
+              : {}), // if empty → delete all tickets for event
+          },
+        });
+
+        /* ---------- UPSERT / UPDATE / CREATE ---------- */
         for (const ticket of tickets) {
-          if (!ticket.identity) {
-            continue; // skip invalid ticket update
+          /* ---------- BASIC GUARDS ---------- */
+          if (!ticket.name || !ticket.sellingTo) continue;
+
+          /* ===== UPDATE EXISTING TICKET ===== */
+          if (ticket.identity) {
+            const existing = await tx.ticket.findUnique({
+              where: { identity: ticket.identity },
+            });
+
+            if (!existing) continue;
+
+            const sellingStarted = new Date() >= existing.sellingFrom;
+
+            await tx.ticket.update({
+              where: { identity: ticket.identity },
+              data: {
+                name: ticket.name,
+                sellingFrom: sellingStarted ? undefined : ticket.sellingFrom,
+                sellingTo: ticket.sellingTo
+              },
+            });
+          } else {
+          /* ===== CREATE NEW TICKET ===== */
+            await tx.ticket.create({
+              data: {
+                eventIdentity,
+                name: ticket.name,
+                sellingFrom: ticket.sellingFrom,
+                sellingTo: ticket.sellingTo,
+                price: ticket.price,
+                totalQuantity: ticket.totalQuantity
+              },
+            });
           }
-
-          const existing = await tx.ticket.findUnique({
-            where: { identity: ticket.identity },
-          });
-
-          if (!existing) continue;
-
-          const sellingStarted = new Date() >= existing.sellingFrom;
-
-          await tx.ticket.update({
-            where: { identity: ticket.identity },
-            data: {
-              name: ticket.name,
-              sellingFrom: sellingStarted ? undefined : ticket.sellingFrom,
-              sellingTo: ticket.sellingTo,
-            },
-          });
         }
       }
 
       /* ================= COLLABORATORS ================= */
-      for (const collab of payload.collaborators) {
-        await tx.collaboratorMember.update({
-          where: { identity: collab.collaboratorMemberId },
-          data: {
-            organizationName: collab.organizationName,
-            organizerNumber: collab.organizerNumber,
+      if (Array.isArray(payload.collaborators)) {
+        /* ---------- GET EVENT OWNER ORG ---------- */
+        const event = await tx.event.findUnique({
+          where: { identity: eventIdentity },
+          select: { orgIdentity: true },
+        });
+
+        if (!event) {
+          throw new Error("Event not found");
+        }
+
+        const orgIdentity = event.orgIdentity;
+
+        /* ---------- COLLECT EXISTING MEMBER IDS ---------- */
+        const incomingMemberIds = payload.collaborators
+          .filter((c: any) => typeof c.collaboratorMemberId === "string")
+          .map((c: any) => c.collaboratorMemberId);
+
+        /* ---------- DELETE REMOVED COLLABORATORS ---------- */
+        await tx.collaborator.deleteMany({
+          where: {
+            eventIdentity,
+            ...(incomingMemberIds.length > 0
+              ? { collaboratorMemberId: { notIn: incomingMemberIds } }
+              : {}), // if empty array → delete all
           },
         });
+
+        /* ---------- UPSERT / CREATE ---------- */
+        for (const collab of payload.collaborators) {
+          if (!collab.organizerNumber) continue;
+
+          let member;
+
+          /* ===== EXISTING COLLABORATOR (ID PROVIDED) ===== */
+          if (collab.collaboratorMemberId) {
+            member = await tx.collaboratorMember.update({
+              where: { identity: collab.collaboratorMemberId },
+              data: {
+                organizerName: collab.organizerName,
+                organizerNumber: collab.organizerNumber,
+              },
+            });
+          } else {
+            /* ===== NEW / REUSED COLLABORATOR (NO ID) ===== */
+            // IMPORTANT FIX: find-or-create using organizerNumber
+            member = await tx.collaboratorMember.upsert({
+              where: {
+                organizerNumber: collab.organizerNumber, // must be UNIQUE
+              },
+              update: {
+                organizerName: collab.organizerName,
+              },
+              create: {
+                organizerName: collab.organizerName,
+                organizerNumber: collab.organizerNumber,
+                organizationName: collab.organizationName,
+                orgDept: collab.orgDept,
+                location: collab.location,
+                hostIdentity: collab.hostIdentity ?? null,
+              },
+            });
+          }
+
+          /* ---------- ENSURE EVENT LINK ---------- */
+          await tx.collaborator.upsert({
+            where: {
+              collaboratorMemberId_eventIdentity: {
+                collaboratorMemberId: member.identity,
+                eventIdentity,
+              },
+            },
+            update: {
+              role: collab.role,
+            },
+            create: {
+              collaboratorMemberId: member.identity,
+              eventIdentity,
+              orgIdentity,
+              role: collab.role,
+            },
+          });
+        }
       }
 
       return { eventIdentity };
