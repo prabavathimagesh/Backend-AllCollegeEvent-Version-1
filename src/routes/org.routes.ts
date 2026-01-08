@@ -24,7 +24,7 @@ router.get(
   validate(orgValidation.getSingle),
   OrgController.getOrgById
 );
-
+  
 /**
  * @route PUT /api/v1/organizations/:orgId
  * @desc  Update organization details

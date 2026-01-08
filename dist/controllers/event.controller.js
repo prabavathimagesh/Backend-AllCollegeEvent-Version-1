@@ -153,42 +153,44 @@ class EventController {
         try {
             const { eventIdentity } = req.params;
             if (!eventIdentity) {
-                return res.status(200).json({
+                return res.status(400).json({
                     success: false,
                     message: event_message_1.EVENT_MESSAGES.EVENT_ID_REQUIRED,
                 });
             }
-            /* ---------- PARSE JSON FIELDS ---------- */
-            const existingBannerImages = req.body.existingBannerImages
-                ? JSON.parse(req.body.existingBannerImages)
-                : [];
-            const perkIdentities = req.body.perkIdentities
-                ? JSON.parse(req.body.perkIdentities)
-                : [];
-            const accommodationIdentities = req.body.accommodationIdentities
-                ? JSON.parse(req.body.accommodationIdentities)
-                : [];
-            const collaborators = req.body.collaborators
-                ? JSON.parse(req.body.collaborators)
-                : [];
-            /* ---------- UPLOAD NEW IMAGES ---------- */
-            const newBannerUrls = [];
-            if (req.files && Array.isArray(req.files)) {
+            /* ---------- PARSE JSON FIELDS (ONLY IF PRESENT) ---------- */
+            const payload = { ...req.body };
+            if (req.body.existingBannerImages !== undefined) {
+                payload.existingBannerImages = JSON.parse(req.body.existingBannerImages);
+            }
+            if (req.body.perkIdentities !== undefined) {
+                payload.perkIdentities = JSON.parse(req.body.perkIdentities);
+            }
+            if (req.body.accommodationIdentities !== undefined) {
+                payload.accommodationIdentities = JSON.parse(req.body.accommodationIdentities);
+            }
+            if (req.body.collaborators !== undefined) {
+                payload.collaborators = JSON.parse(req.body.collaborators);
+            }
+            if (req.body.tickets !== undefined) {
+                payload.tickets = JSON.parse(req.body.tickets);
+            }
+            /* ---------- UPLOAD NEW IMAGES (ONLY IF FILES SENT) ---------- */
+            if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+                const newBannerUrls = [];
                 for (const file of req.files) {
                     const uploaded = await (0, s3Upload_1.uploadToS3)(file, "events");
                     newBannerUrls.push(uploaded.url);
                 }
+                payload.newBannerUrls = newBannerUrls;
             }
-            const payload = {
-                ...req.body,
-                existingBannerImages,
-                newBannerUrls,
-                perkIdentities,
-                accommodationIdentities,
-                collaborators,
-            };
+            /* ---------- CALL SERVICE ---------- */
             const data = await event_service_1.EventService.updateEvent(eventIdentity, payload);
-            return res.status(200).json({ success: true, data });
+            return res.status(200).json({
+                success: true,
+                data,
+                message: event_message_1.EVENT_MESSAGES.EVENT_UPDATED,
+            });
         }
         catch (err) {
             return res.status(500).json({

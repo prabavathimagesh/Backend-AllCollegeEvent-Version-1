@@ -327,30 +327,60 @@ export class EventService {
 
   static async updateEvent(eventIdentity: string, payload: any) {
     return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      /* ================= EVENT CORE ================= */
-      const finalBannerImages = [
-        ...payload.existingBannerImages,
-        ...payload.newBannerUrls,
-      ];
-
-      await tx.event.update({
+      /* =====================================================
+       1️⃣ ENSURE EVENT EXISTS (ONCE)
+    ===================================================== */
+      console.log(eventIdentity);
+      const event = await tx.event.findUnique({
         where: { identity: eventIdentity },
-        data: {
-          description: payload.description,
-          offers: payload.offers,
-          certIdentity: payload.certIdentity,
-          socialLinks: payload.socialLinks
-            ? JSON.parse(payload.socialLinks)
-            : undefined,
-          bannerImages: finalBannerImages,
-        },
+        select: { identity: true, orgIdentity: true },
       });
+      console.log(event);
 
-      /* ================= PERKS ================= */
-      if (payload.perkIdentities) {
+      if (!event) {
+        throw new Error("Event not found or access denied");
+      }
+
+      console.log(payload)
+
+      /* =====================================================
+       2️⃣ EVENT CORE (PATCH STYLE)
+    ===================================================== */
+      const eventUpdateData: any = {};
+
+      if (payload.description !== undefined) {
+        eventUpdateData.description = payload.description;
+      }
+
+      if (payload.offers !== undefined) {
+        eventUpdateData.offers = payload.offers;
+      }
+
+      if (payload.certIdentity !== undefined) {
+        eventUpdateData.certIdentity = payload.certIdentity;
+      }
+
+      if (payload.socialLinks !== undefined) {
+        eventUpdateData.socialLinks = payload.socialLinks
+          ? JSON.parse(payload.socialLinks)
+          : null;
+      }
+
+      // ✅ Update event ONLY if needed
+      if (Object.keys(eventUpdateData).length > 0) {
+        await tx.event.update({
+          where: { identity: eventIdentity },
+          data: eventUpdateData,
+        });
+      }
+
+      /* =====================================================
+       3️⃣ PERKS
+    ===================================================== */
+      if (payload.perkIdentities !== undefined) {
         await tx.eventPerk.deleteMany({ where: { eventIdentity } });
 
-        if (payload.perkIdentities.length) {
+        if (payload.perkIdentities.length > 0) {
           await tx.eventPerk.createMany({
             data: payload.perkIdentities.map((perkId: string) => ({
               eventIdentity,
@@ -360,13 +390,15 @@ export class EventService {
         }
       }
 
-      /* ================= ACCOMMODATIONS ================= */
-      if (payload.accommodationIdentities) {
+      /* =====================================================
+       4️⃣ ACCOMMODATIONS
+    ===================================================== */
+      if (payload.accommodationIdentities !== undefined) {
         await tx.eventAccommodation.deleteMany({
           where: { eventIdentity },
         });
 
-        if (payload.accommodationIdentities.length) {
+        if (payload.accommodationIdentities.length > 0) {
           await tx.eventAccommodation.createMany({
             data: payload.accommodationIdentities.map((accId: string) => ({
               eventIdentity,
@@ -376,10 +408,11 @@ export class EventService {
         }
       }
 
-      /* ================= TICKETS ================= */
+      /* =====================================================
+       5️⃣ TICKETS (SYNC LOGIC)
+    ===================================================== */
       let tickets = payload.tickets;
 
-      /* ---------- NORMALIZE PAYLOAD ---------- */
       if (typeof tickets === "string") {
         try {
           tickets = JSON.parse(tickets);
@@ -388,28 +421,23 @@ export class EventService {
         }
       }
 
-      if (Array.isArray(tickets)) {
-        /* ---------- COLLECT INCOMING TICKET IDENTITIES ---------- */
+      if (payload.tickets !== undefined && Array.isArray(tickets)) {
         const incomingTicketIds = tickets
           .filter((t: any) => typeof t.identity === "string")
           .map((t: any) => t.identity);
 
-        /* ---------- DELETE REMOVED TICKETS ---------- */
         await tx.ticket.deleteMany({
           where: {
             eventIdentity,
             ...(incomingTicketIds.length > 0
               ? { identity: { notIn: incomingTicketIds } }
-              : {}), // if empty → delete all tickets for event
+              : {}),
           },
         });
 
-        /* ---------- UPSERT / UPDATE / CREATE ---------- */
         for (const ticket of tickets) {
-          /* ---------- BASIC GUARDS ---------- */
           if (!ticket.name || !ticket.sellingTo) continue;
 
-          /* ===== UPDATE EXISTING TICKET ===== */
           if (ticket.identity) {
             const existing = await tx.ticket.findUnique({
               where: { identity: ticket.identity },
@@ -424,11 +452,12 @@ export class EventService {
               data: {
                 name: ticket.name,
                 sellingFrom: sellingStarted ? undefined : ticket.sellingFrom,
-                sellingTo: ticket.sellingTo
+                sellingTo: ticket.sellingTo,
+                price: ticket.price,
+                totalQuantity: ticket.totalQuantity,
               },
             });
           } else {
-          /* ===== CREATE NEW TICKET ===== */
             await tx.ticket.create({
               data: {
                 eventIdentity,
@@ -436,49 +465,38 @@ export class EventService {
                 sellingFrom: ticket.sellingFrom,
                 sellingTo: ticket.sellingTo,
                 price: ticket.price,
-                totalQuantity: ticket.totalQuantity
+                totalQuantity: ticket.totalQuantity,
               },
             });
           }
         }
       }
 
-      /* ================= COLLABORATORS ================= */
-      if (Array.isArray(payload.collaborators)) {
-        /* ---------- GET EVENT OWNER ORG ---------- */
-        const event = await tx.event.findUnique({
-          where: { identity: eventIdentity },
-          select: { orgIdentity: true },
-        });
-
-        if (!event) {
-          throw new Error("Event not found");
-        }
-
-        const orgIdentity = event.orgIdentity;
-
-        /* ---------- COLLECT EXISTING MEMBER IDS ---------- */
+      /* =====================================================
+       6️⃣ COLLABORATORS (PRODUCTION SAFE)
+    ===================================================== */
+      if (
+        payload.collaborators !== undefined &&
+        Array.isArray(payload.collaborators)
+      ) {
         const incomingMemberIds = payload.collaborators
           .filter((c: any) => typeof c.collaboratorMemberId === "string")
           .map((c: any) => c.collaboratorMemberId);
 
-        /* ---------- DELETE REMOVED COLLABORATORS ---------- */
         await tx.collaborator.deleteMany({
           where: {
             eventIdentity,
             ...(incomingMemberIds.length > 0
               ? { collaboratorMemberId: { notIn: incomingMemberIds } }
-              : {}), // if empty array → delete all
+              : {}),
           },
         });
 
-        /* ---------- UPSERT / CREATE ---------- */
         for (const collab of payload.collaborators) {
           if (!collab.organizerNumber) continue;
 
           let member;
 
-          /* ===== EXISTING COLLABORATOR (ID PROVIDED) ===== */
           if (collab.collaboratorMemberId) {
             member = await tx.collaboratorMember.update({
               where: { identity: collab.collaboratorMemberId },
@@ -488,27 +506,36 @@ export class EventService {
               },
             });
           } else {
-            /* ===== NEW / REUSED COLLABORATOR (NO ID) ===== */
-            // IMPORTANT FIX: find-or-create using organizerNumber
-            member = await tx.collaboratorMember.upsert({
-              where: {
-                organizerNumber: collab.organizerNumber, // must be UNIQUE
-              },
-              update: {
-                organizerName: collab.organizerName,
-              },
-              create: {
-                organizerName: collab.organizerName,
-                organizerNumber: collab.organizerNumber,
-                organizationName: collab.organizationName,
-                orgDept: collab.orgDept,
-                location: collab.location,
-                hostIdentity: collab.hostIdentity ?? null,
-              },
+            const existingMember = await tx.collaboratorMember.findFirst({
+              where: { organizerNumber: collab.organizerNumber },
+              orderBy: { createdAt: "asc" },
             });
+
+            if (existingMember) {
+              member = await tx.collaboratorMember.update({
+                where: { identity: existingMember.identity },
+                data: {
+                  organizerName: collab.organizerName,
+                  organizationName: collab.organizationName,
+                  orgDept: collab.orgDept,
+                  location: collab.location,
+                  hostIdentity: collab.hostIdentity ?? null,
+                },
+              });
+            } else {
+              member = await tx.collaboratorMember.create({
+                data: {
+                  organizerName: collab.organizerName,
+                  organizerNumber: collab.organizerNumber,
+                  organizationName: collab.organizationName,
+                  orgDept: collab.orgDept,
+                  location: collab.location,
+                  hostIdentity: collab.hostIdentity ?? null,
+                },
+              });
+            }
           }
 
-          /* ---------- ENSURE EVENT LINK ---------- */
           await tx.collaborator.upsert({
             where: {
               collaboratorMemberId_eventIdentity: {
@@ -516,13 +543,11 @@ export class EventService {
                 eventIdentity,
               },
             },
-            update: {
-              role: collab.role,
-            },
+            update: { role: collab.role },
             create: {
               collaboratorMemberId: member.identity,
               eventIdentity,
-              orgIdentity,
+              orgIdentity: event.orgIdentity,
               role: collab.role,
             },
           });

@@ -177,51 +177,59 @@ export class EventController {
       const { eventIdentity } = req.params;
 
       if (!eventIdentity) {
-        return res.status(200).json({
+        return res.status(400).json({
           success: false,
           message: EVENT_MESSAGES.EVENT_ID_REQUIRED,
         });
       }
 
-      /* ---------- PARSE JSON FIELDS ---------- */
-      const existingBannerImages = req.body.existingBannerImages
-        ? JSON.parse(req.body.existingBannerImages)
-        : [];
+      /* ---------- PARSE JSON FIELDS (ONLY IF PRESENT) ---------- */
+      const payload: any = { ...req.body };
 
-      const perkIdentities = req.body.perkIdentities
-        ? JSON.parse(req.body.perkIdentities)
-        : [];
+      if (req.body.existingBannerImages !== undefined) {
+        payload.existingBannerImages = JSON.parse(
+          req.body.existingBannerImages
+        );
+      }
 
-      const accommodationIdentities = req.body.accommodationIdentities
-        ? JSON.parse(req.body.accommodationIdentities)
-        : [];
+      if (req.body.perkIdentities !== undefined) {
+        payload.perkIdentities = JSON.parse(req.body.perkIdentities);
+      }
 
-      const collaborators = req.body.collaborators
-        ? JSON.parse(req.body.collaborators)
-        : [];
+      if (req.body.accommodationIdentities !== undefined) {
+        payload.accommodationIdentities = JSON.parse(
+          req.body.accommodationIdentities
+        );
+      }
 
-      /* ---------- UPLOAD NEW IMAGES ---------- */
-      const newBannerUrls: string[] = [];
+      if (req.body.collaborators !== undefined) {
+        payload.collaborators = JSON.parse(req.body.collaborators);
+      }
 
-      if (req.files && Array.isArray(req.files)) {
+      if (req.body.tickets !== undefined) {
+        payload.tickets = JSON.parse(req.body.tickets);
+      }
+
+      /* ---------- UPLOAD NEW IMAGES (ONLY IF FILES SENT) ---------- */
+      if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+        const newBannerUrls: string[] = [];
+
         for (const file of req.files) {
           const uploaded = await uploadToS3(file, "events");
           newBannerUrls.push(uploaded.url);
         }
+
+        payload.newBannerUrls = newBannerUrls;
       }
 
-      const payload = {
-        ...req.body,
-        existingBannerImages,
-        newBannerUrls,
-        perkIdentities,
-        accommodationIdentities,
-        collaborators,
-      };
-
+      /* ---------- CALL SERVICE ---------- */
       const data = await EventService.updateEvent(eventIdentity, payload);
 
-      return res.status(200).json({ success: true, data });
+      return res.status(200).json({
+        status: true,
+        data,
+        message: EVENT_MESSAGES.EVENT_UPDATED,
+      });
     } catch (err: any) {
       return res.status(500).json({
         success: false,

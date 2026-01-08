@@ -1,0 +1,153 @@
+[2026-01-08 13:13:10] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-08 13:13:11] [ERROR] → Error → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289 | Message: 
+Invalid `tx.event.update()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:294:28
+
+  291         ...(payload.newBannerUrls ?? []),
+  292     ];
+  293 }
+→ 294 await tx.event.update(
+An operation failed because it depends on one or more records that were required but not found. Record to update not found.
+[2026-01-08 13:13:57] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-08 13:13:57] [ERROR] → Error → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289 | Message: 
+Invalid `tx.event.update()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:294:28
+
+  291         ...(payload.newBannerUrls ?? []),
+  292     ];
+  293 }
+→ 294 await tx.event.update(
+An operation failed because it depends on one or more records that were required but not found. Record to update not found.
+[2026-01-08 13:20:47] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-08 13:20:48] [ERROR] → Error → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289 | Message: 
+Invalid `tx.event.update()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:313:28
+
+  310     ];
+  311     eventUpdateData.bannerImages = bannerImagesUpdate;
+  312 }
+→ 313 await tx.event.update(
+An operation failed because it depends on one or more records that were required but not found. Record to update not found.
+[2026-01-08 13:23:00] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-08 13:23:01] [ERROR] → Error → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289 | Message: Event not found or access denied
+[2026-01-08 13:23:42] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-08 13:23:42] [ERROR] → Error → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289 | Message: Event not found or access denied
+[2026-01-08 13:26:39] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-08 13:26:39] [ERROR] → Error → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289 | Message: Event not found or access denied
+[2026-01-08 14:25:18] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-08 14:25:19] [ERROR] → Error → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289 | Message: Event not found or access denied
+[2026-01-08 14:27:09] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-08 14:27:09] [ERROR] → Error → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289 | Message: Event not found or access denied
+[2026-01-08 14:27:51] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-08 14:27:52] [ERROR] → Error → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289 | Message: Event not found or access denied
+[2026-01-08 14:28:34] [INFO] → Incoming → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289
+[2026-01-08 14:28:35] [ERROR] → Error → PUT /api/v1/events/72b27d4f-2e26-491d-939c-fb9cfcf0a289 | Message: Event not found or access denied
+[2026-01-08 14:43:53] [INFO] → Incoming → POST //api/v1/events/2687f503-b278-4a59-822f-4817d6ff8980
+[2026-01-08 14:44:00] [INFO] → Incoming → POST /api/v1/events/2687f503-b278-4a59-822f-4817d6ff8980
+[2026-01-08 14:44:11] [INFO] → Incoming → POST /api/v1/events/2687f503-b278-4a59-822f-4817d6ff8980
+[2026-01-08 14:44:48] [INFO] → Incoming → GET /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events
+[2026-01-08 14:44:59] [INFO] → Incoming → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events
+[2026-01-08 14:44:59] [ERROR] → Error → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events | Message: 
+Invalid `tx.event.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:31:42
+
+  28   /* ---------------------------------------------------
+  29    1. Create Event (UNCHANGED)
+  30 --------------------------------------------------- */
+→ 31   const event = await tx.event.create(
+An operation failed because it depends on one or more records that were required but not found. No 'AceCertification' record(s) (needed to inline the relation on 'Event' record(s)) was found for a nested connect on one-to-many relation 'AceCertificationToEvent'.
+[2026-01-08 14:45:25] [INFO] → Incoming → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events
+[2026-01-08 14:45:25] [ERROR] → Error → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events | Message: 
+Invalid `tx.event.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:31:42
+
+  28   /* ---------------------------------------------------
+  29    1. Create Event (UNCHANGED)
+  30 --------------------------------------------------- */
+→ 31   const event = await tx.event.create(
+An operation failed because it depends on one or more records that were required but not found. No 'AceCertification' record(s) (needed to inline the relation on 'Event' record(s)) was found for a nested connect on one-to-many relation 'AceCertificationToEvent'.
+[2026-01-08 14:46:37] [INFO] → Incoming → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events
+[2026-01-08 14:46:37] [ERROR] → Error → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events | Message: 
+Invalid `tx.event.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:31:42
+
+  28   /* ---------------------------------------------------
+  29    1. Create Event (UNCHANGED)
+  30 --------------------------------------------------- */
+→ 31   const event = await tx.event.create(
+An operation failed because it depends on one or more records that were required but not found. No 'AceCertification' record(s) (needed to inline the relation on 'Event' record(s)) was found for a nested connect on one-to-many relation 'AceCertificationToEvent'.
+[2026-01-08 14:53:59] [INFO] → Incoming → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events
+[2026-01-08 14:54:00] [ERROR] → Error → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events | Message: 
+Invalid `tx.event.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:31:42
+
+  28   /* ---------------------------------------------------
+  29    1. Create Event (UNCHANGED)
+  30 --------------------------------------------------- */
+→ 31   const event = await tx.event.create(
+An operation failed because it depends on one or more records that were required but not found. No 'AceCertification' record(s) (needed to inline the relation on 'Event' record(s)) was found for a nested connect on one-to-many relation 'AceCertificationToEvent'.
+[2026-01-08 14:56:25] [INFO] → Incoming → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events
+[2026-01-08 14:56:26] [ERROR] → Error → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events | Message: 
+Invalid `tx.event.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:42:42
+
+  39     }
+  40     // else: ignore silently (old behavior)
+  41 }
+→ 42 const event = await tx.event.create(
+An operation failed because it depends on one or more records that were required but not found. No 'Org' record(s) (needed to inline the relation on 'Event' record(s)) was found for a nested connect on one-to-many relation 'EventToOrg'.
+[2026-01-08 14:57:44] [INFO] → Incoming → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events
+[2026-01-08 14:57:44] [ERROR] → Error → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events | Message: 
+Invalid `tx.event.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:42:42
+
+  39     }
+  40     // else: ignore silently (old behavior)
+  41 }
+→ 42 const event = await tx.event.create(
+An operation failed because it depends on one or more records that were required but not found. No 'Org' record(s) (needed to inline the relation on 'Event' record(s)) was found for a nested connect on one-to-many relation 'EventToOrg'.
+[2026-01-08 15:05:12] [INFO] → Incoming → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events
+[2026-01-08 15:05:12] [ERROR] → Error → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events | Message: 
+Invalid `tx.event.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:42:42
+
+  39     }
+  40     // else: ignore silently (old behavior)
+  41 }
+→ 42 const event = await tx.event.create(
+An operation failed because it depends on one or more records that were required but not found. No 'Org' record(s) (needed to inline the relation on 'Event' record(s)) was found for a nested connect on one-to-many relation 'EventToOrg'.
+[2026-01-08 15:05:44] [INFO] → Incoming → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events
+[2026-01-08 15:05:44] [ERROR] → Error → POST /api/v1/organizations/2687f503-b278-4a59-822f-4817d6ff8980/events | Message: 
+Invalid `tx.event.create()` invocation in
+D:\Siva\Backend-AllCollegeEvent-Version-1\dist\services\event\event.service.js:42:42
+
+  39     }
+  40     // else: ignore silently (old behavior)
+  41 }
+→ 42 const event = await tx.event.create(
+An operation failed because it depends on one or more records that were required but not found. No 'Org' record(s) (needed to inline the relation on 'Event' record(s)) was found for a nested connect on one-to-many relation 'EventToOrg'.
+[2026-01-08 15:07:25] [INFO] → Incoming → GET /api/v1/events
+[2026-01-08 15:07:26] [INFO] → Incoming → GET /favicon.ico
+[2026-01-08 15:07:49] [INFO] → Incoming → GET /api/v1/events
+[2026-01-08 15:14:12] [INFO] → Incoming → POST /api/v1/auth/signup
+[2026-01-08 15:16:29] [INFO] → Incoming → POST /api/v1/organizations/e8795939-10e8-440b-95dc-11d54c648c4a/events
+[2026-01-08 15:21:24] [INFO] → Incoming → PUT /api/v1/events/9cd21a50-bd5f-442d-a8bd-b69453687376
+[2026-01-08 15:21:24] [ERROR] → Error → PUT /api/v1/events/9cd21a50-bd5f-442d-a8bd-b69453687376 | Message: Missing required key 'Bucket' in params
+[2026-01-08 15:23:01] [INFO] → Incoming → PUT /api/v1/events/9cd21a50-bd5f-442d-a8bd-b69453687376
+[2026-01-08 15:23:41] [INFO] → Incoming → PUT /api/v1/events/9cd21a50-bd5f-442d-a8bd-b69453687376
+[2026-01-08 15:24:09] [INFO] → Incoming → PUT /api/v1/events/9cd21a50-bd5f-442d-a8bd-b69453687376
+[2026-01-08 15:27:30] [INFO] → Incoming → PUT /api/v1/events/9cd21a50-bd5f-442d-a8bd-b69453687376
+[2026-01-08 15:28:44] [INFO] → Incoming → PUT /api/v1/events/9cd21a50-bd5f-442d-a8bd-b69453687376
+[2026-01-08 15:30:33] [INFO] → Incoming → PUT /api/v1/events/9cd21a50-bd5f-442d-a8bd-b69453687376
+[2026-01-08 15:56:22] [INFO] → Incoming → PUT /api/v1/events/9cd21a50-bd5f-442d-a8bd-b69453687376
+[2026-01-08 15:56:36] [INFO] → Incoming → PUT /api/v1/events/9cd21a50-bd5f-442d-a8bd-b69453687376
+[2026-01-08 15:57:09] [INFO] → Incoming → PUT /api/v1/events/9cd21a50-bd5f-442d-a8bd-b69453687376
+[2026-01-08 16:00:10] [INFO] → Incoming → PUT /api/v1/events/9cd21a50-bd5f-442d-a8bd-b69453687376
+[2026-01-08 16:30:26] [INFO] → Incoming → PUT /api/v1/events/9cd21a50-bd5f-442d-a8bd-b69453687376
+[2026-01-08 16:33:17] [INFO] → Incoming → PUT /api/v1/events/9cd21a50-bd5f-442d-a8bd-b69453687376
+[2026-01-08 16:40:11] [INFO] → Incoming → POST /api/v1/organizations/e8795939-10e8-440b-95dc-11d54c648c4a/events
+[2026-01-08 16:41:55] [INFO] → Incoming → PUT /api/v1/events/8788d3e5-f169-4deb-ab8d-5546e3114925
+[2026-01-08 16:46:16] [INFO] → Incoming → POST /api/v1/organizations/e8795939-10e8-440b-95dc-11d54c648c4a/events
+[2026-01-08 16:49:00] [INFO] → Incoming → PUT /api/v1/events/594a0a66-94db-437d-a28c-998209aa49e4
+[2026-01-08 16:50:26] [INFO] → Incoming → PUT /api/v1/events/594a0a66-94db-437d-a28c-998209aa49e4
+[2026-01-08 16:50:37] [INFO] → Incoming → PUT /api/v1/events/594a0a66-94db-437d-a28c-998209aa49e4
