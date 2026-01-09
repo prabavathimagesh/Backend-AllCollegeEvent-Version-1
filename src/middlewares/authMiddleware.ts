@@ -12,7 +12,7 @@ export const authMiddleware = (
 
     if (!authHeader) {
       return res.status(401).json({
-        success: false,
+        status: false,
         message: "Authorization header missing",
       });
     }
@@ -21,7 +21,7 @@ export const authMiddleware = (
 
     if (!token) {
       return res.status(401).json({
-        success: false,
+        status: false,
         message: "Token not provided",
       });
     }
@@ -38,7 +38,7 @@ export const authMiddleware = (
     next();
   } catch (err: any) {
     return res.status(401).json({
-      success: false,
+      status: false,
       message: "Invalid or expired token",
     });
   }

@@ -3,8 +3,8 @@ import { AceCategoryTypeService } from "../../services/master/aceCategoryType.se
 
 export class AceCategoryTypeController {
   static create = async (req: Request, res: Response) =>
-    res.json({ success: true, data: await AceCategoryTypeService.create(req.body.categoryName) });
+    res.json({ status: true, data: await AceCategoryTypeService.create(req.body.categoryName) });
 
   static getAll = async (_: Request, res: Response) =>
-    res.json({ success: true, data: await AceCategoryTypeService.getAll() });
+    res.json({ status: true, data: await AceCategoryTypeService.getAll() });
 }

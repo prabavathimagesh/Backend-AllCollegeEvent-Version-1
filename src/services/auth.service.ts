@@ -293,7 +293,7 @@ export class AuthService {
     if (org) {
       if (org.isVerified) {
         return {
-          success: true,
+          status: true,
           message: AUTH_MESSAGES.ORG_ALREADY_VERIFIED,
         };
       }
@@ -304,7 +304,7 @@ export class AuthService {
       });
 
       return {
-        success: true,
+        status: true,
         message: AUTH_MESSAGES.ORG_VERIFIED_SUCCESS,
       };
     }
@@ -317,7 +317,7 @@ export class AuthService {
     if (user) {
       if (user.isActive) {
         return {
-          success: true,
+          status: true,
           message: AUTH_MESSAGES.USER_ALREADY_VERIFIED,
         };
       }
@@ -328,7 +328,7 @@ export class AuthService {
       });
 
       return {
-        success: true,
+        status: true,
         message: AUTH_MESSAGES.USER_VERIFIED_SUCCESS,
       };
     }
@@ -373,7 +373,7 @@ export class AuthService {
     await sendOtpEmail(email, otp, 10);
 
     return {
-      success: true,
+      status: true,
       message: AUTH_MESSAGES.OTP_SENT,
     };
   }
@@ -421,7 +421,7 @@ export class AuthService {
     await sendOtpEmail(email, otp, 10);
 
     return {
-      success: true,
+      status: true,
       message: AUTH_MESSAGES.OTP_RESENT,
     };
   }
@@ -439,7 +439,7 @@ export class AuthService {
     if (record.expAt < new Date()) throw new Error(AUTH_MESSAGES.OTP_EXPIRED);
 
     return {
-      success: true,
+      status: true,
       message: AUTH_MESSAGES.OTP_VERIFIED,
     };
   }
@@ -470,7 +470,7 @@ export class AuthService {
     }
 
     return {
-      success: true,
+      status: true,
       message: AUTH_MESSAGES.PASSWORD_RESET_SUCCESS,
     };
   }

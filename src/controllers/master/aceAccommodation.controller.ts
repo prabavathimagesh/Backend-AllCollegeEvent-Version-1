@@ -4,10 +4,10 @@ import { AceAccommodationService } from "../../services/master/aceAccommodation.
 export class AceAccommodationController {
   static create = async (req: Request, res: Response) =>
     res.json({
-      success: true,
+      status: true,
       data: await AceAccommodationService.create(req.body.accommodationName),
     });
 
   static getAll = async (_: Request, res: Response) =>
-    res.json({ success: true, data: await AceAccommodationService.getAll() });
+    res.json({ status: true, data: await AceAccommodationService.getAll() });
 }

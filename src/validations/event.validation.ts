@@ -107,7 +107,7 @@ export const eventValidation = {
    */
   getSinglePublicEvent: {
     params: Joi.object({
-      eventId: Joi.string().uuid().required(),
+      slug: Joi.string().required(),
     }),
   },
 };

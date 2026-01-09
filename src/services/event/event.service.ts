@@ -341,7 +341,7 @@ export class EventService {
         throw new Error("Event not found or access denied");
       }
 
-      console.log(payload)
+      console.log(payload);
 
       /* =====================================================
        2️⃣ EVENT CORE (PATCH STYLE)
@@ -582,9 +582,9 @@ export class EventService {
     return enrichEvents(events);
   }
 
-  static async getSingleEventsService(eventId: string) {
+  static async getSingleEventBySlug(slug: string) {
     const event = await prisma.event.findUnique({
-      where: { identity: eventId },
+      where: { slug },
       include: EVENT_FULL_INCLUDE,
     });
 

@@ -427,7 +427,7 @@ export class AuthController {
 
       if (!type || !identity) {
         return res.status(200).json({
-          success: false,
+          status: false,
           message: AUTH_MESSAGES.TYPE_AND_ID_REQUIRED,
         });
       }
@@ -462,8 +462,9 @@ export class AuthController {
       const data = await AuthService.updateProfile(payload);
 
       return res.status(200).json({
-        success: true,
+        status: true,
         data,
+        message:AUTH_MESSAGES.PROFILE_UPDATE_SUCCESS
       });
     } catch (err: any) {
       const message = err.message || AUTH_MESSAGES.SOMETHING_WENT_WRONG;
@@ -480,14 +481,14 @@ export class AuthController {
       /* ---------- SAFE ERRORS (EXPECTED) ---------- */
       if (safeErrors.includes(message)) {
         return res.status(200).json({
-          success: false,
+          status: false,
           message,
         });
       }
 
       /* ---------- UNEXPECTED / SYSTEM ERRORS ---------- */
       return res.status(500).json({
-        success: false,
+        status: false,
         message,
       });
     }

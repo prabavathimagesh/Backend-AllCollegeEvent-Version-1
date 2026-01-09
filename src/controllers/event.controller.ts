@@ -91,7 +91,7 @@ export class EventController {
 
       if (!orgIdentity) {
         return res.status(400).json({
-          success: false,
+          status: false,
           message: "orgId is required",
         });
       }
@@ -151,7 +151,7 @@ export class EventController {
 
       const event = await EventService.createEvent(payload);
 
-      res.status(200).json({ success: true, data: event });
+      res.status(200).json({ status: true, data: event });
     } catch (err: any) {
       const safeErrors = [EVENT_MESSAGES.ORGANIZER_NUMBER_REQUIRED];
 
@@ -163,7 +163,7 @@ export class EventController {
       }
 
       res.status(400).json({
-        success: false,
+        status: false,
         message: err.message,
       });
     }
@@ -178,7 +178,7 @@ export class EventController {
 
       if (!eventIdentity) {
         return res.status(400).json({
-          success: false,
+          status: false,
           message: EVENT_MESSAGES.EVENT_ID_REQUIRED,
         });
       }
@@ -232,7 +232,7 @@ export class EventController {
       });
     } catch (err: any) {
       return res.status(500).json({
-        success: false,
+        status: false,
         message: err.message,
       });
     }
@@ -286,31 +286,32 @@ export class EventController {
   /**
    * Get a single public event by event ID
    */
-  static async getSingleEvent(req: Request, res: Response) {
-    try {
-      const { eventId } = req.params;
+static async getSingleEvent(req: Request, res: Response) {
+  try {
+    const { slug } = req.params;
 
-      const event = await EventService.getSingleEventsService(eventId);
+    const event = await EventService.getSingleEventBySlug(slug);
 
-      if (!event) {
-        return res.status(404).json({
-          status: false,
-          message: EVENT_MESSAGES.EVENT_NOT_FOUND,
-        });
-      }
-
+    if (!event) {
       return res.status(200).json({
-        status: true,
-        data: event,
-        message: EVENT_MESSAGES.EVENT_FETCHED,
-      });
-    } catch (err) {
-      return res.status(500).json({
         status: false,
-        message: EVENT_MESSAGES.INTERNAL_ERROR,
+        message: EVENT_MESSAGES.EVENT_NOT_FOUND,
       });
     }
+
+    return res.status(200).json({
+      status: true,
+      data: event,
+      message: EVENT_MESSAGES.EVENT_FETCHED,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: EVENT_MESSAGES.INTERNAL_ERROR,
+    });
   }
+}
+
 
   /**
    * Get all available event statuses
@@ -355,11 +356,11 @@ export class EventController {
 
   static async autoSave(req: Request, res: Response) {
     await EventService.autoSaveEvent(req.params.id, req.body);
-    res.json({ success: true });
+    res.json({ status: true });
   }
 
   static async publishEvent(req: Request, res: Response) {
     const event = await EventService.publishEvent(req.params.id, req.body);
-    res.json({ success: true, data: event });
+    res.json({ status: true, data: event });
   }
 }

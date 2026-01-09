@@ -74,7 +74,7 @@ router.get("/events", EventController.getAllEvents);
  * @desc  Get a single public event
  */
 router.get(
-  "/events/:eventId",
+  "/events/:slug",
   validate(eventValidation.getSinglePublicEvent),
   EventController.getSingleEvent
 );

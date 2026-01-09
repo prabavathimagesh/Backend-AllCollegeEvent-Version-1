@@ -62,6 +62,8 @@ export const AUTH_MESSAGES = {
   INVALID_PROFILE_TYPE: "Invalid profile type",
 
   SOMETHING_WENT_WRONG: "Something went wrong",
+
+  PROFILE_UPDATE_SUCCESS:"Profile Updated Successfully"
 };
 
 export const PUBLIC_EMAIL_DOMAINS = [

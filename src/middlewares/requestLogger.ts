@@ -7,7 +7,7 @@ export const appLogger = (req: Request, res: Response, next: NextFunction) => {
   const oldJson = res.json;
 
   res.json = function (body: any) {
-    if (body && body.success === false) {
+    if (body && body.status === false) {
       logger.error(
         `Error → ${req.method} ${req.originalUrl} | Message: ${body.message}`
       );

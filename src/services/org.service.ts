@@ -3,6 +3,7 @@ import { EventType, EventWithRelations } from "../types/type";
 import { Prisma } from "@prisma/client";
 import { EVENT_FULL_INCLUDE } from "../services/event/event.include";
 import { enrichEvents } from "../services/event/event.enricher";
+import { OrgSocialLink } from "@prisma/client";
 
 export class OrgService {
   static async getAllOrgs() {
@@ -40,10 +41,27 @@ export class OrgService {
   }
 
   static async getOrgById(identity: string) {
-    // fetching a single organization by identity
-    return prisma.org.findUnique({
+    const org = await prisma.org.findUnique({
       where: { identity },
+      include: {
+        socialLinks: true,
+      },
     });
+
+    if (!org) return null;
+
+    const socialLinks = org.socialLinks.reduce(
+      (acc: Record<string, string>, link: OrgSocialLink) => {
+        acc[link.platform] = link.url;
+        return acc;
+      },
+      {} as Record<string, string>
+    );
+
+    return {
+      ...org,
+      socialLinks,
+    };
   }
 
   static async updateOrg(identity: string, data: any) {
