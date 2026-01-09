@@ -25,9 +25,9 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(
   cors({
     origin: [
-      "https://ace-fe-dev.vercel.app",
-      "http://localhost:3000",
-      "http://localhost:3001"
+      process.env.DOMAIN,
+      process.env.DOMAIN1,
+      process.env.DOMAIN2
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
