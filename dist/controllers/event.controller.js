@@ -187,7 +187,7 @@ class EventController {
             /* ---------- CALL SERVICE ---------- */
             const data = await event_service_1.EventService.updateEvent(eventIdentity, payload);
             return res.status(200).json({
-                success: true,
+                status: true,
                 data,
                 message: event_message_1.EVENT_MESSAGES.EVENT_UPDATED,
             });

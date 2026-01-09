@@ -2,14 +2,14 @@
   "name": "ace1",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "main.js",
   "prisma": {
     "seed": "node ./prisma/seed.js"
   },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
-    "dev": "ts-node src/server.ts",
+    "start": "node dist/main.js",
+    "dev": "ts-node src/main.ts",
     "postinstall": "npx prisma generate",
     "seed": "node prisma/seed.js"
   },
