@@ -25,10 +25,9 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(
   cors({
     origin: [
-      "https://www.allcollegeevent.com",
-      "https://allcollegeevent.com",
-      "https://aces-projects-cd688f2e.vercel.app",
-      "http://localhost:3000"
+      process.env.DOMAIN,
+      process.env.DOMAIN1,
+      process.env.DOMAIN2
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
