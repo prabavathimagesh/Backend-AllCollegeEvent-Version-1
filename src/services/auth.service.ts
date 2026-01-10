@@ -16,6 +16,7 @@ import {
 } from "../utils/helperFunction";
 import { Platform } from "../types/type";
 import { Prisma } from "@prisma/client";
+import { generateSlug } from "../utils/slug"
 
 /**
  * Send organization account verification email
@@ -173,6 +174,7 @@ export class AuthService {
       //   throw new Error("Organization name must match the email domain");
       // }
 
+      
       const org = await prisma.org.create({
         data: {
           domainEmail: email,
@@ -180,6 +182,7 @@ export class AuthService {
           roleId: role.id,
           organizationName: extra.org_name,
           organizationCategory: extra.org_cat,
+          slug:generateSlug(extra.org_name),
           country: extra.country,
           state: extra.state,
           city: extra.city,

@@ -36,5 +36,8 @@ export const EVENT_MESSAGES = {
 
   ORG_AND_EVENT_ID_REQ: "Organization ID and Event ID are required",
 
-  ORGANIZER_NUMBER_REQUIRED:"organizerNumber is required for collaborator"
+  ORGANIZER_NUMBER_REQUIRED: "organizerNumber is required for collaborator",
+
+  ORG_SLUG_REQUIRED: "Organization slug is required",
+  ORG_NOT_FOUND: "Organization not found",
 };

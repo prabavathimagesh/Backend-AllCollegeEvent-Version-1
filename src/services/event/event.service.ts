@@ -11,15 +11,30 @@ import { EVENT_FULL_INCLUDE } from "./event.include";
 import { enrichEvents } from "./event.enricher";
 
 export class EventService {
-  static async getEventsByOrg(identity: string) {
+  static async getEventsByOrgSlug(slug: string) {
+    const org = await prisma.org.findUnique({
+      where: { slug },
+      select: { identity: true },
+    });
+
+    if (!org) {
+      throw new Error(EVENT_MESSAGES.ORG_NOT_FOUND);
+    }
+
     const events = await prisma.event.findMany({
-      where: { orgIdentity: identity, status: "APPROVED" },
+      where: {
+        orgIdentity: org.identity,
+        status: "APPROVED",
+      },
       orderBy: { createdAt: "desc" },
       include: EVENT_FULL_INCLUDE,
     });
 
     const count = await prisma.event.count({
-      where: { orgIdentity: identity, status: "APPROVED" },
+      where: {
+        orgIdentity: org.identity,
+        status: "APPROVED",
+      },
     });
 
     return {

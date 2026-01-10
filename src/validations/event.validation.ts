@@ -86,7 +86,7 @@ export const eventValidation = {
    */
   getAll: {
     params: Joi.object({
-      orgId: Joi.string().uuid().required(),
+      slug: Joi.string().required(),
     }),
   },
 

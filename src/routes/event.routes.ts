@@ -12,7 +12,7 @@ const router = Router();
  * @desc  Get all events of a specific organization
  */
 router.get(
-  "/organizations/:orgId/events",
+  "/organizations/:slug/events",
   validate(eventValidation.getAll),
   EventController.getOrgEvents
 );

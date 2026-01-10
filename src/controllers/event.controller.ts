@@ -14,26 +14,26 @@ export class EventController {
    */
   static async getOrgEvents(req: Request, res: Response) {
     try {
-      const identity = String(req.params.orgId);
+      const slug = String(req.params.slug);
 
-      if (!identity) {
+      if (!slug) {
         return res.status(200).json({
           status: false,
-          message: EVENT_MESSAGES.ORG_ID_REQUIRED,
+          message: EVENT_MESSAGES.ORG_SLUG_REQUIRED,
         });
       }
 
-      const result = await EventService.getEventsByOrg(identity);
+      const result = await EventService.getEventsByOrgSlug(slug);
 
       return res.status(200).json({
         status: true,
-        count: result.count, // total events
-        data: result.events, // events list
+        count: result.count,
+        data: result.events,
         message: EVENT_MESSAGES.EVENTS_FETCHED,
       });
     } catch (err: any) {
       const safeErrors = [
-        EVENT_MESSAGES.ORG_ID_REQUIRED,
+        EVENT_MESSAGES.ORG_NOT_FOUND,
         EVENT_MESSAGES.EVENTS_NOT_FOUND,
       ];
 
@@ -286,32 +286,31 @@ export class EventController {
   /**
    * Get a single public event by event ID
    */
-static async getSingleEvent(req: Request, res: Response) {
-  try {
-    const { slug } = req.params;
+  static async getSingleEvent(req: Request, res: Response) {
+    try {
+      const { slug } = req.params;
 
-    const event = await EventService.getSingleEventBySlug(slug);
+      const event = await EventService.getSingleEventBySlug(slug);
 
-    if (!event) {
+      if (!event) {
+        return res.status(200).json({
+          status: false,
+          message: EVENT_MESSAGES.EVENT_NOT_FOUND,
+        });
+      }
+
       return res.status(200).json({
+        status: true,
+        data: event,
+        message: EVENT_MESSAGES.EVENT_FETCHED,
+      });
+    } catch (err) {
+      return res.status(500).json({
         status: false,
-        message: EVENT_MESSAGES.EVENT_NOT_FOUND,
+        message: EVENT_MESSAGES.INTERNAL_ERROR,
       });
     }
-
-    return res.status(200).json({
-      status: true,
-      data: event,
-      message: EVENT_MESSAGES.EVENT_FETCHED,
-    });
-  } catch (err) {
-    return res.status(500).json({
-      status: false,
-      message: EVENT_MESSAGES.INTERNAL_ERROR,
-    });
   }
-}
-
 
   /**
    * Get all available event statuses
