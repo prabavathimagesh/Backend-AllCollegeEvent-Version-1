@@ -12,6 +12,7 @@ export class OrgService {
       select: {
         identity: true,
         organizationName: true,
+        slug:true,
         domainEmail: true, // FIXED
         createdAt: true,
         id: true,
@@ -57,6 +58,8 @@ export class OrgService {
       },
       {} as Record<string, string>
     );
+
+    console.log(org)
 
     return {
       ...org,
