@@ -63,7 +63,9 @@ export const AUTH_MESSAGES = {
 
   SOMETHING_WENT_WRONG: "Something went wrong",
 
-  PROFILE_UPDATE_SUCCESS:"Profile Updated Successfully"
+  PROFILE_UPDATE_SUCCESS: "Profile Updated Successfully",
+
+  LOG_OUT: "Logged out successfully",
 };
 
 export const PUBLIC_EMAIL_DOMAINS = [

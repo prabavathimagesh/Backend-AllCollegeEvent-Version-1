@@ -219,7 +219,9 @@ model AceEventTypes {
   identity String @id @default(uuid())
   id       Int    @unique @default(autoincrement())
 
-  name String
+  name     String
+  imageUrl String?   @map("image_url") // S3 URL
+  color    String?   // hex like
 
   categoryIdentity String          @map("category_identity")
   category         AceCategoryType @relation(fields: [categoryIdentity], references: [identity])
@@ -279,6 +281,8 @@ model Event {
 
   // Certification (NEW)
   certIdentity String? // FK to AceCertification
+
+  viewCount   Int      @default(0)
 
   // Eligibility
   eligibleDeptIdentities String[]

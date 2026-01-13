@@ -12,6 +12,7 @@ import adminOrgRoutes from "./routes/admin/admin.org.routes";
 import adminAuthRoutes from "./routes/admin/admin.auth.routes";
 import masterRoutes from "./routes/master.routes";
 import path from "path";
+const cookieParser = require('cookie-parser')
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ const app = express();
 // enabling JSON body parsing
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(cookieParser())
 
 // enabling cross-origin access for allowed domains
 app.use(

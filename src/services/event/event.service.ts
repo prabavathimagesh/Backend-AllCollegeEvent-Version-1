@@ -1,5 +1,5 @@
 const prisma = require("../../config/db.config");
-import { EventType, EventWithRelations } from "../../types/type";
+import { AssetItem, EventType, EventWithRelations } from "../../types/type";
 import { EVENT_STATUS_LIST } from "../../constants/event.status.message";
 import { EVENT_MESSAGES } from "../../constants/event.message";
 import { getResolvedImageUrl } from "../../utils/s3SignedUrl";
@@ -9,6 +9,7 @@ import { EventMode } from "@prisma/client";
 import { generateSlug } from "../../utils/slug";
 import { EVENT_FULL_INCLUDE } from "./event.include";
 import { enrichEvents } from "./event.enricher";
+import { uploadToS3 } from "../../utils/s3Upload";
 
 export class EventService {
   static async getEventsByOrgSlug(slug: string) {
@@ -611,6 +612,55 @@ export class EventService {
 
   static getAllStatuses() {
     return EVENT_STATUS_LIST;
+  }
+
+  static async incrementViewCount(slug: string) {
+    const event = await prisma.event.update({
+      where: { slug },
+      data: {
+        viewCount: {
+          increment: 1,
+        },
+      },
+    });
+
+    if (!event) {
+      throw new Error(EVENT_MESSAGES.EVENT_NOT_FOUND);
+    }
+
+    return true;
+  }
+
+  /* ----------------------- BULK UPDATE FOR EVENT TYPES ----------------------- */
+
+  static async bulkUpdateAssets(
+    items: AssetItem[],
+    files: Express.Multer.File[]
+  ) {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const file = files[i];
+
+        const updateData: Prisma.AceEventTypesUpdateInput = {};
+
+        // color from JSON
+        if (item.color) {
+          updateData.color = item.color;
+        }
+
+        // image from file
+        if (file) {
+          const upload = await uploadToS3(file, "event-types-images");
+          updateData.imageUrl = upload.url;
+        }
+
+        await tx.aceEventTypes.update({
+          where: { identity: item.identity },
+          data: updateData,
+        });
+      }
+    });
   }
 
   // Event & Draft Based Servcies

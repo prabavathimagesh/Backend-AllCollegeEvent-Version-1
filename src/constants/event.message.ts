@@ -40,4 +40,7 @@ export const EVENT_MESSAGES = {
 
   ORG_SLUG_REQUIRED: "Organization slug is required",
   ORG_NOT_FOUND: "Organization not found",
+
+  EVENT_VIEW_UPDATED: "Event view count updated",
+  EVENT_SLUG_REQUIRED: "Event slug is required"
 };

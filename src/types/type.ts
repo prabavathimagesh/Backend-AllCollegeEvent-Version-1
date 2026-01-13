@@ -99,3 +99,8 @@ export type EventWithRelations = Prisma.EventGetPayload<{
     };
   };
 }>;
+
+export type AssetItem = {
+  identity: string;
+  color?: string;
+};

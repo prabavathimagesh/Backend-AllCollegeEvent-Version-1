@@ -336,7 +336,78 @@ export class EventController {
     }
   }
 
-  // New Event and Draft Based Controllers
+  static async incrementEventView(req: Request, res: Response) {
+    try {
+      const slug = String(req.params.slug);
+
+      if (!slug) {
+        return res.status(200).json({
+          status: false,
+          message: EVENT_MESSAGES.EVENT_SLUG_REQUIRED,
+        });
+      }
+
+      await EventService.incrementViewCount(slug);
+
+      return res.status(200).json({
+        status: true,
+        message: EVENT_MESSAGES.EVENT_VIEW_UPDATED,
+      });
+    } catch (err: any) {
+      const safeErrors = [EVENT_MESSAGES.EVENT_NOT_FOUND];
+
+      if (safeErrors.includes(err.message)) {
+        return res.status(200).json({
+          status: false,
+          message: err.message,
+        });
+      }
+
+      return res.status(500).json({
+        status: false,
+        message: EVENT_MESSAGES.INTERNAL_ERROR,
+        error: err.message,
+      });
+    }
+  }
+
+  /* ----------------------- BULK UPDATE FOR EVENT TYPES ----------------------- */
+
+  static async bulkUpdateAssets(req: Request, res: Response) {
+    try {
+      const items = JSON.parse(req.body.data);
+      const files = req.files as Express.Multer.File[];
+
+      if (!Array.isArray(items)) {
+        return res.status(400).json({
+          status: false,
+          message: "Invalid data format",
+        });
+      }
+
+      if (files.length !== items.length) {
+        return res.status(400).json({
+          status: false,
+          message: "Images count and data count must match",
+        });
+      }
+
+      await EventService.bulkUpdateAssets(items, files);
+
+      return res.json({
+        status: true,
+        message: "Assets updated successfully",
+      });
+    } catch (err: any) {
+      return res.status(500).json({
+        status: false,
+        message: "Bulk update failed",
+        error: err.message,
+      });
+    }
+  }
+
+  // New Event and Draft Based Controllers --------------------------------------------
 
   static async createDraft(req: Request, res: Response) {
     if (!req.user || !(req.user as any).data) {

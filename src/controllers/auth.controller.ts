@@ -77,6 +77,26 @@ export class AuthController {
       // Call login service
       const data = await AuthService.login(email, password, type);
 
+      // SET COOKIE HERE (added)
+
+      // http
+      // res.cookie("authToken", data.token, {
+      //   httpOnly: true, // Prevent JS access
+      //   maxAge: 60 * 60 * 1000, // 1 hour
+      //   path: "/", // Available across site
+      //   sameSite: "lax", // CSRF protection
+      //   secure: process.env.NODE_ENV === "production",
+      // });
+
+      // https
+      res.cookie("authToken", data.token, {
+        httpOnly: true, // Prevent JS access
+        maxAge: 60 * 60 * 1000, // 1 hour
+        path: "/", // Available across site
+        sameSite: "none", // CSRF protection
+        secure: true,
+      });
+
       // Success response
       return res.status(200).json({
         status: true,
@@ -111,6 +131,24 @@ export class AuthController {
       });
     }
   }
+
+  /**
+   * Logout user or organization
+   */
+
+  static logout = (req: Request, res: Response) => {
+    res.clearCookie("authToken", {
+      httpOnly: true,
+      secure: true, // REQUIRED (HTTPS)
+      sameSite: "none", // MUST match login cookie
+      path: "/",
+    });
+
+    return res.status(200).json({
+      status: true,
+      message: AUTH_MESSAGES.LOG_OUT,
+    });
+  };
 
   /**
    * Verify organization account using email token
@@ -464,7 +502,7 @@ export class AuthController {
       return res.status(200).json({
         status: true,
         data,
-        message:AUTH_MESSAGES.PROFILE_UPDATE_SUCCESS
+        message: AUTH_MESSAGES.PROFILE_UPDATE_SUCCESS,
       });
     } catch (err: any) {
       const message = err.message || AUTH_MESSAGES.SOMETHING_WENT_WRONG;

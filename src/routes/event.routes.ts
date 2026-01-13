@@ -34,7 +34,7 @@ router.get(
  */
 router.post(
   "/organizations/:orgId/events",
-  upload.array("bannerImages",5),
+  upload.array("bannerImages", 5),
   EventController.createEvent
 );
 
@@ -45,10 +45,9 @@ router.post(
 // routes/event.route.ts
 router.put(
   "/events/:eventIdentity",
-  upload.array("bannerImages",5), // multer
+  upload.array("bannerImages", 5), // multer
   EventController.updateEvent
 );
-
 
 /**
  * @route DELETE /api/v1/organizations/:orgId/events/:eventId
@@ -59,6 +58,15 @@ router.delete(
   authMiddleware,
   validate(eventValidation.deleteEvent),
   EventController.deleteEvent
+);
+
+
+/* ----------------------- BULK UPDATE FOR EVENT TYPES ----------------------- */
+
+router.put(
+  "/event-types/bulk/assets",
+  upload.array("images", 50),
+  EventController.bulkUpdateAssets
 );
 
 /* ----------------------- PUBLIC EVENT ROUTES ----------------------- */
@@ -81,11 +89,16 @@ router.get(
 
 router.get("/event/statuses", EventController.getStatuses);
 
+router.post("/events/:slug/view", EventController.incrementEventView);
 
-// ---------------------------------- Draft Work
+// ---------------------------------- Draft Work 
 
-router.post("/events/draft", authMiddleware,EventController.createDraft);
-router.patch("/events/:id", authMiddleware,EventController.autoSave);
-router.post("/events/:id/publish", authMiddleware,EventController.publishEvent);
+router.post("/events/draft", authMiddleware, EventController.createDraft);
+router.patch("/events/:id", authMiddleware, EventController.autoSave);
+router.post(
+  "/events/:id/publish",
+  authMiddleware,
+  EventController.publishEvent
+);
 
 export default router;
