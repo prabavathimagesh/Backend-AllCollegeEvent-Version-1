@@ -12,7 +12,8 @@ import adminOrgRoutes from "./routes/admin/admin.org.routes";
 import adminAuthRoutes from "./routes/admin/admin.auth.routes";
 import masterRoutes from "./routes/master.routes";
 import path from "path";
-const cookieParser = require('cookie-parser')
+const cookieParser = require("cookie-parser");
+const { CorsOptions } = require("cors");
 
 dotenv.config();
 
@@ -21,21 +22,33 @@ const app = express();
 // enabling JSON body parsing
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
-app.use(cookieParser())
+app.use(cookieParser());
 
 // enabling cross-origin access for allowed domains
-app.use(
-  cors({
-    origin: [
-      "https://ace-fe-dev.vercel.app",
-      "http://localhost:3000",
-      "http://localhost:3001"
-    ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  })
-);
+const allowedOrigins = [
+  "https://ace-fe-dev.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:3001",
+];
 
+const corsOptions = {
+  origin: (
+    origin: string | undefined,
+    callback: (err: Error | null, allow?: boolean) => void
+  ) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+};
+
+app.use(cors(corsOptions));
+
+app.use(cors(corsOptions));
 // exposing uploaded images/files publicly
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
