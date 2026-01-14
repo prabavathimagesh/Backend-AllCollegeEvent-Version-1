@@ -7,4 +7,5 @@ export class AceCategoryTypeController {
 
   static getAll = async (_: Request, res: Response) =>
     res.json({ status: true, data: await AceCategoryTypeService.getAll() });
+
 }

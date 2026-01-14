@@ -28,6 +28,7 @@ router.get("/categories", AceCategoryTypeController.getAll);
 // Event Types
 router.post("/event-types", AceEventTypesController.create);
 router.get("/event-types/:categoryId", AceEventTypesController.getByCategory);
+router.get("/event-types", AceEventTypesController.getAll);
 
 // Accommodation
 router.post("/accommodations", AceAccommodationController.create);
