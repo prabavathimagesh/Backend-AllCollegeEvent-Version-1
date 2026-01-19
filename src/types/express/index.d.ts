@@ -1,4 +1,4 @@
-import "express";
+declare module "express";
 
 declare global {
   namespace Express {
