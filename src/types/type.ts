@@ -1,6 +1,8 @@
 import { Request } from "express";
 import { Prisma } from "@prisma/client";
 
+// types
+
 export interface EventType {
   identity: string;
   id: number;
