@@ -90,6 +90,12 @@ export const eventValidation = {
     }),
   },
 
+    getAll1: {
+    params: Joi.object({
+      orgId: Joi.string().required(),
+    }),
+  },
+
   /**
    * DELETE EVENT
    * - Organization deletes an event

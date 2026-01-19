@@ -11,6 +11,7 @@ import adminUserRoutes from "./routes/admin/admin.user.routes";
 import adminOrgRoutes from "./routes/admin/admin.org.routes";
 import adminAuthRoutes from "./routes/admin/admin.auth.routes";
 import masterRoutes from "./routes/master.routes";
+import locationRoutes from "./routes/location.routes";
 import path from "path";
 const cookieParser = require("cookie-parser");
 const { CorsOptions } = require("cors");
@@ -68,6 +69,7 @@ app.use(
   adminAuthRoutes
 ); // admin API's
 app.use("/api/v1/master", masterRoutes);
+app.use("/api/v1/location", locationRoutes);
 
 // testing root endpoint to check server status
 app.get("/", (req: any, res: any) => {

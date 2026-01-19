@@ -7,6 +7,7 @@ const { seedAceCategoryTypes } = require("./seeds/categoryType.seed.ts");
 const { seedAceEventTypes } = require("./seeds/aceEventTypes.seed.ts");
 const { seedAceAccommodation } = require("./seeds/accommodation.seed.ts");
 const { seedOrgCategory } = require("./seeds/orgCategory.seed.ts");
+const { seedCountries } = require("./seeds/countries.seed.ts");
 
 
 // Initialize Prisma client
@@ -28,6 +29,7 @@ async function main() {
   await seedAceEventTypes();
   await seedAceAccommodation()
   await seedOrgCategory();
+  await seedCountries();
 
   // Log completion
   console.log("Seed completed!");

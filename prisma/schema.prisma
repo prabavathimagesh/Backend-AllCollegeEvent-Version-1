@@ -458,3 +458,42 @@ enum EventMode {
   OFFLINE
   HYBRID
 }
+
+model Country {
+  identity        String   @id @default(uuid())
+  name      String   @unique
+  code      String?   @unique // ISO 3166-1 alpha-2 code (e.g., "IN", "US")
+  phoneCode String?  // e.g., "+91", "+1"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  states    State[]
+
+  @@map("ace_countries")
+}
+
+model State {
+  identity        String   @id @default(uuid())
+  name      String
+  code      String?  // State code (e.g., "TN", "CA")
+  countryId String
+  country   Country  @relation(fields: [countryId], references: [identity], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cities    City[]
+
+  @@unique([name, countryId])
+  @@map("ace_states")
+}
+
+model City {
+  identity        String   @id @default(uuid())
+  name      String
+  stateId   String
+  state     State    @relation(fields: [stateId], references: [identity], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, stateId])
+  @@map("ace_cities")
+}
+

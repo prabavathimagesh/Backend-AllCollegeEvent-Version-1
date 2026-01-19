@@ -50,7 +50,7 @@ router.delete(
 router.get(
   "/organization/:orgId/events",
   authMiddleware,
-  validate(eventValidation.getAll),
+  validate(eventValidation.getAll1),
   OrgController.getOrgEvents
 );
 
