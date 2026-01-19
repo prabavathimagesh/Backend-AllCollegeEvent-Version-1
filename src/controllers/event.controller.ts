@@ -12,7 +12,7 @@ export class EventController {
   /**
    * Get all events of a specific organization (Public / Org view)
    */
-  static async getOrgEvents(req: Request, res: Response) {
+  static async getOrgEvents(req: any, res: any) {
     try {
       const slug = String(req.params.slug);
 
@@ -55,7 +55,7 @@ export class EventController {
   /**
    * Get a single event by organization and event ID
    */
-  static async getEventById(req: Request, res: Response) {
+  static async getEventById(req: any, res: any) {
     try {
       const { orgId, eventId } = req.params;
 
@@ -85,7 +85,7 @@ export class EventController {
    * Create a new event under an organization
    */
 
-  static async createEvent(req: Request, res: Response) {
+  static async createEvent(req: any, res: any) {
     try {
       const orgIdentity = req.params.orgId;
 
@@ -172,7 +172,7 @@ export class EventController {
   /**
    * Update an existing event
    */
-  static async updateEvent(req: Request, res: Response) {
+  static async updateEvent(req: any, res: any) {
     try {
       const { eventIdentity } = req.params;
 
@@ -241,7 +241,7 @@ export class EventController {
   /**
    * Delete an event
    */
-  static async deleteEvent(req: Request, res: Response) {
+  static async deleteEvent(req: any, res: any) {
     try {
       // Extract route params
       const { orgId, eventId } = req.params;
@@ -266,7 +266,7 @@ export class EventController {
   /**
    * Get all events (Admin / Public listing)
    */
-  static async getAllEvents(req: Request, res: Response) {
+  static async getAllEvents(req: any, res: any) {
     try {
       const events = await EventService.getAllEventsService();
 
@@ -286,7 +286,7 @@ export class EventController {
   /**
    * Get a single public event by event ID
    */
-  static async getSingleEvent(req: Request, res: Response) {
+  static async getSingleEvent(req: any, res: any) {
     try {
       const { slug } = req.params;
 
@@ -315,7 +315,7 @@ export class EventController {
   /**
    * Get all available event statuses
    */
-  static async getStatuses(req: Request, res: Response) {
+  static async getStatuses(req: any, res: any) {
     try {
       // Fetch status list
       const statuses = EventService.getAllStatuses();
@@ -336,7 +336,7 @@ export class EventController {
     }
   }
 
-  static async incrementEventView(req: Request, res: Response) {
+  static async incrementEventView(req: any, res: any) {
     try {
       const slug = String(req.params.slug);
 
@@ -373,64 +373,64 @@ export class EventController {
 
   /* ----------------------- BULK UPDATE FOR EVENT TYPES ----------------------- */
 
-  static async bulkUpdateAssets(req: Request, res: Response) {
-    try {
-      const items = JSON.parse(req.body.data);
-      const files = req.files as Express.Multer.File[];
+  // static async bulkUpdateAssets(req: any, res: any) {
+  //   try {
+  //     const items = JSON.parse(req.body.data);
+  //     const files = req.files as Express.Multer.File[];
 
-      if (!Array.isArray(items)) {
-        return res.status(400).json({
-          status: false,
-          message: "Invalid data format",
-        });
-      }
+  //     if (!Array.isArray(items)) {
+  //       return res.status(400).json({
+  //         status: false,
+  //         message: "Invalid data format",
+  //       });
+  //     }
 
-      if (files.length !== items.length) {
-        return res.status(400).json({
-          status: false,
-          message: "Images count and data count must match",
-        });
-      }
+  //     if (files.length !== items.length) {
+  //       return res.status(400).json({
+  //         status: false,
+  //         message: "Images count and data count must match",
+  //       });
+  //     }
 
-      await EventService.bulkUpdateAssets(items, files);
+  //     await EventService.bulkUpdateAssets(items, files);
 
-      return res.json({
-        status: true,
-        message: "Assets updated successfully",
-      });
-    } catch (err: any) {
-      return res.status(500).json({
-        status: false,
-        message: "Bulk update failed",
-        error: err.message,
-      });
-    }
-  }
+  //     return res.json({
+  //       status: true,
+  //       message: "Assets updated successfully",
+  //     });
+  //   } catch (err: any) {
+  //     return res.status(500).json({
+  //       status: false,
+  //       message: "Bulk update failed",
+  //       error: err.message,
+  //     });
+  //   }
+  // }
 
   // New Event and Draft Based Controllers --------------------------------------------
 
-  static async createDraft(req: Request, res: Response) {
-    if (!req.user || !(req.user as any).data) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+  // static async createDraft(req: any, res: any) {
+  //   if (!req.user || !(req.user as any).data) {
+  //     return res.status(401).json({ message: "Unauthorized" });
+  //   }
 
-    const decoded = (req.user as any).data;
+  //   const decoded = (req.user as any).data;
 
-    const userId = decoded.id; // number
-    const orgIdentity = decoded.identity; // UUID string
+  //   const userId = decoded.id; // number
+  //   const orgIdentity = decoded.identity; // UUID string
 
-    const event = await EventService.createDraftEvent(userId, orgIdentity);
+  //   const event = await EventService.createDraftEvent(userId, orgIdentity);
 
-    res.status(201).json(event);
-  }
+  //   res.status(201).json(event);
+  // }
 
-  static async autoSave(req: Request, res: Response) {
-    await EventService.autoSaveEvent(req.params.id, req.body);
-    res.json({ status: true });
-  }
+  // static async autoSave(req: any, res: any) {
+  //   await EventService.autoSaveEvent(req.params.id, req.body);
+  //   res.json({ status: true });
+  // }
 
-  static async publishEvent(req: Request, res: Response) {
-    const event = await EventService.publishEvent(req.params.id, req.body);
-    res.json({ status: true, data: event });
-  }
+  // static async publishEvent(req: any, res: any) {
+  //   const event = await EventService.publishEvent(req.params.id, req.body);
+  //   res.json({ status: true, data: event });
+  // }
 }

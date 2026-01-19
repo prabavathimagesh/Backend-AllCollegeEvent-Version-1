@@ -11,7 +11,7 @@ export class UserController {
   /**
    * Get all users
    */
-  static async getAllUsers(req: Request, res: Response) {
+  static async getAllUsers(req: any, res: any) {
     try {
       // Fetch all users from service
       const users = await UserService.getAllUsers();
@@ -34,7 +34,7 @@ export class UserController {
   /**
    * Get a single user by ID
    */
-  static async getUserById(req: Request, res: Response) {
+  static async getUserById(req: any, res: any) {
     try {
       // Extract user ID from route params
       const identity = req.params.userId;
@@ -68,7 +68,7 @@ export class UserController {
   /**
    * Update user details
    */
-  static async updateUser(req: Request, res: Response) {
+  static async updateUser(req: any, res: any) {
     try {
       // Extract user ID and request body
       const identity = req.params.userId;
@@ -95,7 +95,7 @@ export class UserController {
   /**
    * Delete a user
    */
-  static async deleteUser(req: Request, res: Response) {
+  static async deleteUser(req: any, res: any) {
     try {
       // Extract user ID
       const identity = req.params.userId;

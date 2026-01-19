@@ -11,7 +11,7 @@ export class OrgController {
   /**
    * Get all organizations
    */
-  static async getAllOrgs(req: Request, res: Response) {
+  static async getAllOrgs(req: any, res: any) {
     try {
       // Fetch all organizations
       const data = await OrgService.getAllOrgs();
@@ -33,7 +33,7 @@ export class OrgController {
   /**
    * Get single organization by ID
    */
-  static async getOrgById(req: Request, res: Response) {
+  static async getOrgById(req: any, res: any) {
     try {
       // Extract organization ID from params
       const identity = req.params.orgId;
@@ -67,7 +67,7 @@ export class OrgController {
   /**
    * Update organization details
    */
-  static async updateOrg(req: Request, res: Response) {
+  static async updateOrg(req: any, res: any) {
     try {
       // Extract organization ID
       const identity = req.params.orgId;
@@ -96,7 +96,7 @@ export class OrgController {
   /**
    * Delete an organization
    */
-  static async deleteOrg(req: Request, res: Response) {
+  static async deleteOrg(req: any, res: any) {
     try {
       // Extract organization ID
       const identity = req.params.orgId;
@@ -122,7 +122,7 @@ export class OrgController {
   /**
    * Get all events created by an organization
    */
-  static async getOrgEvents(req: Request, res: Response) {
+  static async getOrgEvents(req: any, res: any) {
     try {
       const identity = String(req.params.orgId);
 

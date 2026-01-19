@@ -63,11 +63,11 @@ router.delete(
 
 /* ----------------------- BULK UPDATE FOR EVENT TYPES ----------------------- */
 
-router.put(
-  "/event-types/bulk/assets",
-  upload.array("images", 50),
-  EventController.bulkUpdateAssets
-);
+// router.put(
+//   "/event-types/bulk/assets",
+//   upload.array("images", 50),
+//   EventController.bulkUpdateAssets
+// );
 
 /* ----------------------- PUBLIC EVENT ROUTES ----------------------- */
 
@@ -93,12 +93,12 @@ router.post("/events/:slug/view", EventController.incrementEventView);
 
 // ---------------------------------- Draft Work 
 
-router.post("/events/draft", authMiddleware, EventController.createDraft);
-router.patch("/events/:id", authMiddleware, EventController.autoSave);
-router.post(
-  "/events/:id/publish",
-  authMiddleware,
-  EventController.publishEvent
-);
+// router.post("/events/draft", authMiddleware, EventController.createDraft);
+// router.patch("/events/:id", authMiddleware, EventController.autoSave);
+// router.post(
+//   "/events/:id/publish",
+//   authMiddleware,
+//   EventController.publishEvent
+// );
 
 export default router;
