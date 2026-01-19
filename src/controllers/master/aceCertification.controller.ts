@@ -11,11 +11,11 @@ export class AceCertificationController {
   static update = async (req: Request, res: Response) =>
     res.json({
       status: true,
-      data: await AceCertificationService.update(req.params.id, req.body.certName),
+      data: await AceCertificationService.update(req.params.id as string, req.body.certName),
     });
 
   static delete = async (req: Request, res: Response) => {
-    await AceCertificationService.delete(req.params.id);
+    await AceCertificationService.delete(req.params.id as string);
     res.json({ status: true });
   };
 }

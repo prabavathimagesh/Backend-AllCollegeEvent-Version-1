@@ -25,7 +25,7 @@ export class AdminOrgController {
   static async getOrg(req: Request, res: Response) {
     try {
       const { orgId } = req.params;
-      const data = await AdminOrgService.getOrgById(orgId);
+      const data = await AdminOrgService.getOrgById(orgId as string);
 
       // SAFE business error
       if (!data) {
@@ -87,7 +87,7 @@ export class AdminOrgController {
       const { orgId } = req.params;
       const payload = req.body;
 
-      const result = await AdminOrgService.updateOrg(orgId, payload);
+      const result = await AdminOrgService.updateOrg(orgId as string, payload);
 
       return res.status(200).json({
         status: true,
@@ -106,7 +106,7 @@ export class AdminOrgController {
   static async deleteOrg(req: Request, res: Response) {
     try {
       const { orgId } = req.params;
-      const result = await AdminOrgService.deleteOrg(orgId);
+      const result = await AdminOrgService.deleteOrg(orgId as string);
 
       return res.status(200).json({
         status: true,

@@ -28,7 +28,7 @@ export class AdminUserController {
   static async getUser(req: Request, res: Response) {
     try {
       const { userId } = req.params;
-      const user = await AdminUserService.getUserById(userId);
+      const user = await AdminUserService.getUserById(userId as string);
 
       // SAFE business error
       if (!user) {
@@ -92,7 +92,7 @@ export class AdminUserController {
       const { userId } = req.params;
       const payload = req.body;
 
-      const user = await AdminUserService.updateUser(userId, payload);
+      const user = await AdminUserService.updateUser(userId as string, payload);
 
       return res.status(200).json({
         status: true,
@@ -111,7 +111,7 @@ export class AdminUserController {
   static async deleteUser(req: Request, res: Response) {
     try {
       const { userId } = req.params;
-      const user = await AdminUserService.deleteUser(userId);
+      const user = await AdminUserService.deleteUser(userId as string);
 
       return res.status(200).json({
         status: true,

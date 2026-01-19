@@ -40,7 +40,7 @@ export class UserController {
       const identity = req.params.userId;
 
       // Fetch user details
-      const user = await UserService.getUserById(identity);
+      const user = await UserService.getUserById(identity as string);
 
       // Handle user not found
       if (!user) {
@@ -75,7 +75,7 @@ export class UserController {
       const body = req.body;
 
       // Update user data
-      const updated = await UserService.updateUser(identity, body);
+      const updated = await UserService.updateUser(identity as string, body);
 
       // Success response
       res.status(200).json({
@@ -101,7 +101,7 @@ export class UserController {
       const identity = req.params.userId;
 
       // Delete user
-      const deletedUser = await UserService.deleteUser(identity);
+      const deletedUser = await UserService.deleteUser(identity as string);
 
       // Success response
       res.status(200).json({

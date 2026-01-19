@@ -39,7 +39,7 @@ export class OrgController {
       const identity = req.params.orgId;
 
       // Fetch organization details
-      const data = await OrgService.getOrgById(identity);
+      const data = await OrgService.getOrgById(identity as string);
 
       // Organization not found
       if (!data) {
@@ -76,7 +76,7 @@ export class OrgController {
       const updatedData = req.body;
 
       // Update organization
-      const result = await OrgService.updateOrg(identity, updatedData);
+      const result = await OrgService.updateOrg(identity as string, updatedData);
 
       // Success response
       res.json({
@@ -102,7 +102,7 @@ export class OrgController {
       const identity = req.params.orgId;
 
       // Delete organization
-      const result = await OrgService.deleteOrg(identity);
+      const result = await OrgService.deleteOrg(identity as string);
 
       // Success response
       res.json({

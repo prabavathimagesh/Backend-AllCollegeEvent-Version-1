@@ -9,16 +9,16 @@ export class AcePerkController {
     res.json({ status: true, data: await AcePerkService.getAll() });
 
   static getOne = async (req: Request, res: Response) =>
-    res.json({ status: true, data: await AcePerkService.getById(req.params.id) });
+    res.json({ status: true, data: await AcePerkService.getById(req.params.id as string) });
 
   static update = async (req: Request, res: Response) =>
     res.json({
       status: true,
-      data: await AcePerkService.update(req.params.id, req.body.perkName),
+      data: await AcePerkService.update(req.params.id as string, req.body.perkName),
     });
 
   static delete = async (req: Request, res: Response) => {
-    await AcePerkService.delete(req.params.id);
+    await AcePerkService.delete(req.params.id as string);
     res.json({ status: true });
   };
 }

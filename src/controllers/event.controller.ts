@@ -59,7 +59,7 @@ export class EventController {
     try {
       const { orgId, eventId } = req.params;
 
-      const event = await EventService.getEventById(orgId, eventId);
+      const event = await EventService.getEventById(orgId as string, eventId as string);
 
       if (!event) {
         return res.status(404).json({
@@ -223,7 +223,7 @@ export class EventController {
       }
 
       /* ---------- CALL SERVICE ---------- */
-      const data = await EventService.updateEvent(eventIdentity, payload);
+      const data = await EventService.updateEvent(eventIdentity as string, payload);
 
       return res.status(200).json({
         status: true,
@@ -247,7 +247,7 @@ export class EventController {
       const { orgId, eventId } = req.params;
 
       // Delete event
-      const deleted = await EventService.deleteEvent(orgId, eventId);
+      const deleted = await EventService.deleteEvent(orgId as string, eventId as string);
 
       // Success response
       res.json({
@@ -290,7 +290,7 @@ export class EventController {
     try {
       const { slug } = req.params;
 
-      const event = await EventService.getSingleEventBySlug(slug);
+      const event = await EventService.getSingleEventBySlug(slug as string);
 
       if (!event) {
         return res.status(200).json({
@@ -425,12 +425,12 @@ export class EventController {
   }
 
   static async autoSave(req: Request, res: Response) {
-    await EventService.autoSaveEvent(req.params.id, req.body);
+    await EventService.autoSaveEvent(req.params.id as string, req.body);
     res.json({ status: true });
   }
 
   static async publishEvent(req: Request, res: Response) {
-    const event = await EventService.publishEvent(req.params.id, req.body);
+    const event = await EventService.publishEvent(req.params.id as string, req.body);
     res.json({ status: true, data: event });
   }
 }
