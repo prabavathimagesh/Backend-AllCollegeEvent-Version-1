@@ -9,6 +9,7 @@ const { seedAceAccommodation } = require("./seeds/accommodation.seed.ts");
 const { seedOrgCategory } = require("./seeds/orgCategory.seed.ts");
 
 
+//test
 // Initialize Prisma client
 const prisma = new PrismaClient();
 
