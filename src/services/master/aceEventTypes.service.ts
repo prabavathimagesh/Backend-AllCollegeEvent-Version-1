@@ -10,4 +10,10 @@ export class AceEventTypesService {
   static getByCategory(categoryIdentity: string) {
     return prisma.aceEventTypes.findMany({ where: { categoryIdentity } });
   }
+
+  static getAll() {
+    return prisma.aceEventTypes.findMany({
+      orderBy: { name: "asc" }, // optional but recommended
+    });
+  }
 }
