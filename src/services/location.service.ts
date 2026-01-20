@@ -162,7 +162,7 @@ export class LocationService {
 
   static async getCityById(id: string) {
     return await prisma.city.findUnique({
-      where: { id },
+      where: { identity:id },
       include: {
         state: {
           include: {
