@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { DecodedToken } from "../types/type";
-import prisma from "../prisma/client"; // adjust path if needed
+const prisma = require("../../config/db.config");
 
 export const authMiddleware = async (
   req: Request,
@@ -32,10 +32,10 @@ export const authMiddleware = async (
       throw new Error("JWT_SECRET not configured");
     }
 
-    // ✅ Verify JWT
+    //  Verify JWT
     const decoded = jwt.verify(token, secret) as DecodedToken;
 
-    // ✅ DB validation based on type
+    //  DB validation based on type
     if (decoded.type === "org") {
       const org = await prisma.org.findUnique({
         where: { identity: decoded.identity },

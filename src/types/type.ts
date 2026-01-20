@@ -26,10 +26,20 @@ export interface EventType {
   };
 }
 
+// export interface DecodedToken {
+//   identity: string;
+//   roleId: number;
+//   email: string;
+// }
+
 export interface DecodedToken {
+  id: number;
   identity: string;
-  roleId: number;
   email: string;
+  roleId: string;
+  type: "user" | "org";
+  iat?: number;
+  exp?: number;
 }
 
 export interface JwtPayload {
