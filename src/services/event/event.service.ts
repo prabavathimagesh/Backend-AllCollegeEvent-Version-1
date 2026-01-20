@@ -824,7 +824,20 @@ export class EventFilterService {
     if (pricingSet) filterSets.push(pricingSet);
 
     // Perform set intersection to get common event identities
-    const finalEventIdentities = this.intersectSets(filterSets);
+    let finalEventIdentities = this.intersectSets(filterSets);
+
+    // CRITICAL FIX: If any filter was applied and returned an empty set,
+    // we should have NO results (not all results)
+    // Check if we had filters but got no matches
+    const hadActiveFilters = filterSets.length > 0;
+    if (hadActiveFilters && finalEventIdentities.size === 0) {
+      // Return empty result immediately - no need to query database
+      return {
+        events: [],
+        total: 0,
+        executionTime: Date.now() - startTime,
+      };
+    }
 
     // Build Prisma where clause for main event table filters
     const whereClause: any = {
