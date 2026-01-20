@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { DecodedToken } from "../types/type";
-const prisma = require("../../config/db.config");
+const prisma = require("../config/db.config");
 
 export const authMiddleware = async (
   req: Request,
@@ -62,7 +62,7 @@ export const authMiddleware = async (
       }
     }
 
-    // ✅ Attach decoded token to request
+    // Attach decoded token to request
     (req as any).user = decoded;
 
     next();
