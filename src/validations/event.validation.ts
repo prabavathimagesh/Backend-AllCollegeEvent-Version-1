@@ -1,4 +1,6 @@
 import Joi from "joi";
+import { EventMode } from "@prisma/client";
+import { Request, Response, NextFunction } from "express";
 
 /**
  * Event-related request validations
@@ -90,7 +92,7 @@ export const eventValidation = {
     }),
   },
 
-    getAll1: {
+  getAll1: {
     params: Joi.object({
       orgId: Joi.string().required(),
     }),
@@ -116,4 +118,131 @@ export const eventValidation = {
       slug: Joi.string().required(),
     }),
   },
+};
+
+export const validateEventFilter = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { body } = req;
+
+  // Validate eventTypes
+  if (body.eventTypes) {
+    if (!Array.isArray(body.eventTypes)) {
+      return res.status(400).json({
+        success: false,
+        message: "eventTypes must be an array",
+      });
+    }
+
+    const validEventTypes = ["trending", "featured"];
+    const invalidTypes = body.eventTypes.filter(
+      (t: string) => !validEventTypes.includes(t),
+    );
+
+    if (invalidTypes.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid eventTypes: ${invalidTypes.join(", ")}`,
+      });
+    }
+  }
+
+  // Validate modes
+  if (body.modes) {
+    if (!Array.isArray(body.modes)) {
+      return res.status(400).json({
+        success: false,
+        message: "modes must be an array",
+      });
+    }
+
+    const validModes = Object.values(EventMode);
+    const invalidModes = body.modes.filter(
+      (m: string) => !validModes.includes(m as EventMode),
+    );
+
+    if (invalidModes.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid modes: ${invalidModes.join(", ")}`,
+      });
+    }
+  }
+
+  // Validate date range
+  if (body.dateRange) {
+    if (typeof body.dateRange !== "object") {
+      return res.status(400).json({
+        success: false,
+        message: "dateRange must be an object",
+      });
+    }
+
+    const { startDate, endDate } = body.dateRange;
+
+    if (startDate && endDate && startDate > endDate) {
+      return res.status(400).json({
+        success: false,
+        message: "startDate must be before endDate",
+      });
+    }
+  }
+
+  // Validate price range
+  if (body.priceRange) {
+    if (typeof body.priceRange !== "object") {
+      return res.status(400).json({
+        success: false,
+        message: "priceRange must be an object",
+      });
+    }
+
+    const { min, max } = body.priceRange;
+
+    if (min !== undefined && min < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "priceRange.min cannot be negative",
+      });
+    }
+
+    if (max !== undefined && max < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "priceRange.max cannot be negative",
+      });
+    }
+
+    if (min !== undefined && max !== undefined && min > max) {
+      return res.status(400).json({
+        success: false,
+        message: "priceRange.min must be less than priceRange.max",
+      });
+    }
+  }
+
+  // Validate pagination
+  if (body.page !== undefined) {
+    const page = parseInt(body.page);
+    if (isNaN(page) || page < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "page must be a positive number",
+      });
+    }
+  }
+
+  if (body.limit !== undefined) {
+    const limit = parseInt(body.limit);
+    if (isNaN(limit) || limit < 1 || limit > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "limit must be between 1 and 100",
+      });
+    }
+  }
+
+  next();
 };

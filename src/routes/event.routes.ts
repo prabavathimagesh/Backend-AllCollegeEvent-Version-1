@@ -1,11 +1,18 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/authMiddleware";
-import { EventController } from "../controllers/event.controller";
+import {
+  EventController,
+  EventFilterController,
+} from "../controllers/event.controller";
 import upload from "../middlewares/fileUpload";
 import { validate } from "../utils/validate";
-import { eventValidation } from "../validations/event.validation";
+import {
+  eventValidation,
+  validateEventFilter,
+} from "../validations/event.validation";
 
 const router = Router();
+const eventController = new EventFilterController();
 
 /**
  * @route GET /api/v1/organizations/:orgId/events
@@ -14,7 +21,7 @@ const router = Router();
 router.get(
   "/organizations/:slug/events",
   validate(eventValidation.getAll),
-  EventController.getOrgEvents
+  EventController.getOrgEvents,
 );
 
 /**
@@ -25,7 +32,7 @@ router.get(
   "/organizations/:orgId/events/:eventId",
   authMiddleware,
   validate(eventValidation.getSingle),
-  EventController.getEventById
+  EventController.getEventById,
 );
 
 /**
@@ -35,7 +42,7 @@ router.get(
 router.post(
   "/organizations/:orgId/events",
   upload.array("bannerImages", 5),
-  EventController.createEvent
+  EventController.createEvent,
 );
 
 /**
@@ -46,7 +53,7 @@ router.post(
 router.put(
   "/events/:eventIdentity",
   upload.array("bannerImages", 5), // multer
-  EventController.updateEvent
+  EventController.updateEvent,
 );
 
 /**
@@ -57,16 +64,21 @@ router.delete(
   "/organizations/:orgId/events/:eventId",
   authMiddleware,
   validate(eventValidation.deleteEvent),
-  EventController.deleteEvent
+  EventController.deleteEvent,
 );
 
+/**
+ * POST /api/events/filter
+ * Filter events with multiple criteria
+ */
+router.post("/filter", validateEventFilter, eventController.filterEvents);
 
 /* ----------------------- BULK UPDATE FOR EVENT TYPES ----------------------- */
 
 router.put(
   "/event-types/bulk/assets",
   upload.array("images", 50),
-  EventController.bulkUpdateAssets
+  EventController.bulkUpdateAssets,
 );
 
 /* ----------------------- PUBLIC EVENT ROUTES ----------------------- */
@@ -84,21 +96,21 @@ router.get("/events", EventController.getAllEvents);
 router.get(
   "/events/:slug",
   validate(eventValidation.getSinglePublicEvent),
-  EventController.getSingleEvent
+  EventController.getSingleEvent,
 );
 
 router.get("/event/statuses", EventController.getStatuses);
 
 router.post("/events/:slug/view", EventController.incrementEventView);
 
-// ---------------------------------- Draft Work 
+// ---------------------------------- Draft Work
 
 router.post("/events/draft", authMiddleware, EventController.createDraft);
 router.patch("/events/:id", authMiddleware, EventController.autoSave);
 router.post(
   "/events/:id/publish",
   authMiddleware,
-  EventController.publishEvent
+  EventController.publishEvent,
 );
 
 export default router;

@@ -1,8 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import { EventService } from "../services/event/event.service";
+import {
+  EventFilterService,
+  EventService,
+} from "../services/event/event.service";
 import { EVENT_MESSAGES } from "../constants/event.message";
 import { uploadToS3 } from "../utils/s3Upload";
-import { AuthRequest } from "../types/type";
+import { AuthRequest, EventFilterDTO } from "../types/type";
 
 /**
  * Event Controller
@@ -59,7 +62,10 @@ export class EventController {
     try {
       const { orgId, eventId } = req.params;
 
-      const event = await EventService.getEventById(orgId as string, eventId as string);
+      const event = await EventService.getEventById(
+        orgId as string,
+        eventId as string,
+      );
 
       if (!event) {
         return res.status(404).json({
@@ -139,7 +145,7 @@ export class EventController {
         perkIdentities: parseJSON(req.body.perkIdentities, []),
         accommodationIdentities: parseJSON(
           req.body.accommodationIdentities,
-          []
+          [],
         ),
 
         location: parseJSON(req.body.location, {}),
@@ -188,7 +194,7 @@ export class EventController {
 
       if (req.body.existingBannerImages !== undefined) {
         payload.existingBannerImages = JSON.parse(
-          req.body.existingBannerImages
+          req.body.existingBannerImages,
         );
       }
 
@@ -198,7 +204,7 @@ export class EventController {
 
       if (req.body.accommodationIdentities !== undefined) {
         payload.accommodationIdentities = JSON.parse(
-          req.body.accommodationIdentities
+          req.body.accommodationIdentities,
         );
       }
 
@@ -223,7 +229,10 @@ export class EventController {
       }
 
       /* ---------- CALL SERVICE ---------- */
-      const data = await EventService.updateEvent(eventIdentity as string, payload);
+      const data = await EventService.updateEvent(
+        eventIdentity as string,
+        payload,
+      );
 
       return res.status(200).json({
         status: true,
@@ -247,7 +256,10 @@ export class EventController {
       const { orgId, eventId } = req.params;
 
       // Delete event
-      const deleted = await EventService.deleteEvent(orgId as string, eventId as string);
+      const deleted = await EventService.deleteEvent(
+        orgId as string,
+        eventId as string,
+      );
 
       // Success response
       res.json({
@@ -430,7 +442,43 @@ export class EventController {
   }
 
   static async publishEvent(req: Request, res: Response) {
-    const event = await EventService.publishEvent(req.params.id as string, req.body);
+    const event = await EventService.publishEvent(
+      req.params.id as string,
+      req.body,
+    );
     res.json({ status: true, data: event });
   }
+}
+
+export class EventFilterController {
+  private filterService: EventFilterService;
+
+  constructor() {
+    this.filterService = new EventFilterService();
+  }
+
+  filterEvents = async (req: Request, res: Response) => {
+    try {
+      const filters: EventFilterDTO = req.body;
+
+      const result = await this.filterService.filterEvents(filters);
+
+      return res.status(200).json({
+        success: true,
+        data: result.events,
+        meta: {
+          total: result.total,
+          filtered: result.events.length,
+          executionTime: result.executionTime,
+        },
+      });
+    } catch (error) {
+      console.error("Event filter error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to filter events",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
 }

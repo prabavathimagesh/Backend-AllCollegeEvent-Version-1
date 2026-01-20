@@ -1,5 +1,11 @@
 const prisma = require("../../config/db.config");
-import { AssetItem, EventType, EventWithRelations } from "../../types/type";
+import {
+  AssetItem,
+  EventFilterDTO,
+  EventType,
+  EventWithRelations,
+  FilterResult,
+} from "../../types/type";
 import { EVENT_STATUS_LIST } from "../../constants/event.status.message";
 import { EVENT_MESSAGES } from "../../constants/event.message";
 import { getResolvedImageUrl } from "../../utils/s3SignedUrl";
@@ -299,7 +305,7 @@ export class EventService {
           location: col.member.location,
           hostIdentity: col.member.hostIdentity,
           hostCategoryName: col.member.hostIdentity
-            ? hostCategoryMap[col.member.hostIdentity] ?? null
+            ? (hostCategoryMap[col.member.hostIdentity] ?? null)
             : null,
         },
       });
@@ -334,7 +340,7 @@ export class EventService {
 
       perks: event.eventPerks.map((p: any) => p.perk),
       accommodations: event.eventAccommodations.map(
-        (a: any) => a.accommodation
+        (a: any) => a.accommodation,
       ),
 
       collaborators,
@@ -635,7 +641,7 @@ export class EventService {
 
   static async bulkUpdateAssets(
     items: AssetItem[],
-    files: Express.Multer.File[]
+    files: Express.Multer.File[],
   ) {
     await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       for (let i = 0; i < items.length; i++) {
@@ -775,5 +781,313 @@ export class EventService {
 
       return eventId;
     });
+  }
+}
+
+/**
+ * Event Filter Service using Optimized Set Intersection Algorithm
+ *
+ * ALGORITHM EXPLANATION:
+ * We use a Hash Set Intersection approach with early termination optimization.
+ * This is O(n + m) where n and m are the sizes of sets being intersected.
+ *
+ * Strategy:
+ * 1. Build individual filter result sets in parallel
+ * 2. Use Set data structure for O(1) lookup
+ * 3. Intersect sets progressively (early termination if empty)
+ * 4. Single final database query with filtered identities
+ *
+ * This approach is faster than multiple JOINs or sequential filtering
+ */
+export class EventFilterService {
+  async filterEvents(filters: EventFilterDTO): Promise<FilterResult> {
+    const startTime = Date.now();
+
+    // Collect all event identity sets from different filters
+    const filterSets: Set<string>[] = [];
+
+    // Run all independent filters in parallel for better performance
+    const [locationSet, perkSet, accommodationSet, dateSet, pricingSet] =
+      await Promise.all([
+        this.getLocationFilterSet(filters),
+        this.getPerkFilterSet(filters),
+        this.getAccommodationFilterSet(filters),
+        this.getDateFilterSet(filters),
+        this.getPricingFilterSet(filters),
+      ]);
+
+    // Add non-null sets to filterSets array
+    if (locationSet) filterSets.push(locationSet);
+    if (perkSet) filterSets.push(perkSet);
+    if (accommodationSet) filterSets.push(accommodationSet);
+    if (dateSet) filterSets.push(dateSet);
+    if (pricingSet) filterSets.push(pricingSet);
+
+    // Perform set intersection to get common event identities
+    const finalEventIdentities = this.intersectSets(filterSets);
+
+    // Build Prisma where clause for main event table filters
+    const whereClause: any = {
+      // If we have intersection results, filter by those identities
+      ...(finalEventIdentities.size > 0 && {
+        identity: { in: Array.from(finalEventIdentities) },
+      }),
+    };
+
+    // Apply direct event table filters
+    this.applyDirectFilters(whereClause, filters);
+
+    // Execute final query with all filters
+    const events = await prisma.event.findMany({
+      where: whereClause,
+      include: {
+        location: true,
+        calendars: true,
+        tickets: true,
+        eventPerks: { include: { perk: true } },
+        eventAccommodations: { include: { accommodation: true } },
+        cert: true,
+      },
+      skip: ((filters.page || 1) - 1) * (filters.limit || 20),
+      take: filters.limit || 20,
+      orderBy: { createdAt: "desc" },
+    });
+
+    const total = await prisma.event.count({ where: whereClause });
+
+    return {
+      events,
+      total,
+      executionTime: Date.now() - startTime,
+    };
+  }
+
+  /**
+   * Set Intersection Algorithm - O(n + m)
+   * Uses the smallest set as base for optimization
+   */
+  private intersectSets(sets: Set<string>[]): Set<string> {
+    if (sets.length === 0) return new Set();
+    if (sets.length === 1) return sets[0];
+
+    // Sort by size - start with smallest set for optimization
+    sets.sort((a, b) => a.size - b.size);
+
+    let result = new Set(sets[0]);
+
+    // Intersect with remaining sets
+    for (let i = 1; i < sets.length; i++) {
+      const intersection = new Set<string>();
+
+      for (const item of result) {
+        if (sets[i].has(item)) {
+          intersection.add(item);
+        }
+      }
+
+      result = intersection;
+
+      // Early termination - if intersection is empty, no need to continue
+      if (result.size === 0) break;
+    }
+
+    return result;
+  }
+
+  /**
+   * Apply filters that can be done directly on Event table
+   */
+  private applyDirectFilters(whereClause: any, filters: EventFilterDTO) {
+    // 1. Trending/Featured events
+    if (filters.eventTypes?.length) {
+      const orConditions = [];
+
+      if (filters.eventTypes.includes("trending")) {
+        orConditions.push({
+          viewCount: { gte: filters.trendingThreshold || 100 },
+        });
+      }
+
+      if (filters.eventTypes.includes("featured")) {
+        orConditions.push({ isPaid: true });
+      }
+
+      if (orConditions.length > 0) {
+        whereClause.OR = orConditions;
+      }
+    }
+
+    // 2. Mode filter
+    if (filters.modes?.length) {
+      whereClause.mode = { in: filters.modes };
+    }
+
+    // 4. Certification
+    if (filters.certIdentity) {
+      whereClause.certIdentity = filters.certIdentity;
+    }
+
+    // 7. Event Type
+    if (filters.eventTypeIdentity) {
+      whereClause.eventTypeIdentity = filters.eventTypeIdentity;
+    }
+
+    // 8. Eligible Departments (array overlap check)
+    if (filters.eligibleDeptIdentities?.length) {
+      whereClause.eligibleDeptIdentities = {
+        hasSome: filters.eligibleDeptIdentities,
+      };
+    }
+
+    // 11. Search by title
+    if (filters.searchText) {
+      whereClause.title = {
+        contains: filters.searchText,
+        mode: "insensitive",
+      };
+    }
+
+    // 12. Tags filter (array overlap)
+    if (filters.tags?.length) {
+      whereClause.tags = {
+        hasSome: filters.tags,
+      };
+    }
+  }
+
+  /**
+   * 3. Location Filter - Get event identities from location table
+   */
+  private async getLocationFilterSet(
+    filters: EventFilterDTO,
+  ): Promise<Set<string> | null> {
+    if (!filters.country && !filters.state && !filters.city) {
+      return null;
+    }
+
+    const locationWhere: any = {};
+
+    if (filters.country) locationWhere.country = filters.country;
+    if (filters.state) locationWhere.state = filters.state;
+    if (filters.city) locationWhere.city = filters.city;
+
+    const locations = await prisma.eventLocation.findMany({
+      where: locationWhere,
+      select: { eventIdentity: true },
+    });
+
+    return new Set(
+      locations.map((l: { eventIdentity: string }) => l.eventIdentity),
+    );
+  }
+
+  /**
+   * 5. Perks Filter - Union approach (OR logic)
+   */
+  private async getPerkFilterSet(
+    filters: EventFilterDTO,
+  ): Promise<Set<string> | null> {
+    if (!filters.perkIdentities?.length) {
+      return null;
+    }
+
+    const eventPerks = await prisma.eventPerk.findMany({
+      where: {
+        perkIdentity: { in: filters.perkIdentities },
+      },
+      select: { eventIdentity: true },
+    });
+
+    return new Set(
+      eventPerks.map((ep: { eventIdentity: string }) => ep.eventIdentity),
+    );
+  }
+
+  /**
+   * 6. Accommodation Filter - Union approach (OR logic)
+   */
+  private async getAccommodationFilterSet(
+    filters: EventFilterDTO,
+  ): Promise<Set<string> | null> {
+    if (!filters.accommodationIdentities?.length) {
+      return null;
+    }
+
+    const eventAccommodations = await prisma.eventAccommodation.findMany({
+      where: {
+        accommodationIdentity: { in: filters.accommodationIdentities },
+      },
+      select: { eventIdentity: true },
+    });
+
+    return new Set(
+      eventAccommodations.map(
+        (ea: { eventIdentity: string }) => ea.eventIdentity,
+      ),
+    );
+  }
+
+  /**
+   * 9. Date Range Filter
+   */
+  private async getDateFilterSet(
+    filters: EventFilterDTO,
+  ): Promise<Set<string> | null> {
+    if (!filters.dateRange?.startDate && !filters.dateRange?.endDate) {
+      return null;
+    }
+
+    const dateWhere: any = {};
+
+    if (filters.dateRange.startDate) {
+      dateWhere.startDate = { gte: filters.dateRange.startDate };
+    }
+
+    if (filters.dateRange.endDate) {
+      dateWhere.endDate = { lte: filters.dateRange.endDate };
+    }
+
+    const calendars = await prisma.eventCalendar.findMany({
+      where: dateWhere,
+      select: { eventIdentity: true },
+    });
+
+    return new Set(
+      calendars.map((c: { eventIdentity: string }) => c.eventIdentity),
+    );
+  }
+
+  /**
+   * 10. Pricing Filter
+   */
+  private async getPricingFilterSet(
+    filters: EventFilterDTO,
+  ): Promise<Set<string> | null> {
+    if (!filters.priceRange?.min && !filters.priceRange?.max) {
+      return null;
+    }
+
+    const priceWhere: any = {};
+
+    if (filters.priceRange.min !== undefined) {
+      priceWhere.price = { gte: filters.priceRange.min };
+    }
+
+    if (filters.priceRange.max !== undefined) {
+      priceWhere.price = {
+        ...priceWhere.price,
+        lte: filters.priceRange.max,
+      };
+    }
+
+    const tickets = await prisma.ticket.findMany({
+      where: priceWhere,
+      select: { eventIdentity: true },
+      distinct: ["eventIdentity"],
+    });
+
+    return new Set(
+      tickets.map((t: { eventIdentity: string }) => t.eventIdentity),
+    );
   }
 }

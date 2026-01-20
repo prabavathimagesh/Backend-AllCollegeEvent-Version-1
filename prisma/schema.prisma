@@ -8,180 +8,138 @@ datasource db {
 }
 
 model Role {
-  id    Int    @id @default(autoincrement())
-  idnty String @unique @default(uuid())
-
-  name  String
+  id    Int     @id @default(autoincrement())
+  idnty String  @unique @default(uuid())
+  name  String  @unique
   isDel Boolean @default(false)
-
-  users User[]
   orgs  Org[]
+  users User[]
 
-  @@unique([name])
   @@map("ace_role")
 }
 
 model User {
-  identity String @id @default(uuid())
-  id       Int    @unique @default(autoincrement())
-
-  name     String
-  email    String @unique
-  password String
-
-  phone        String?
-  city         String?
-  state        String?
-  country      String?
-  profileImage String?
-
-  isDeleted   Boolean   @default(false)
-  isActive    Boolean?  @default(false)
-  lastLoginAt DateTime?
-
-  roleId Int?
-  role   Role? @relation(fields: [roleId], references: [id])
-
-  isAdminCreated Boolean @default(false)
+  identity       String          @id @default(uuid())
+  id             Int             @unique @default(autoincrement())
+  name           String
+  email          String          @unique
+  password       String
+  phone          String?
+  city           String?
+  state          String?
+  country        String?
+  profileImage   String?
+  isDeleted      Boolean         @default(false)
+  isActive       Boolean?        @default(false)
+  lastLoginAt    DateTime?
+  roleId         Int?
+  isAdminCreated Boolean         @default(false)
   adminCreatedBy String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  otps          OTP[]
-  SocialAccount SocialAccount[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  otps           OTP[]
+  SocialAccount  SocialAccount[]
+  role           Role?           @relation(fields: [roleId], references: [id])
 
   @@map("ace_user")
 }
 
 model Org {
-  identity String @id @default(uuid())
-  id       Int    @unique @default(autoincrement())
-
-  domainEmail String @unique
-  password    String
-
-  slug                 String? @unique
+  identity             String          @id @default(uuid())
+  id                   Int             @unique @default(autoincrement())
+  domainEmail          String          @unique
+  password             String
   organizationName     String
   organizationCategory String
   city                 String
   state                String
   country              String
   profileImage         String?
-
-  eventCount Int     @default(0)
-  isDeleted  Boolean @default(false)
-  isVerified Boolean @default(false)
-
-  roleId Int?
-  role   Role? @relation(fields: [roleId], references: [id])
-
-  updatedAt DateTime? @updatedAt
-  isActive  Boolean?  @default(true)
-  logoUrl   String?
-  website   String?
-
-  isAdminCreated Boolean @default(false)
-  adminCreatedBy String?
-
-  createdAt DateTime @default(now())
-
-  otps         OTP[]
-  events       Event[]
-  Collaborator Collaborator[]
-
-  socialLinks OrgSocialLink[]
+  eventCount           Int             @default(0)
+  isDeleted            Boolean         @default(false)
+  isVerified           Boolean         @default(false)
+  roleId               Int?
+  updatedAt            DateTime?       @updatedAt
+  isActive             Boolean?        @default(true)
+  logoUrl              String?
+  website              String?
+  isAdminCreated       Boolean         @default(false)
+  adminCreatedBy       String?
+  createdAt            DateTime        @default(now())
+  slug                 String?         @unique
+  Collaborator         Collaborator[]
+  events               Event[]
+  role                 Role?           @relation(fields: [roleId], references: [id])
+  socialLinks          OrgSocialLink[]
+  otps                 OTP[]
 
   @@map("ace_org")
 }
 
 model OrgSocialLink {
-  identity String @id @default(uuid())
-
+  identity    String   @id @default(uuid())
   orgIdentity String
-  platform    String // facebook, instagram, youtube, x, telegram, whatsapp
+  platform    String
   url         String
-
-  org Org @relation(fields: [orgIdentity], references: [identity], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  org         Org      @relation(fields: [orgIdentity], references: [identity], onDelete: Cascade)
 
   @@unique([orgIdentity, platform])
   @@map("ace_org_social_link")
 }
 
 model OTP {
-  identity String @id @default(uuid())
-  id       Int    @unique @default(autoincrement())
-
-  email   String
-  code    String
-  purpose String
-
-  expiresAt DateTime?
-  createdAt DateTime  @default(now())
-
-  usedAt    DateTime?
-  ipAddress String?
-
-  updatedAt DateTime? @updatedAt
-
+  identity     String    @id @default(uuid())
+  id           Int       @unique @default(autoincrement())
+  email        String
+  code         String
+  purpose      String
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  usedAt       DateTime?
+  ipAddress    String?
+  updatedAt    DateTime? @updatedAt
   userIdentity String?
-  user         User?   @relation(fields: [userIdentity], references: [identity], onDelete: Cascade)
-
-  orgIdentity String?
-  org         Org?    @relation(fields: [orgIdentity], references: [identity], onDelete: Cascade)
+  orgIdentity  String?
+  org          Org?      @relation(fields: [orgIdentity], references: [identity], onDelete: Cascade)
+  user         User?     @relation(fields: [userIdentity], references: [identity], onDelete: Cascade)
 
   @@map("ace_otp")
 }
 
-// ENUM FOR EVENT STATUS
-enum EventStatus {
-  DRAFT
-  PENDING
-  APPROVED
-  REJECTED
-  PRIVATE
-}
-
 model AuthProvider {
-  identity     String   @id @default(uuid())
-  id           Int      @unique @default(autoincrement())
-  providerName String
-  displayName  String
-  status       Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
+  identity       String          @id @default(uuid())
+  id             Int             @unique @default(autoincrement())
+  providerName   String
+  displayName    String
+  status         Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   socialAccounts SocialAccount[]
 
   @@map("ace_auth_provider")
 }
 
 model SocialAccount {
-  identity       String  @id @default(uuid())
-  id             Int     @unique @default(autoincrement())
+  identity       String       @id @default(uuid())
+  id             Int          @unique @default(autoincrement())
   userId         String
   providerId     String
   providerUserId String?
   providerEmail  String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user     User         @relation(fields: [userId], references: [identity])
-  provider AuthProvider @relation(fields: [providerId], references: [identity])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  provider       AuthProvider @relation(fields: [providerId], references: [identity])
+  user           User         @relation(fields: [userId], references: [identity])
 
   @@map("ace_social_account")
 }
 
 model AcePerk {
-  identity String @id @default(uuid()) @map("identity")
-  id       Int    @unique @default(autoincrement())
-
-  perkName String @unique @map("perk_name")
-
+  identity  String      @id @default(uuid()) @map("identity")
+  id        Int         @unique @default(autoincrement())
+  perkName  String      @unique @map("perk_name")
   createdAt DateTime    @default(now()) @map("created_at")
   updatedAt DateTime    @updatedAt @map("updated_at")
   EventPerk EventPerk[]
@@ -190,11 +148,9 @@ model AcePerk {
 }
 
 model AceCertification {
-  identity String @id @default(uuid()) @map("identity")
-  id       Int    @unique @default(autoincrement())
-
-  certName String @unique @map("cert_name")
-
+  identity  String   @id @default(uuid()) @map("identity")
+  id        Int      @unique @default(autoincrement())
+  certName  String   @unique @map("cert_name")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   Event     Event[]
@@ -203,11 +159,9 @@ model AceCertification {
 }
 
 model AceCategoryType {
-  identity String @id @default(uuid()) @map("identity")
-  id       Int    @unique @default(autoincrement())
-
-  categoryName String @unique @map("category_name")
-
+  identity      String          @id @default(uuid()) @map("identity")
+  id            Int             @unique @default(autoincrement())
+  categoryName  String          @unique @map("category_name")
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt @map("updated_at")
   AceEventTypes AceEventTypes[]
@@ -216,29 +170,24 @@ model AceCategoryType {
 }
 
 model AceEventTypes {
-  identity String @id @default(uuid())
-  id       Int    @unique @default(autoincrement())
-
-  name     String
-  imageUrl String?   @map("image_url") // S3 URL
-  color    String?   // hex like
-
+  identity         String          @id @default(uuid())
+  id               Int             @unique @default(autoincrement())
+  name             String
   categoryIdentity String          @map("category_identity")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+  color            String?
+  imageUrl         String?         @map("image_url")
   category         AceCategoryType @relation(fields: [categoryIdentity], references: [identity])
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([name, categoryIdentity])
   @@map("ace_event_types")
 }
 
 model AceAccommodation {
-  identity String @id @default(uuid()) @map("identity")
-  id       Int    @unique @default(autoincrement())
-
-  accommodationName String @unique @map("accommodation_name")
-
+  identity           String               @id @default(uuid()) @map("identity")
+  id                 Int                  @unique @default(autoincrement())
+  accommodationName  String               @unique @map("accommodation_name")
   createdAt          DateTime             @default(now()) @map("created_at")
   updatedAt          DateTime             @updatedAt @map("updated_at")
   EventAccommodation EventAccommodation[]
@@ -247,167 +196,122 @@ model AceAccommodation {
 }
 
 model OrgCategory {
-  identity String @id @default(uuid()) @map("identity")
-  id       Int    @unique @default(autoincrement())
-
-  categoryName String @unique @map("category_name")
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  identity     String   @id @default(uuid()) @map("identity")
+  id           Int      @unique @default(autoincrement())
+  categoryName String   @unique @map("category_name")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   @@map("ace_org_category")
 }
 
 model Event {
-  identity String @id @default(uuid())
-  id       Int    @unique @default(autoincrement())
-
-  // Organization
-  orgIdentity         String
-  orgCategoryIdentity String?
-  createdBy           Int?
-
-  // Core Event
-  title       String      @default("")
-  slug        String?     @unique
-  description String?
-  offers      String?
-  mode        EventMode   @default(ONLINE)
-  status      EventStatus @default(PENDING)
-
-  // Category & Type
-  categoryIdentity  String?
-  eventTypeIdentity String?
-
-  // Certification (NEW)
-  certIdentity String? // FK to AceCertification
-
-  viewCount   Int      @default(0)
-
-  // Eligibility
+  identity               String               @id @default(uuid())
+  id                     Int                  @unique @default(autoincrement())
+  orgIdentity            String
+  createdBy              Int?
+  title                  String               @default("")
+  slug                   String?              @unique
+  description            String?
+  publishedAt            DateTime?
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  status                 EventStatus          @default(PENDING)
+  bannerImages           String[]
+  categoryIdentity       String?
   eligibleDeptIdentities String[]
-
-  // Tags
-  tags String[]
-
-  // Media
-  bannerImages String[]
-  videoLink    String?
-  eventLink    String?
-  socialLinks  Json?
-
-  // Payment
-  paymentLink String?
-
-  // Relations
-  org  Org               @relation(fields: [orgIdentity], references: [identity])
-  cert AceCertification? @relation(fields: [certIdentity], references: [identity])
-
-  location EventLocation?
-
-  calendars           EventCalendar[]
-  tickets             Ticket[]
-  eventPerks          EventPerk[]
-  eventAccommodations EventAccommodation[]
-
-  publishedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  Collaborator Collaborator[]
+  eventLink              String?
+  eventTypeIdentity      String?
+  offers                 String?
+  orgCategoryIdentity    String?
+  paymentLink            String?
+  socialLinks            Json?
+  tags                   String[]
+  videoLink              String?
+  mode                   EventMode            @default(ONLINE)
+  certIdentity           String?
+  viewCount              Int                  @default(0)
+  isPaid                 Boolean              @default(false)
+  Collaborator           Collaborator[]
+  cert                   AceCertification?    @relation(fields: [certIdentity], references: [identity])
+  org                    Org                  @relation(fields: [orgIdentity], references: [identity])
+  eventAccommodations    EventAccommodation[]
+  calendars              EventCalendar[]
+  location               EventLocation?
+  eventPerks             EventPerk[]
+  tickets                Ticket[]
 
   @@map("ace_event")
 }
 
 model EventLocation {
-  identity String @id @default(uuid())
-
-  eventIdentity String @unique
-  event         Event  @relation(fields: [eventIdentity], references: [identity], onDelete: Cascade)
-
-  // ONLINE
+  identity       String   @id @default(uuid())
+  eventIdentity  String   @unique
   onlineMeetLink String?
-
-  // OFFLINE
-  country String?
-  state   String?
-  city    String?
-  venue   String?
-  mapLink String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  country        String?
+  state          String?
+  city           String?
+  mapLink        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  venue          String?
+  event          Event    @relation(fields: [eventIdentity], references: [identity], onDelete: Cascade)
 
   @@map("ace_event_location")
 }
 
 model CollaboratorMember {
-  identity String @id @default(uuid())
-  id       Int    @unique @default(autoincrement())
-
-  organizerNumber  String  @unique
-  hostIdentity     String? // just a value, NO relation
-  organizerName    String?
-  organizationName String?
-  orgDept          String?
+  identity         String         @id @default(uuid())
+  id               Int            @unique @default(autoincrement())
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  hostIdentity     String?
   location         String?
-
-  collaborations Collaborator[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  orgDept          String?
+  organizationName String?
+  organizerName    String?
+  organizerNumber  String         @unique
+  collaborations   Collaborator[]
 
   @@map("ace_collaborator_members")
 }
 
 model Collaborator {
-  identity String @id @default(uuid())
-  id       Int    @unique @default(autoincrement())
-
+  identity             String             @id @default(uuid())
+  id                   Int                @unique @default(autoincrement())
   collaboratorMemberId String
+  orgIdentity          String
   eventIdentity        String
-  orgIdentity          String // event creator org
+  role                 String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  member               CollaboratorMember @relation(fields: [collaboratorMemberId], references: [identity])
+  event                Event              @relation(fields: [eventIdentity], references: [identity])
+  org                  Org                @relation(fields: [orgIdentity], references: [identity])
 
-  role String? // primary_host | co_host | speaker | organizer
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  member CollaboratorMember @relation(fields: [collaboratorMemberId], references: [identity])
-  event  Event              @relation(fields: [eventIdentity], references: [identity])
-  org    Org                @relation(fields: [orgIdentity], references: [identity])
-
-  // Prevent duplicate collaborator per event
   @@unique([collaboratorMemberId, eventIdentity])
   @@map("ace_collaborator")
 }
 
 model EventCalendar {
-  identity String @id @default(uuid())
-
+  identity      String   @id @default(uuid())
   eventIdentity String
   timeZone      String
-
-  startDate String
-  endDate   String
-  startTime String?
-  endTime   String?
-
-  event Event @relation(fields: [eventIdentity], references: [identity])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  startDate     String
+  endDate       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  endTime       String?
+  startTime     String?
+  event         Event    @relation(fields: [eventIdentity], references: [identity])
 
   @@map("ace_event_calendar")
 }
 
 model Ticket {
-  identity String @id @default(uuid())
-  id       Int    @unique @default(autoincrement())
-
+  identity      String   @id @default(uuid())
+  id            Int      @unique @default(autoincrement())
   eventIdentity String
-
   name          String
   description   String?
   sellingFrom   DateTime
@@ -415,11 +319,9 @@ model Ticket {
   isPaid        Boolean  @default(false)
   price         Float?
   totalQuantity Int
-
-  event Event @relation(fields: [eventIdentity], references: [identity])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  event         Event    @relation(fields: [eventIdentity], references: [identity])
 
   @@map("ace_event_ticket")
 }
@@ -427,12 +329,10 @@ model Ticket {
 model EventPerk {
   eventIdentity String
   perkIdentity  String
-
-  event Event   @relation(fields: [eventIdentity], references: [identity])
-  perk  AcePerk @relation(fields: [perkIdentity], references: [identity])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  event         Event    @relation(fields: [eventIdentity], references: [identity])
+  perk          AcePerk  @relation(fields: [perkIdentity], references: [identity])
 
   @@id([eventIdentity, perkIdentity])
   @@map("ace_event_perk")
@@ -441,29 +341,20 @@ model EventPerk {
 model EventAccommodation {
   eventIdentity         String
   accommodationIdentity String
-
-  event         Event            @relation(fields: [eventIdentity], references: [identity])
-  accommodation AceAccommodation @relation(fields: [accommodationIdentity], references: [identity])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  accommodation         AceAccommodation @relation(fields: [accommodationIdentity], references: [identity])
+  event                 Event            @relation(fields: [eventIdentity], references: [identity])
 
   @@id([eventIdentity, accommodationIdentity])
   @@map("ace_event_accommodation")
 }
 
-// ENUM for EVENT MODE
-enum EventMode {
-  ONLINE
-  OFFLINE
-  HYBRID
-}
-
 model Country {
-  identity        String   @id @default(uuid())
+  identity  String   @id @default(uuid())
   name      String   @unique
-  code      String?   @unique // ISO 3166-1 alpha-2 code (e.g., "IN", "US")
-  phoneCode String?  // e.g., "+91", "+1"
+  code      String?  @unique
+  phoneCode String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   states    State[]
@@ -472,28 +363,41 @@ model Country {
 }
 
 model State {
-  identity        String   @id @default(uuid())
+  identity  String   @id @default(uuid())
   name      String
-  code      String?  // State code (e.g., "TN", "CA")
+  code      String?
   countryId String
-  country   Country  @relation(fields: [countryId], references: [identity], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   cities    City[]
+  country   Country  @relation(fields: [countryId], references: [identity], onDelete: Cascade)
 
   @@unique([name, countryId])
   @@map("ace_states")
 }
 
 model City {
-  identity        String   @id @default(uuid())
+  identity  String   @id @default(uuid())
   name      String
   stateId   String
-  state     State    @relation(fields: [stateId], references: [identity], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  state     State    @relation(fields: [stateId], references: [identity], onDelete: Cascade)
 
   @@unique([name, stateId])
   @@map("ace_cities")
 }
 
+enum EventStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  PRIVATE
+}
+
+enum EventMode {
+  ONLINE
+  OFFLINE
+  HYBRID
+}

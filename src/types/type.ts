@@ -1,5 +1,6 @@
 import { Request } from "express";
 import { Prisma } from "@prisma/client";
+import { EventMode } from "@prisma/client";
 
 // types
 
@@ -106,3 +107,60 @@ export type AssetItem = {
   identity: string;
   color?: string;
 };
+
+export interface EventFilterDTO {
+  // 1. Events filter (trending/featured)
+  eventTypes?: ("trending" | "featured")[];
+  trendingThreshold?: number; // viewCount threshold for trending
+
+  // 2. Mode
+  modes?: EventMode[]; // OFFLINE, ONLINE, HYBRID
+
+  // 3. Location (single choice)
+  country?: string;
+  state?: string;
+  city?: string;
+
+  // 4. Certification (single choice)
+  certIdentity?: string;
+
+  // 5. Perks (multi choice)
+  perkIdentities?: string[];
+
+  // 6. Accommodation (multi choice)
+  accommodationIdentities?: string[];
+
+  // 7. Type (single choice)
+  eventTypeIdentity?: string;
+
+  // 8. Eligible department (multi choice)
+  eligibleDeptIdentities?: string[];
+
+  // 9. Date range
+  dateRange?: {
+    startDate?: string;
+    endDate?: string;
+  };
+
+  // 10. Pricing
+  priceRange?: {
+    min?: number;
+    max?: number;
+  };
+
+  // 11. Name/Title search
+  searchText?: string;
+
+  // 12. Tags
+  tags?: string[];
+
+  // Pagination
+  page?: number;
+  limit?: number;
+}
+
+export interface FilterResult {
+  events: any[];
+  total: number;
+  executionTime: number;
+}
