@@ -73,6 +73,10 @@ router.delete(
  */
 router.post("/filter", validateEventFilter, eventController.filterEvents);
 
+router.post("/events/save", authMiddleware, EventController.toggleSaveEvent);
+
+router.post("/events/like", authMiddleware, EventController.likeEvent);
+
 /* ----------------------- BULK UPDATE FOR EVENT TYPES ----------------------- */
 
 router.put(

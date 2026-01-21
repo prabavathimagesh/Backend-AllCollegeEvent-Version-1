@@ -637,6 +637,44 @@ export class EventService {
     return true;
   }
 
+  static async toggleSave(eventIdentity: string, userIdentity: string) {
+    const existing = await prisma.eventSave.findFirst({
+      where: { eventIdentity, userIdentity },
+    });
+
+    if (existing) {
+      await prisma.eventSave.delete({
+        where: { identity: existing.identity },
+      });
+      return { saved: false };
+    }
+
+    await prisma.eventSave.create({
+      data: { eventIdentity, userIdentity },
+    });
+
+    return { saved: true };
+  }
+
+  static async updateLike(eventIdentity: string, action: "like" | "unlike") {
+    const incrementValue = action === "like" ? 1 : -1;
+
+    const updatedEvent = await prisma.event.update({
+      where: { identity: eventIdentity },
+      data: {
+        likeCount: {
+          increment: incrementValue,
+        },
+      },
+      select: {
+        identity: true,
+        likeCount: true,
+      },
+    });
+
+    return updatedEvent;
+  }
+
   /* ----------------------- BULK UPDATE FOR EVENT TYPES ----------------------- */
 
   static async bulkUpdateAssets(
@@ -952,19 +990,22 @@ export class EventFilterService {
       };
     }
 
-    // 11. Search by title
+    // 11 + 12. Unified Search (title OR tags)
     if (filters.searchText) {
-      whereClause.title = {
-        contains: filters.searchText,
-        mode: "insensitive",
-      };
-    }
-
-    // 12. Tags filter (array overlap)
-    if (filters.tags?.length) {
-      whereClause.tags = {
-        hasSome: filters.tags,
-      };
+      const search = filters.searchText.toLowerCase();
+      whereClause.OR = [
+        {
+          title: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          tags: {
+            has: search,
+          },
+        },
+      ];
     }
   }
 

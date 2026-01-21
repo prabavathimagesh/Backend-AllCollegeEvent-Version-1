@@ -114,50 +114,50 @@ export type AssetItem = {
 
 export interface EventFilterDTO {
   // 1. Events filter (trending/featured)
-  eventTypes?: ("trending" | "featured")[];
+  eventTypes?: ('trending' | 'featured')[];
   trendingThreshold?: number; // viewCount threshold for trending
-
+  
   // 2. Mode
   modes?: EventMode[]; // OFFLINE, ONLINE, HYBRID
-
+  
   // 3. Location (single choice)
   country?: string;
   state?: string;
   city?: string;
-
+  
   // 4. Certification (single choice)
   certIdentity?: string;
-
+  
   // 5. Perks (multi choice)
   perkIdentities?: string[];
-
+  
   // 6. Accommodation (multi choice)
   accommodationIdentities?: string[];
-
+  
   // 7. Type (single choice)
   eventTypeIdentity?: string;
-
+  
   // 8. Eligible department (multi choice)
   eligibleDeptIdentities?: string[];
-
+  
   // 9. Date range
   dateRange?: {
     startDate?: string;
     endDate?: string;
   };
-
+  
   // 10. Pricing
   priceRange?: {
     min?: number;
     max?: number;
   };
-
-  // 11. Name/Title search
+  
+  // 11. Search (title AND tags combined)
   searchText?: string;
-
-  // 12. Tags
-  tags?: string[];
-
+  
+  // 12. Sorting
+  sortBy?: 'viewCount' | 'titleAsc' | 'titleDesc' | 'recentlyAdded';
+  
   // Pagination
   page?: number;
   limit?: number;

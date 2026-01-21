@@ -171,6 +171,22 @@ export const validateEventFilter = (
     }
   }
 
+  // Validate sortBy
+  if (body.sortBy) {
+    const validSortOptions = [
+      "viewCount",
+      "titleAsc",
+      "titleDesc",
+      "recentlyAdded",
+    ];
+    if (!validSortOptions.includes(body.sortBy)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid sortBy. Must be one of: ${validSortOptions.join(", ")}`,
+      });
+    }
+  }
+
   // Validate date range
   if (body.dateRange) {
     if (typeof body.dateRange !== "object") {

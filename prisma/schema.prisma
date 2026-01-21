@@ -232,6 +232,8 @@ model Event {
   certIdentity           String?
   viewCount              Int                  @default(0)
   isPaid                 Boolean              @default(false)
+  likeCount              Int                  @default(0)
+  shareCount             Int                  @default(0)
   Collaborator           Collaborator[]
   cert                   AceCertification?    @relation(fields: [certIdentity], references: [identity])
   org                    Org                  @relation(fields: [orgIdentity], references: [identity])
@@ -406,6 +408,16 @@ model AceEligibleDepartment {
   updatedAt DateTime @updatedAt
 
   @@map("ace_eligible_department")
+}
+
+model EventSave {
+  identity      String   @id @default(uuid())
+  eventIdentity String
+  userIdentity  String
+  createdAt     DateTime @default(now())
+
+  @@unique([eventIdentity, userIdentity])
+  @@map("ace_event_save")
 }
 
 enum EventStatus {

@@ -383,6 +383,77 @@ export class EventController {
     }
   }
 
+  static async toggleSaveEvent(req: Request, res: Response) {
+    try {
+      const { eventIdentity, userIdentity } = req.body;
+
+      // Basic validation
+      if (!eventIdentity || !userIdentity) {
+        return res.status(400).json({
+          status: false,
+          message: "eventIdentity and userIdentity are required",
+        });
+      }
+
+      const result = await EventService.toggleSave(
+        eventIdentity,
+        userIdentity,
+      );
+
+      return res.status(200).json({
+        status: true,
+        message: result.saved
+          ? "Event saved successfully"
+          : "Event removed from saved list",
+        data: result,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        status: false,
+        message: error.message,
+      });
+    }
+  }
+
+   static async likeEvent(req: Request, res: Response) {
+    try {
+      const { eventIdentity, action } = req.body;
+
+      if (!eventIdentity || !action) {
+        return res.status(400).json({
+          status: false,
+          message: "eventIdentity and action are required",
+        });
+      }
+
+      if (!["like", "unlike"].includes(action)) {
+        return res.status(400).json({
+          status: false,
+          message: "action must be either 'like' or 'unlike'",
+        });
+      }
+
+      const data = await EventService.updateLike(
+        eventIdentity,
+        action
+      );
+
+      return res.status(200).json({
+        status: true,
+        message:
+          action === "like"
+            ? "Event liked successfully"
+            : "Event unliked successfully",
+        data,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        status: false,
+        message: error.message,
+      });
+    }
+  }
+
   /* ----------------------- BULK UPDATE FOR EVENT TYPES ----------------------- */
 
   static async bulkUpdateAssets(req: Request, res: Response) {
@@ -464,7 +535,7 @@ export class EventFilterController {
       const result = await this.filterService.filterEvents(filters);
 
       return res.status(200).json({
-        success: true,
+        status: true,
         data: result.events,
         meta: {
           total: result.total,
@@ -475,7 +546,7 @@ export class EventFilterController {
     } catch (error) {
       console.error("Event filter error:", error);
       return res.status(500).json({
-        success: false,
+        status: false,
         message: "Failed to filter events",
         error: error instanceof Error ? error.message : "Unknown error",
       });
