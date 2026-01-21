@@ -901,7 +901,7 @@ export class EventFilterService {
       },
       skip: ((filters.page || 1) - 1) * (filters.limit || 20),
       take: filters.limit || 20,
-      orderBy: { createdAt: "desc" },
+      orderBy: this.getOrderBy(filters), // sorting applied here
     });
 
     const total = await prisma.event.count({ where: whereClause });
@@ -1181,5 +1181,30 @@ export class EventFilterService {
     return new Set(
       tickets.map((t: { eventIdentity: string }) => t.eventIdentity),
     );
+  }
+
+  /**
+   * Resolve sorting based on filter option
+   * Does NOT affect filtering logic
+   */
+  private getOrderBy(filters: EventFilterDTO) {
+    switch (filters.sortBy) {
+      case "A_Z":
+        return { title: "asc" };
+
+      case "Z_A":
+        return { title: "desc" };
+
+      case "MOST_VIEWED":
+        return { viewCount: "desc" };
+
+      case "RECENT":
+        // Prefer publishedAt, fallback to createdAt
+        return [{ publishedAt: "desc" }, { createdAt: "desc" }];
+
+      default:
+        // Existing default behavior
+        return { createdAt: "desc" };
+    }
   }
 }
