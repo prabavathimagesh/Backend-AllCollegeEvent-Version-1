@@ -388,6 +388,26 @@ model City {
   @@map("ace_cities")
 }
 
+model AceDepartment {
+  identity String @id @default(uuid())
+  name     String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ace_department")
+}
+
+model AceEligibleDepartment {
+  identity String @id @default(uuid())
+  name     String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ace_eligible_department")
+}
+
 enum EventStatus {
   DRAFT
   PENDING

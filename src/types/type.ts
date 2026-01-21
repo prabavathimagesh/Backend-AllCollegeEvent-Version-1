@@ -26,12 +26,6 @@ export interface EventType {
   };
 }
 
-// export interface DecodedToken {
-//   identity: string;
-//   roleId: number;
-//   email: string;
-// }
-
 export interface DecodedToken {
   id: number;
   identity: string;

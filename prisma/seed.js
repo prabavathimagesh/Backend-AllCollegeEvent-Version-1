@@ -8,7 +8,8 @@ const { seedAceEventTypes } = require("./seeds/aceEventTypes.seed.ts");
 const { seedAceAccommodation } = require("./seeds/accommodation.seed.ts");
 const { seedOrgCategory } = require("./seeds/orgCategory.seed.ts");
 const { seedCountries } = require("./seeds/countries.seed.ts");
-
+const { seedAceDepartment } = require("./seeds/aceDepartment.seed.ts");
+const { seedAceEligibleDepartment } = require("./seeds/aceEligibleDepartment.seed.ts");
 
 // Initialize Prisma client
 const prisma = new PrismaClient();
@@ -22,14 +23,16 @@ async function main() {
   console.log("Seeding database...");
 
   // Seed default roles
-  await seedRoles();
-  await seedAceCertifications();
-  await seedAcePerks();
-  await seedAceCategoryTypes();
-  await seedAceEventTypes();
-  await seedAceAccommodation()
-  await seedOrgCategory();
-  await seedCountries();
+  // await seedRoles();
+  // await seedAceCertifications();
+  // await seedAcePerks();
+  // await seedAceCategoryTypes();
+  // await seedAceEventTypes();
+  // await seedAceAccommodation()
+  // await seedOrgCategory();
+  // await seedCountries();
+  await seedAceDepartment();
+  await seedAceEligibleDepartment()
 
   // Log completion
   console.log("Seed completed!");

@@ -31,7 +31,7 @@ async function seedAceEventTypes() {
       { name: "Startup Events", categoryIdentity: map["networking"] },
       { name: "Alumni Meets", categoryIdentity: map["networking"] },
       { name: "Expo & Tradeshows", categoryIdentity: map["networking"] },
-      { name: "Explore More", categoryIdentity: map["networking"] }
+      { name: "Explore More", categoryIdentity: map["networking"] },
 
       // SPORTS
       { name: "Tournaments", categoryIdentity: map["sports"] },

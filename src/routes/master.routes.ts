@@ -5,6 +5,7 @@ import { AceCategoryTypeController } from "../controllers/master/aceCategoryType
 import { AceEventTypesController } from "../controllers/master/aceEventTypes.controller";
 import { AceAccommodationController } from "../controllers/master/aceAccommodation.controller";
 import { OrgCategoryController } from "../controllers/master/orgCategory.controller";
+import DepartmentController from "../controllers/master/department.controller";
 
 const router = Router();
 
@@ -38,4 +39,14 @@ router.get("/accommodations", AceAccommodationController.getAll);
 router.post("/org-categories", OrgCategoryController.create);
 router.get("/org-categories", OrgCategoryController.getAll);
 
+// Departments
+router.get("/departments", DepartmentController.getDepartments);
+
+// Eligible Departments
+router.get(
+  "/eligible-departments",
+  DepartmentController.getEligibleDepartments
+);
+
 export default router;
+

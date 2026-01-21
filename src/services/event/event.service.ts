@@ -1041,7 +1041,8 @@ export class EventFilterService {
   }
 
   /**
-   * 9. Date Range Filter
+   * 9. Date Range Filter - FIXED
+   * Proper date range overlap logic
    */
   private async getDateFilterSet(
     filters: EventFilterDTO,
@@ -1052,12 +1053,21 @@ export class EventFilterService {
 
     const dateWhere: any = {};
 
-    if (filters.dateRange.startDate) {
-      dateWhere.startDate = { gte: filters.dateRange.startDate };
-    }
+    // Logic: Find events where the event's date range overlaps with filter's date range
+    // Event overlaps if: event.startDate <= filter.endDate AND event.endDate >= filter.startDate
 
-    if (filters.dateRange.endDate) {
-      dateWhere.endDate = { lte: filters.dateRange.endDate };
+    if (filters.dateRange.startDate && filters.dateRange.endDate) {
+      // Both dates provided - find events that overlap with this range
+      dateWhere.AND = [
+        { startDate: { lte: filters.dateRange.endDate } },
+        { endDate: { gte: filters.dateRange.startDate } },
+      ];
+    } else if (filters.dateRange.startDate) {
+      // Only start date - find events that end on or after this date
+      dateWhere.endDate = { gte: filters.dateRange.startDate };
+    } else if (filters.dateRange.endDate) {
+      // Only end date - find events that start on or before this date
+      dateWhere.startDate = { lte: filters.dateRange.endDate };
     }
 
     const calendars = await prisma.eventCalendar.findMany({
@@ -1065,32 +1075,60 @@ export class EventFilterService {
       select: { eventIdentity: true },
     });
 
+    // Return set even if empty (for proper intersection)
     return new Set(
       calendars.map((c: { eventIdentity: string }) => c.eventIdentity),
     );
   }
 
   /**
-   * 10. Pricing Filter
+   * 10. Pricing Filter - FIXED
+   * Properly handles isPaid field and price ranges including free events
    */
   private async getPricingFilterSet(
     filters: EventFilterDTO,
   ): Promise<Set<string> | null> {
-    if (!filters.priceRange?.min && !filters.priceRange?.max) {
+    // Only return null if priceRange is completely undefined
+    if (
+      !filters.priceRange ||
+      (filters.priceRange.min === undefined &&
+        filters.priceRange.max === undefined)
+    ) {
       return null;
     }
 
-    const priceWhere: any = {};
+    const { min, max } = filters.priceRange;
 
-    if (filters.priceRange.min !== undefined) {
-      priceWhere.price = { gte: filters.priceRange.min };
+    // Case 1: Free events (min: 0, max: 0 or just max: 0)
+    if ((min === 0 && max === 0) || (min === undefined && max === 0)) {
+      const tickets = await prisma.ticket.findMany({
+        where: {
+          OR: [{ isPaid: false }, { isPaid: true, price: 0 }],
+        },
+        select: { eventIdentity: true },
+        distinct: ["eventIdentity"],
+      });
+
+      return new Set(
+        tickets.map((t: { eventIdentity: string }) => t.eventIdentity),
+      );
     }
 
-    if (filters.priceRange.max !== undefined) {
-      priceWhere.price = {
-        ...priceWhere.price,
-        lte: filters.priceRange.max,
-      };
+    // Case 2: Paid events with price range
+    const priceWhere: any = {
+      isPaid: true,
+      price: { not: null },
+    };
+
+    if (min !== undefined && max !== undefined) {
+      // Both min and max
+      priceWhere.AND = [{ price: { gte: min } }, { price: { lte: max } }];
+    } else if (min !== undefined) {
+      // Only min (events priced >= min)
+      priceWhere.price = { gte: min };
+    } else if (max !== undefined) {
+      // Only max (events priced <= max, but > 0 for paid events)
+      priceWhere.AND = [{ price: { lte: max } }, { price: { gt: 0 } }];
     }
 
     const tickets = await prisma.ticket.findMany({
