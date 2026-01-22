@@ -395,10 +395,7 @@ export class EventController {
         });
       }
 
-      const result = await EventService.toggleSave(
-        eventIdentity,
-        userIdentity,
-      );
+      const result = await EventService.toggleSave(eventIdentity, userIdentity);
 
       return res.status(200).json({
         status: true,
@@ -415,41 +412,32 @@ export class EventController {
     }
   }
 
-   static async likeEvent(req: Request, res: Response) {
+  static async likeEvent(req: Request, res: Response) {
     try {
-      const { eventIdentity, action } = req.body;
+      const { eventIdentity, isLiked } = req.body;
 
-      if (!eventIdentity || !action) {
+      console.log(req.body)
+
+      if (!eventIdentity || typeof isLiked !== "boolean") {
         return res.status(400).json({
           status: false,
-          message: "eventIdentity and action are required",
+          message: "eventIdentity and isLiked (boolean) are required",
         });
       }
 
-      if (!["like", "unlike"].includes(action)) {
-        return res.status(400).json({
-          status: false,
-          message: "action must be either 'like' or 'unlike'",
-        });
-      }
-
-      const data = await EventService.updateLike(
-        eventIdentity,
-        action
-      );
+      const data = await EventService.updateLike(eventIdentity, isLiked);
 
       return res.status(200).json({
         status: true,
-        message:
-          action === "like"
-            ? "Event liked successfully"
-            : "Event unliked successfully",
+        message: isLiked
+          ? "Event liked successfully"
+          : "Event unliked successfully",
         data,
       });
     } catch (error: any) {
       return res.status(500).json({
         status: false,
-        message: error.message,
+        message: error.message || "Something went wrong",
       });
     }
   }

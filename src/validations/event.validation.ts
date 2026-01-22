@@ -174,10 +174,7 @@ export const validateEventFilter = (
   // Validate sortBy
   if (body.sortBy) {
     const validSortOptions = [
-      "viewCount",
-      "titleAsc",
-      "titleDesc",
-      "recentlyAdded",
+     "A_Z", "Z_A", "MOST_VIEWED", "RECENT"
     ];
     if (!validSortOptions.includes(body.sortBy)) {
       return res.status(400).json({

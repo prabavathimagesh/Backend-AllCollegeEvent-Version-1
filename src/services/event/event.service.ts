@@ -656,23 +656,30 @@ export class EventService {
     return { saved: true };
   }
 
-  static async updateLike(eventIdentity: string, action: "like" | "unlike") {
-    const incrementValue = action === "like" ? 1 : -1;
+  static async updateLike(eventIdentity: string, isLiked: boolean) {
+    const event = await prisma.event.findUnique({
+      where: { identity: eventIdentity },
+      select: { likeCount: true },
+    });
 
-    const updatedEvent = await prisma.event.update({
+    if (!event) {
+      throw new Error("Event not found");
+    }
+
+    const newLikeCount = isLiked
+      ? event.likeCount + 1
+      : Math.max(event.likeCount - 1, 0);
+
+    return prisma.event.update({
       where: { identity: eventIdentity },
       data: {
-        likeCount: {
-          increment: incrementValue,
-        },
+        likeCount: newLikeCount,
       },
       select: {
         identity: true,
         likeCount: true,
       },
     });
-
-    return updatedEvent;
   }
 
   /* ----------------------- BULK UPDATE FOR EVENT TYPES ----------------------- */
@@ -890,7 +897,10 @@ export class EventFilterService {
 
     // Execute final query with all filters
     const events = await prisma.event.findMany({
-      where: whereClause,
+      where: {
+        ...whereClause,
+        status: "APPROVED"
+      },
       include: {
         location: true,
         calendars: true,
@@ -904,7 +914,12 @@ export class EventFilterService {
       orderBy: this.getOrderBy(filters), // sorting applied here
     });
 
-    const total = await prisma.event.count({ where: whereClause });
+    const total = await prisma.event.count({
+      where: {
+        ...whereClause,
+        status: "APPROVED"
+      }
+    });
 
     return {
       events,

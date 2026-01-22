@@ -11,7 +11,7 @@ class UserService {
     });
   }
 
-  
+
   static async getUserById(identity: string): Promise<UserType | null> {
     // fetching a single user by identity (unique id)
     return prisma.user.findUnique({
@@ -41,6 +41,48 @@ class UserService {
       data: { isDeleted: true },
     });
   }
+
+  // services/event.service.ts
+  static async getSavedEventsByUser(userIdentity: string) {
+    // Step 1: Get saved event identities
+    const savedEvents = await prisma.eventSave.findMany({
+      where: { userIdentity },
+      select: { eventIdentity: true },
+    });
+
+    if (!savedEvents.length) {
+      return [];
+    }
+
+    const eventIdentities = savedEvents.map(
+      (item: { eventIdentity: string }) => item.eventIdentity
+    );
+
+    // Step 2: Fetch events from event table
+    const events = await prisma.event.findMany({
+      where: {
+        identity: { in: eventIdentities },
+        status: "APPROVED",
+      },
+      include: {
+        location: true,
+        calendars: true,
+        tickets: true,
+        eventPerks: { include: { perk: true } },
+        eventAccommodations: { include: { accommodation: true } },
+        cert: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return {
+      events,
+      count: events.length,
+    };
+  }
+
 }
 
 export default UserService;

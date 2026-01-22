@@ -45,4 +45,9 @@ router.delete(
   UserController.deleteUser
 );
 
+router.get(
+  "/user/saved/:userIdentity",
+  UserController.getSavedEventsByUser
+);
+
 export default router;

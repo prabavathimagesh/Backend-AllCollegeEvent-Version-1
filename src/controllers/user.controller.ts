@@ -117,4 +117,31 @@ export class UserController {
       });
     }
   }
+
+  // controllers/event.controller.ts
+  static async getSavedEventsByUser(req: Request, res: Response) {
+    try {
+      const { userIdentity } = req.params;
+
+      if (!userIdentity) {
+        return res.status(400).json({
+          status: false,
+          message: "userIdentity is required",
+        });
+      }
+
+      const data = await UserService.getSavedEventsByUser(userIdentity as string);
+
+      return res.status(200).json({
+        status: true,
+        data,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        status: false,
+        message: error.message || "Something went wrong",
+      });
+    }
+  }
+
 }
