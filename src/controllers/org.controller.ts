@@ -142,4 +142,80 @@ export class OrgController {
       });
     }
   }
+
+
+  static async followOrg(req: Request, res: Response) {
+    try {
+      const { orgIdentity } = req.body;
+
+      if (!orgIdentity) {
+        return res.status(400).json({
+          status: false,
+          message: "orgIdentity is required",
+        });
+      }
+
+      // from JWT middleware
+      const user = req.user as any;
+
+      let followerType: "USER" | "ORG";
+      let followerId: string;
+
+      if (user.type === "user") {
+        followerType = "USER";
+        followerId = user.identity;
+      } else {
+        followerType = "ORG";
+        followerId = user.identity;
+      }
+
+      const data = await OrgService.toggleFollow(
+        followerType,
+        followerId,
+        orgIdentity
+      );
+
+      return res.status(200).json({
+        status: true,
+        message: data.followed
+          ? "Followed successfully"
+          : "Unfollowed successfully",
+        data,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        status: false,
+        message: error.message,
+      });
+    }
+  }
+
+  static async getFollowersAndFollowing(req: Request, res: Response) {
+    try {
+      const user = req.user as any;
+      console.log(user)
+
+      // Only org can access
+      if (user.type !== "org") {
+        return res.status(403).json({
+          status: false,
+          message: "Only organizations can access this API",
+        });
+      }
+
+      const orgIdentity = user.identity;
+
+      const data = await OrgService.getFollowersAndFollowing(orgIdentity);
+
+      return res.status(200).json({
+        status: true,
+        data,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        status: false,
+        message: error.message,
+      });
+    }
+  }
 }

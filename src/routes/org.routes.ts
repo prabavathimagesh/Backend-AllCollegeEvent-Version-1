@@ -8,6 +8,10 @@ import { eventValidation } from "../validations/event.validation";
 
 const router = Router();
 
+
+router.get("/organizations/followers-following", authMiddleware, OrgController.getFollowersAndFollowing);
+
+
 /**
  * @route GET /api/v1/organizations
  * @desc  Get list of all organizations
@@ -53,5 +57,9 @@ router.get(
   validate(eventValidation.getAll1),
   OrgController.getOrgEvents
 );
+
+router.post("/organizations/follow-org", authMiddleware, OrgController.followOrg);
+
+
 
 export default router;

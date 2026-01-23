@@ -72,6 +72,7 @@ model Org {
   role                 Role?           @relation(fields: [roleId], references: [id])
   socialLinks          OrgSocialLink[]
   otps                 OTP[]
+  followers            Follow[]
 
   @@map("ace_org")
 }
@@ -272,7 +273,7 @@ model CollaboratorMember {
   orgDept          String?
   organizationName String?
   organizerName    String?
-  organizerNumber  String         
+  organizerNumber  String
   collaborations   Collaborator[]
 
   @@map("ace_collaborator_members")
@@ -391,9 +392,8 @@ model City {
 }
 
 model AceDepartment {
-  identity String @id @default(uuid())
-  name     String @unique
-
+  identity  String   @id @default(uuid())
+  name      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -401,9 +401,8 @@ model AceDepartment {
 }
 
 model AceEligibleDepartment {
-  identity String @id @default(uuid())
-  name     String @unique
-
+  identity  String   @id @default(uuid())
+  name      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -414,7 +413,6 @@ model EventSave {
   identity      String   @id @default(uuid())
   eventIdentity String
   userIdentity  String
-  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -426,12 +424,27 @@ model EventLike {
   identity      String   @id @default(uuid())
   eventIdentity String
   userIdentity  String
-  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@unique([eventIdentity, userIdentity])
   @@map("ace_event_like")
+}
+
+model Follow {
+  identity String @id @default(uuid())
+
+  followerType String // "USER" | "ORG"
+  followerId   String // user.identity OR org.identity
+
+  followingOrgId String
+
+  createdAt DateTime @default(now())
+
+  followingOrg Org @relation(fields: [followingOrgId], references: [identity])
+
+  @@unique([followerType, followerId, followingOrgId])
+  @@map("ace_follow")
 }
 
 enum EventStatus {

@@ -174,4 +174,76 @@ export class OrgService {
       events: enrichedEvents,
     };
   }
+
+  static async toggleFollow(
+    followerType: "USER" | "ORG",
+    followerId: string,
+    followingOrgId: string
+  ) {
+    const existing = await prisma.follow.findFirst({
+      where: {
+        followerType,
+        followerId,
+        followingOrgId,
+      },
+    });
+
+    if (existing) {
+      await prisma.follow.delete({
+        where: { identity: existing.identity },
+      });
+
+      return { followed: false };
+    }
+
+    await prisma.follow.create({
+      data: {
+        followerType,
+        followerId,
+        followingOrgId,
+      },
+    });
+
+    return { followed: true };
+  }
+
+  static async getFollowersAndFollowing(orgIdentity: string) {
+    // Followers = who follows this org
+    const followers = await prisma.follow.findMany({
+      where: {
+        followingOrgId: orgIdentity,
+      },
+      select: {
+        followerType: true,
+        followerId: true,
+        createdAt: true,
+      },
+    });
+
+    // Following = org follows other orgs
+    const following = await prisma.follow.findMany({
+      where: {
+        followerType: "ORG",
+        followerId: orgIdentity,
+      },
+      include: {
+        followingOrg: {
+          select: {
+            identity: true,
+            organizationName: true,
+            profileImage: true,
+            slug: true,
+          },
+        },
+      },
+    });
+
+    return {
+      orgIdentity,
+      followersCount: followers.length,
+      followingCount: following.length,
+      followers,
+      following,
+    };
+  }
 }

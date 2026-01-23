@@ -104,7 +104,14 @@ router.get(
 );
 
 // Protected Events listing
-router.get("/events_protec", authMiddleware,EventController.getAllProtectEvents);
+router.get("/events_protec", authMiddleware, EventController.getAllProtectEvents);
+
+router.get(
+  "/events_protec/:slug",
+  validate(eventValidation.getSinglePublicEvent),
+  authMiddleware,
+  EventController.getSingleProtectedEvent,
+);
 
 // Event Status
 router.get("/event/statuses", EventController.getStatuses);

@@ -596,8 +596,19 @@ export class EventService {
     return enrichEvents(events);
   }
 
+  static async getSingleEventBySlug(slug: string) {
+    const event = await prisma.event.findUnique({
+      where: { slug },
+      include: EVENT_FULL_INCLUDE,
+    });
+
+    if (!event) return null;
+
+    const [enriched] = await enrichEvents([event]);
+    return enriched;
+  }
+
   static async getAllProtectedEventsService(userIdentity?: string) {
-    console.log("userIdentity", userIdentity)
     const events = await prisma.event.findMany({
       where: {
         status: "APPROVED",
@@ -640,8 +651,7 @@ export class EventService {
     }));
   }
 
-
-  static async getSingleEventBySlug(slug: string) {
+  static async getSingleProtectedEventBySlug(slug: string, userIdentity?: string) {
     const event = await prisma.event.findUnique({
       where: { slug },
       include: EVENT_FULL_INCLUDE,
@@ -649,9 +659,42 @@ export class EventService {
 
     if (!event) return null;
 
+    let isLiked = false;
+    let isSaved = false;
+
+    console.log(userIdentity)
+    console.log(event.identity)
+    if (userIdentity) {
+      const [like, save] = await Promise.all([
+        prisma.eventLike.findFirst({
+          where: {
+            userIdentity,
+            eventIdentity: event.identity,
+          },
+          select: { identity: true },
+        }),
+        prisma.eventSave.findFirst({
+          where: {
+            userIdentity,
+            eventIdentity: event.identity,
+          },
+          select: { identity: true },
+        }),
+      ]);
+
+      isLiked = !!like;
+      isSaved = !!save;
+    }
+
     const [enriched] = await enrichEvents([event]);
-    return enriched;
+
+    return {
+      ...enriched,
+      isLiked,
+      isSaved,
+    };
   }
+
 
   static getAllStatuses() {
     return EVENT_STATUS_LIST;

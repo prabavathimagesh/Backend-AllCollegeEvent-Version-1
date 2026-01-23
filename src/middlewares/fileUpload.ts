@@ -15,7 +15,7 @@ const fileFilter = (
   cb: FileFilterCallback
 ) => {
   const allowed =
-    /jpeg|jpg|png|gif|pdf|mp4|avi|mov|mkv|webm/;
+    /jpeg|jpg|png|gif|pdf/;
 
   const extOk = allowed.test(path.extname(file.originalname).toLowerCase());
   const mimeOk = allowed.test(file.mimetype);

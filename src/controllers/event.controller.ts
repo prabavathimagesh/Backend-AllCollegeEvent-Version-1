@@ -329,8 +329,6 @@ export class EventController {
  */
   static async getAllProtectEvents(req: Request, res: Response) {
     try {
-      console.log(req.user?.identity);
-
       const userIdentity = req.user?.identity
 
       const events = await EventService.getAllProtectedEventsService(userIdentity as string);
@@ -339,6 +337,37 @@ export class EventController {
         status: true,
         data: events,
         message: EVENT_MESSAGES.ALL_EVENTS_FETCHED,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        status: false,
+        message: EVENT_MESSAGES.INTERNAL_ERROR,
+      });
+    }
+  }
+
+  /**
+ * Get a single protected event by event ID
+ */
+  static async getSingleProtectedEvent(req: Request, res: Response) {
+    try {
+      const { slug } = req.params;
+      const userIdentity = req.user?.identity
+      console.log(req.user)
+
+      const event = await EventService.getSingleProtectedEventBySlug(slug as string, userIdentity as string);
+
+      if (!event) {
+        return res.status(200).json({
+          status: false,
+          message: EVENT_MESSAGES.EVENT_NOT_FOUND,
+        });
+      }
+
+      return res.status(200).json({
+        status: true,
+        data: event,
+        message: EVENT_MESSAGES.EVENT_FETCHED,
       });
     } catch (err) {
       return res.status(500).json({
