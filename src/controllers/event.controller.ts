@@ -329,7 +329,11 @@ export class EventController {
  */
   static async getAllProtectEvents(req: Request, res: Response) {
     try {
-      const events = await EventService.getAllEventsService();
+      console.log(req.user?.identity);
+
+      const userIdentity = req.user?.identity
+
+      const events = await EventService.getAllProtectedEventsService(userIdentity as string);
 
       return res.status(200).json({
         status: true,
@@ -460,7 +464,6 @@ export class EventController {
       });
     }
   }
-
 
   /* ----------------------- BULK UPDATE FOR EVENT TYPES ----------------------- */
 

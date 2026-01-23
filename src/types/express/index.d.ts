@@ -13,3 +13,16 @@ declare global {
 }
 
 export {};
+
+
+// user?: {
+//         data: {
+//           id: number;
+//           identity: string;
+//           email: string;
+//           roleId: string;
+//           type: string;
+//         };
+//         iat: number;
+//         exp: number;
+//       };

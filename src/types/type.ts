@@ -2,7 +2,6 @@ import { Request } from "express";
 import { Prisma } from "@prisma/client";
 import { EventMode } from "@prisma/client";
 
-// types
 
 export interface EventType {
   identity: string;
@@ -26,12 +25,16 @@ export interface EventType {
   };
 }
 
-export interface DecodedToken {
+export interface JwtUserData {
   id: number;
   identity: string;
   email: string;
   roleId: string;
   type: "user" | "org";
+}
+
+export interface DecodedToken {
+  data: JwtUserData;
   iat?: number;
   exp?: number;
 }
@@ -74,10 +77,7 @@ export interface AceCategory {
 }
 
 export interface AuthRequest extends Request {
-  user: {
-    id: number;
-    identity: string;
-  };
+  user?: JwtUserData;
 }
 
 export type Platform = "web" | "mobile";
@@ -169,4 +169,18 @@ export interface FilterResult {
   events: any[];
   total: number;
   executionTime: number;
+}
+
+export interface JwtPayloadData {
+  id: number;
+  identity: string;
+  email: string;
+  roleId: string;
+  type: string;
+}
+
+export interface JwtPayloadWithMeta {
+  data: JwtPayloadData;
+  iat: number;
+  exp: number;
 }

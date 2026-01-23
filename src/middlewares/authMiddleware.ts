@@ -35,10 +35,10 @@ export const authMiddleware = async (
     //  Verify JWT
     const decoded = jwt.verify(token, secret) as DecodedToken;
 
-    //  DB validation based on type
-    if (decoded.type === "org") {
+    // DB validation based on type
+    if (decoded.data.type === "org") {
       const org = await prisma.org.findUnique({
-        where: { identity: decoded.identity },
+        where: { identity: decoded.data.identity },
       });
 
       if (!org) {
@@ -49,9 +49,9 @@ export const authMiddleware = async (
       }
     }
 
-    if (decoded.type === "user") {
+    if (decoded.data.type === "user") {
       const user = await prisma.user.findUnique({
-        where: { identity: decoded.identity },
+        where: { identity: decoded.data.identity },
       });
 
       if (!user) {
@@ -62,10 +62,11 @@ export const authMiddleware = async (
       }
     }
 
-    // Attach decoded token to request
-    (req as any).user = decoded;
+    // ✅ Attach only user data to req.user (BEST PRACTICE)
+    (req as any).user = decoded.data;
 
     next();
+
   } catch (err) {
     return res.status(401).json({
       status: false,

@@ -51,25 +51,25 @@ export async function enrichEvents(
   const result: any[] = [];
 
   for (const ev of events) {
-    const collaborators: any[] = [];
+    // const collaborators: any[] = [];
 
-    for (const col of ev.Collaborator) {
-      collaborators.push({
-        role: col.role,
-        member: {
-          identity: col.member.identity,
-          organizerName: col.member.organizerName,
-          organizerNumber: col.member.organizerNumber,
-          organizationName: col.member.organizationName,
-          orgDept: col.member.orgDept,
-          location: col.member.location,
-          hostIdentity: col.member.hostIdentity,
-          hostCategoryName: col.member.hostIdentity
-            ? hostCategoryMap[col.member.hostIdentity] ?? null
-            : null,
-        },
-      });
-    }
+    // for (const col of ev.Collaborator) {
+    //   collaborators.push({
+    //     role: col.role,
+    //     member: {
+    //       identity: col.member.identity,
+    //       organizerName: col.member.organizerName,
+    //       organizerNumber: col.member.organizerNumber,
+    //       organizationName: col.member.organizationName,
+    //       orgDept: col.member.orgDept,
+    //       location: col.member.location,
+    //       hostIdentity: col.member.hostIdentity,
+    //       hostCategoryName: col.member.hostIdentity
+    //         ? hostCategoryMap[col.member.hostIdentity] ?? null
+    //         : null,
+    //     },
+    //   });
+    // }
 
     result.push({
       ...ev,
@@ -79,7 +79,7 @@ export async function enrichEvents(
       eventTypeName: ev.eventTypeIdentity
         ? eventTypeMap[ev.eventTypeIdentity] ?? null
         : null,
-      collaborators,
+      // collaborators,
     });
   }
 
