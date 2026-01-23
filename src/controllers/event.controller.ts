@@ -435,22 +435,20 @@ export class EventController {
 
   static async likeEvent(req: Request, res: Response) {
     try {
-      const { eventIdentity, isLiked } = req.body;
+      const { eventIdentity, userIdentity } = req.body;
 
-      console.log(req.body)
-
-      if (!eventIdentity || typeof isLiked !== "boolean") {
+      if (!eventIdentity || !userIdentity) {
         return res.status(400).json({
           status: false,
-          message: "eventIdentity and isLiked (boolean) are required",
+          message: "eventIdentity and userIdentity are required",
         });
       }
 
-      const data = await EventService.updateLike(eventIdentity, isLiked);
+      const data = await EventService.toggleLike(eventIdentity, userIdentity);
 
       return res.status(200).json({
         status: true,
-        message: isLiked
+        message: data.liked
           ? "Event liked successfully"
           : "Event unliked successfully",
         data,
@@ -462,6 +460,7 @@ export class EventController {
       });
     }
   }
+
 
   /* ----------------------- BULK UPDATE FOR EVENT TYPES ----------------------- */
 

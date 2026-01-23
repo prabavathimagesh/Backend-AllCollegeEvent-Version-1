@@ -670,31 +670,50 @@ export class EventService {
     return { saved: true };
   }
 
-  static async updateLike(eventIdentity: string, isLiked: boolean) {
-    const event = await prisma.event.findUnique({
-      where: { identity: eventIdentity },
-      select: { likeCount: true },
+  static async toggleLike(eventIdentity: string, userIdentity: string) {
+
+    // Check if already liked
+    const existingLike = await prisma.eventLike.findFirst({
+      where: { eventIdentity, userIdentity },
     });
 
-    if (!event) {
-      throw new Error("Event not found");
+    // If already liked → Unlike
+    if (existingLike) {
+      await prisma.eventLike.delete({
+        where: { identity: existingLike.identity },
+      });
+
+      // update like count
+      const likeCount = await prisma.eventLike.count({
+        where: { eventIdentity },
+      });
+
+      await prisma.event.update({
+        where: { identity: eventIdentity },
+        data: { likeCount },
+      });
+
+      return { liked: false, likeCount };
     }
 
-    const newLikeCount = isLiked
-      ? event.likeCount + 1
-      : Math.max(event.likeCount - 1, 0);
-
-    return prisma.event.update({
-      where: { identity: eventIdentity },
-      data: {
-        likeCount: newLikeCount,
-      },
-      select: {
-        identity: true,
-        likeCount: true,
-      },
+    // If not liked → Like
+    await prisma.eventLike.create({
+      data: { eventIdentity, userIdentity },
     });
+
+    // update like count
+    const likeCount = await prisma.eventLike.count({
+      where: { eventIdentity },
+    });
+
+    await prisma.event.update({
+      where: { identity: eventIdentity },
+      data: { likeCount },
+    });
+
+    return { liked: true, likeCount };
   }
+
 
   /* ----------------------- BULK UPDATE FOR EVENT TYPES ----------------------- */
 
