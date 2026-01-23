@@ -15,6 +15,7 @@ import locationRoutes from "./routes/location.routes";
 import path from "path";
 const cookieParser = require("cookie-parser");
 const { CorsOptions } = require("cors");
+import { sendEmail } from "./utils/mailer"
 
 dotenv.config();
 

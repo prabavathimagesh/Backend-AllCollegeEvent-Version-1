@@ -103,8 +103,13 @@ router.get(
   EventController.getSingleEvent,
 );
 
+// Protected Events listing
+router.get("/events_protec", authMiddleware,EventController.getAllProtectEvents);
+
+// Event Status
 router.get("/event/statuses", EventController.getStatuses);
 
+// Event view count increase
 router.post("/events/:slug/view", EventController.incrementEventView);
 
 // ---------------------------------- Draft Work

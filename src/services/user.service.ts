@@ -82,7 +82,6 @@ class UserService {
       count: events.length,
     };
   }
-
 }
 
 export default UserService;

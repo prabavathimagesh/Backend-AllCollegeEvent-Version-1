@@ -604,6 +604,20 @@ export class EventService {
     return enrichEvents(events);
   }
 
+  static async getAllProtectedEventsService() {
+    const events = await prisma.event.findMany({
+      where: {
+        status: "APPROVED",
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: EVENT_FULL_INCLUDE,
+    });
+
+    return enrichEvents(events);
+  }
+
   static async getSingleEventBySlug(slug: string) {
     const event = await prisma.event.findUnique({
       where: { slug },

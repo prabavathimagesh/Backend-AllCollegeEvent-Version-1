@@ -325,6 +325,27 @@ export class EventController {
   }
 
   /**
+ * Get all events (Admin / Protected listing)
+ */
+  static async getAllProtectEvents(req: Request, res: Response) {
+    try {
+      const events = await EventService.getAllEventsService();
+
+      return res.status(200).json({
+        status: true,
+        data: events,
+        message: EVENT_MESSAGES.ALL_EVENTS_FETCHED,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        status: false,
+        message: EVENT_MESSAGES.INTERNAL_ERROR,
+      });
+    }
+  }
+
+
+  /**
    * Get all available event statuses
    */
   static async getStatuses(req: Request, res: Response) {
