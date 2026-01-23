@@ -184,3 +184,27 @@ export interface JwtPayloadWithMeta {
   iat: number;
   exp: number;
 }
+
+export type OrgWithCount = {
+  identity: string;
+  organizationName: string;
+  slug: string;
+  domainEmail: string;
+  createdAt: Date;
+  id: number;
+  organizationCategory: string;
+  city: string;
+  state: string;
+  country: string;
+  profileImage: string | null;
+  isVerified: boolean;
+  updatedAt: Date;
+  isActive: boolean;
+  website: string | null;
+  isAdminCreated: boolean;
+  adminCreatedBy: string | null;
+  socialLinks: any;
+  _count: {
+    events: number;
+  };
+};

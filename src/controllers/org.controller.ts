@@ -24,6 +24,7 @@ export class OrgController {
       });
     } catch (err: any) {
       // Internal server error
+      console.log(err)
       res
         .status(500)
         .json({ status: false, message: ORG_MESSAGES.INTERNAL_ERROR });

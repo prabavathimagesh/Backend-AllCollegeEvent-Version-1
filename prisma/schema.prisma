@@ -272,7 +272,7 @@ model CollaboratorMember {
   orgDept          String?
   organizationName String?
   organizerName    String?
-  organizerNumber  String         @unique
+  organizerNumber  String         
   collaborations   Collaborator[]
 
   @@map("ace_collaborator_members")

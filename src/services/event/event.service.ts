@@ -99,18 +99,10 @@ export class EventService {
             throw new Error(EVENT_MESSAGES.ORGANIZER_NUMBER_REQUIRED);
           }
 
-          /* ---------- UPSERT COLLABORATOR MEMBER ---------- */
-          const member = await tx.collaboratorMember.upsert({
-            where: {
-              organizerNumber: c.organizerNumber, // @unique
-            },
-            update: {
-              organizerName: c.organizerName ?? null,
-              organizationName: c.organizationName ?? null,
-              orgDept: c.orgDept ?? null,
-              location: c.location ?? null,
-            },
-            create: {
+          /* ---------- ALWAYS CREATE NEW MEMBER (NO CHECK) ---------- */
+
+          const member = await tx.collaboratorMember.create({
+            data: {
               organizerNumber: c.organizerNumber,
               hostIdentity: c.hostIdentity ?? null,
               organizerName: c.organizerName ?? null,
@@ -605,7 +597,7 @@ export class EventService {
   }
 
   static async getAllProtectedEventsService(userIdentity?: string) {
-    console.log("userIdentity",userIdentity)
+    console.log("userIdentity", userIdentity)
     const events = await prisma.event.findMany({
       where: {
         status: "APPROVED",
@@ -633,7 +625,7 @@ export class EventService {
 
       type LikeRecord = { eventIdentity: string };
       type SaveRecord = { eventIdentity: string };
-      
+
       likedEventIds = likes.map((l: LikeRecord) => l.eventIdentity);
       savedEventIds = saves.map((s: SaveRecord) => s.eventIdentity);
 

@@ -1,5 +1,5 @@
 const prisma = require("../config/db.config");
-import { EventType, EventWithRelations } from "../types/type";
+import { EventType, EventWithRelations, OrgWithCount } from "../types/type";
 import { Prisma } from "@prisma/client";
 import { EVENT_FULL_INCLUDE } from "../services/event/event.include";
 import { enrichEvents } from "../services/event/event.enricher";
@@ -7,13 +7,17 @@ import { OrgSocialLink } from "@prisma/client";
 
 export class OrgService {
   static async getAllOrgs() {
-    return prisma.org.findMany({
-      orderBy: { createdAt: "desc" },
+    const orgs = await prisma.org.findMany({
+      orderBy: {
+        events: {
+          _count: "desc", // sort by event count
+        },
+      },
       select: {
         identity: true,
         organizationName: true,
-        slug:true,
-        domainEmail: true, // FIXED
+        slug: true,
+        domainEmail: true,
         createdAt: true,
         id: true,
         organizationCategory: true,
@@ -39,7 +43,19 @@ export class OrgService {
         },
       },
     });
+
+    const sorted = orgs.sort(
+      (a: OrgWithCount, b: OrgWithCount) => b._count.events - a._count.events
+    );
+
+    return sorted.map((org: OrgWithCount, index: number) => ({
+      ...org,
+      eventCount: org._count.events,
+      rank: index + 1,
+    }));
+
   }
+
 
   static async getOrgById(identity: string) {
     const org = await prisma.org.findUnique({
