@@ -463,6 +463,17 @@ model Admin {
   @@map("ace_admin")
 }
 
+model AceCollege {
+  id           Int      @unique @default(autoincrement())
+  identity     String   @id @default(uuid())
+  name         String
+  cityIdentity String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("ace_college")
+}
+
 enum EventStatus {
   DRAFT
   PENDING

@@ -446,4 +446,27 @@ export class LocationController {
       });
     }
   }
+
+  static async toggleCollege(req: Request, res: Response) {
+    try {
+      const { cityIdentity } = req.params;
+      const { collegename } = req.body;
+
+      if (!cityIdentity || !collegename) {
+        return res.status(400).json({
+          message: "cityIdentity and collegename are required",
+        });
+      }
+
+      const result = await LocationService.toggleCollege(cityIdentity as string, collegename);
+
+      return res.status(200).json({
+        message: result.created ? "College added" : "College removed",
+        ...result,
+      });
+    } catch (error) {
+      console.error("Toggle college error:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  };
 }

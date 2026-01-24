@@ -34,4 +34,8 @@ router.get("/location/countries-with-states", LocationController.getCountriesWit
 router.get("/location/states-with-cities/:countryId", LocationController.getStatesWithCities);
 router.get("/location/complete-tree", LocationController.getCompleteLocationTree);
 
+
+// Colleges API
+router.post("/:cityIdentity", LocationController.toggleCollege);
+
 export default router;

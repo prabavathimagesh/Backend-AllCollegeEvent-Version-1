@@ -2,7 +2,7 @@ const prisma = require("../config/db.config");
 
 export class LocationService {
   // ============ COUNTRY SERVICES ============
- static async createCountry(data: { name: string; code: string; phoneCode?: string }) {
+  static async createCountry(data: { name: string; code: string; phoneCode?: string }) {
     return await prisma.country.create({
       data,
     });
@@ -23,7 +23,7 @@ export class LocationService {
 
   static async getCountryById(id: string) {
     return await prisma.country.findUnique({
-      where: { identity:id },
+      where: { identity: id },
       include: {
         states: {
           orderBy: { name: "asc" },
@@ -34,14 +34,14 @@ export class LocationService {
 
   static async updateCountry(id: string, data: { name?: string; code?: string; phoneCode?: string }) {
     return await prisma.country.update({
-      where: { identity:id },
+      where: { identity: id },
       data,
     });
   }
 
   static async deleteCountry(id: string) {
     return await prisma.country.delete({
-      where: { identity:id },
+      where: { identity: id },
     });
   }
 
@@ -63,7 +63,7 @@ export class LocationService {
       ...state,
       countryId,
     }));
-    
+
     return await prisma.state.createMany({
       data: statesWithCountry,
       skipDuplicates: true,
@@ -88,7 +88,7 @@ export class LocationService {
 
   static async getStateById(id: string) {
     return await prisma.state.findUnique({
-      where: { identity:id },
+      where: { identity: id },
       include: {
         country: true,
         cities: {
@@ -100,14 +100,14 @@ export class LocationService {
 
   static async updateState(id: string, data: { name?: string; code?: string }) {
     return await prisma.state.update({
-      where: { identity:id },
+      where: { identity: id },
       data,
     });
   }
 
   static async deleteState(id: string) {
     return await prisma.state.delete({
-      where: { identity:id },
+      where: { identity: id },
     });
   }
 
@@ -133,7 +133,7 @@ export class LocationService {
       ...city,
       stateId,
     }));
-    
+
     return await prisma.city.createMany({
       data: citiesWithState,
       skipDuplicates: true,
@@ -162,7 +162,7 @@ export class LocationService {
 
   static async getCityById(id: string) {
     return await prisma.city.findUnique({
-      where: { identity:id },
+      where: { identity: id },
       include: {
         state: {
           include: {
@@ -175,14 +175,14 @@ export class LocationService {
 
   static async updateCity(id: string, data: { name?: string }) {
     return await prisma.city.update({
-      where: { identity:id },
+      where: { identity: id },
       data,
     });
   }
 
   static async deleteCity(id: string) {
     return await prisma.city.delete({
-      where: { identity:id },
+      where: { identity: id },
     });
   }
 
@@ -224,5 +224,33 @@ export class LocationService {
       },
       orderBy: { name: "asc" },
     });
+  }
+
+  static async toggleCollege(cityIdentity: string, collegename: string) {
+    const existing = await prisma.aceCollege.findFirst({
+      where: {
+        name: collegename,
+        cityIdentity: cityIdentity,
+      },
+    });
+
+    // If exists → delete (toggle OFF)
+    if (existing) {
+      await prisma.aceCollege.delete({
+        where: { identity: existing.identity },
+      });
+
+      return { created: false };
+    }
+
+    // If not exists → create (toggle ON)
+    await prisma.aceCollege.create({
+      data: {
+        name: collegename,
+        cityIdentity: cityIdentity,
+      },
+    });
+
+    return { created: true };
   }
 }

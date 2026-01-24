@@ -777,6 +777,8 @@ export class EventService {
     return { liked: true, likeCount };
   }
 
+  
+
 
   /* ----------------------- BULK UPDATE FOR EVENT TYPES ----------------------- */
 

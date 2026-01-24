@@ -143,6 +143,30 @@ export class OrgController {
     }
   }
 
+    /**
+   * Get all events created by an organization Protected
+   */
+  static async getProtectedOrgEvents(req: Request, res: Response) {
+    try {
+      const identity = String(req.params.orgId);
+      const userIdentity = req.user?.identity
+
+      const result = await OrgService.getProtectedEventsByOrganization(identity,userIdentity as string);
+
+      return res.status(200).json({
+        status: true,
+        count: result.count, // total events
+        data: result.events,
+        message: EVENT_MESSAGES.EVENTS_FETCHED,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        status: false,
+        message: EVENT_MESSAGES.INTERNAL_ERROR,
+      });
+    }
+  }
+
 
   static async followOrg(req: Request, res: Response) {
     try {

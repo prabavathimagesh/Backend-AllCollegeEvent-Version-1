@@ -11,7 +11,6 @@ const router = Router();
 
 router.get("/organizations/followers-following", authMiddleware, OrgController.getFollowersAndFollowing);
 
-
 /**
  * @route GET /api/v1/organizations
  * @desc  Get list of all organizations
@@ -53,9 +52,15 @@ router.delete(
 
 router.get(
   "/organization/:orgId/events",
-  authMiddleware,
   validate(eventValidation.getAll1),
   OrgController.getOrgEvents
+);
+
+router.get(
+  "/organization/:orgId/events_protec",
+  authMiddleware,
+  validate(eventValidation.getAll1),
+  OrgController.getProtectedOrgEvents
 );
 
 router.post("/organizations/follow-org", authMiddleware, OrgController.followOrg);

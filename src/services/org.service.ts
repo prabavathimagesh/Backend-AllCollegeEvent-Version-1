@@ -175,6 +175,82 @@ export class OrgService {
     };
   }
 
+  static async getProtectedEventsByOrganization(identity: string, userIdentity: string) {
+    if (!identity) {
+      throw new Error("Organization ID is required");
+    }
+
+    // Fetch events + count together
+    const [events, count] = await prisma.$transaction([
+      prisma.event.findMany({
+        where: {
+          orgIdentity: identity,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: EVENT_FULL_INCLUDE,
+      }),
+
+      prisma.event.count({
+        where: {
+          orgIdentity: identity,
+        },
+      }),
+    ]);
+
+    // Enrich events
+    const enrichedEvents = await enrichEvents(events);
+
+    // Like & Save Logic
+    let likedEventIds: string[] = [];
+    let savedEventIds: string[] = [];
+
+    if (userIdentity) {
+      type EventRecord = {
+        identity: string;
+      };
+
+      const eventIds = events.map((e: EventRecord) => e.identity);
+
+      const [likes, saves] = await Promise.all([
+        prisma.eventLike.findMany({
+          where: {
+            userIdentity,
+            eventIdentity: { in: eventIds },
+          },
+          select: { eventIdentity: true },
+        }),
+        prisma.eventSave.findMany({
+          where: {
+            userIdentity,
+            eventIdentity: { in: eventIds },
+          },
+          select: { eventIdentity: true },
+        }),
+      ]);
+
+
+      type LikeRecord = { eventIdentity: string };
+      type SaveRecord = { eventIdentity: string };
+
+      likedEventIds = likes.map((l: LikeRecord) => l.eventIdentity);
+      savedEventIds = saves.map((s: SaveRecord) => s.eventIdentity);
+    }
+
+    // Attach isLiked & isSaved
+    const finalEvents = enrichedEvents.map((event: any) => ({
+      ...event,
+      isLiked: likedEventIds.includes(event.identity),
+      isSaved: savedEventIds.includes(event.identity),
+    }));
+
+    return {
+      count,
+      events: finalEvents,
+    };
+  }
+
   static async toggleFollow(
     followerType: "USER" | "ORG",
     followerId: string,
