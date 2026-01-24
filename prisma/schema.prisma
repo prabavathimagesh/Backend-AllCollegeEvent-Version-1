@@ -447,6 +447,22 @@ model Follow {
   @@map("ace_follow")
 }
 
+model Admin {
+  identity String @id @default(uuid())
+  id       Int    @unique @default(autoincrement())
+
+  name     String
+  email    String    @unique
+  password String
+  role     AdminRole @default(ADMIN)
+  isActive Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ace_admin")
+}
+
 enum EventStatus {
   DRAFT
   PENDING
@@ -459,4 +475,9 @@ enum EventMode {
   ONLINE
   OFFLINE
   HYBRID
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
 }
