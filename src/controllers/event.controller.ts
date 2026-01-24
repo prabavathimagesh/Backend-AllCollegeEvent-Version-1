@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import {
   EventFilterService,
+  EventProtectedFilterService,
   EventService,
 } from "../services/event/event.service";
 import { EVENT_MESSAGES } from "../constants/event.message";
@@ -573,6 +574,42 @@ export class EventFilterController {
       const filters: EventFilterDTO = req.body;
 
       const result = await this.filterService.filterEvents(filters);
+
+      return res.status(200).json({
+        status: true,
+        data: result.events,
+        meta: {
+          total: result.total,
+          filtered: result.events.length,
+          executionTime: result.executionTime,
+        },
+      });
+    } catch (error) {
+      console.error("Event filter error:", error);
+      return res.status(500).json({
+        status: false,
+        message: "Failed to filter events",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
+}
+
+
+export class EventProtectedFilterController {
+  private protectedfilterService: EventProtectedFilterService;
+
+  constructor() {
+    this.protectedfilterService = new EventProtectedFilterService();
+  }
+
+  filterEvents = async (req: Request, res: Response) => {
+    try {
+      const filters: EventFilterDTO = req.body;
+
+      const userIdentity = (req as any).user?.identity;
+
+      const result = await this.protectedfilterService.protectedfilterEvents(filters, userIdentity as string);
 
       return res.status(200).json({
         status: true,

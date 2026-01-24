@@ -3,6 +3,7 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 import {
   EventController,
   EventFilterController,
+  EventProtectedFilterController,
 } from "../controllers/event.controller";
 import upload from "../middlewares/fileUpload";
 import { validate } from "../utils/validate";
@@ -13,6 +14,7 @@ import {
 
 const router = Router();
 const eventController = new EventFilterController();
+const ProtectEventController = new EventProtectedFilterController
 
 /**
  * @route GET /api/v1/organizations/:orgId/events
@@ -113,13 +115,16 @@ router.get(
   EventController.getSingleProtectedEvent,
 );
 
+
+router.post("/filter_protec", validateEventFilter, authMiddleware, ProtectEventController.filterEvents);
+
 // Event Status
 router.get("/event/statuses", EventController.getStatuses);
 
 // Event view count increase
 router.post("/events/:slug/view", EventController.incrementEventView);
 
-// ---------------------------------- Draft Work
+// ---------------------------------- Draft Work 
 
 router.post("/events/draft", authMiddleware, EventController.createDraft);
 router.patch("/events/:id", authMiddleware, EventController.autoSave);
