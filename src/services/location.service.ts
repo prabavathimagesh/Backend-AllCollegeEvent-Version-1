@@ -226,31 +226,44 @@ export class LocationService {
     });
   }
 
-  static async toggleCollege(cityIdentity: string, collegename: string) {
-    const existing = await prisma.aceCollege.findFirst({
-      where: {
-        name: collegename,
-        cityIdentity: cityIdentity,
-      },
-    });
+  static async toggleColleges(cityIdentity: string, colleges: { collegename: string }[]) {
+    const results = [];
 
-    // If exists → delete (toggle OFF)
-    if (existing) {
-      await prisma.aceCollege.delete({
-        where: { identity: existing.identity },
+    for (const college of colleges) {
+      const collegename = college.collegename;
+
+      const existing = await prisma.aceCollege.findFirst({
+        where: {
+          name: collegename,
+          cityIdentity: cityIdentity,
+        },
       });
 
-      return { created: false };
+      if (existing) {
+        await prisma.aceCollege.delete({
+          where: { identity: existing.identity },
+        });
+
+        results.push({
+          collegename,
+          created: false,
+        });
+      } else {
+        await prisma.aceCollege.create({
+          data: {
+            name: collegename,
+            cityIdentity: cityIdentity,
+          },
+        });
+
+        results.push({
+          collegename,
+          created: true,
+        });
+      }
     }
 
-    // If not exists → create (toggle ON)
-    await prisma.aceCollege.create({
-      data: {
-        name: collegename,
-        cityIdentity: cityIdentity,
-      },
-    });
-
-    return { created: true };
+    return results;
   }
+
 }

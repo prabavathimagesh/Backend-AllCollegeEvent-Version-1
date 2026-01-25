@@ -450,23 +450,30 @@ export class LocationController {
   static async toggleCollege(req: Request, res: Response) {
     try {
       const { cityIdentity } = req.params;
-      const { collegename } = req.body;
+      const colleges = req.body; // expecting array
 
-      if (!cityIdentity || !collegename) {
+      if (!cityIdentity) {
         return res.status(400).json({
-          message: "cityIdentity and collegename are required",
+          message: "cityIdentity is required",
         });
       }
 
-      const result = await LocationService.toggleCollege(cityIdentity as string, collegename);
+      if (!Array.isArray(colleges) || colleges.length === 0) {
+        return res.status(400).json({
+          message: "College list is required",
+        });
+      }
+
+      const results = await LocationService.toggleColleges(cityIdentity as string, colleges);
 
       return res.status(200).json({
-        message: result.created ? "College added" : "College removed",
-        ...result,
+        message: "Colleges processed successfully",
+        results,
       });
     } catch (error) {
       console.error("Toggle college error:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
-  };
+  }
+
 }

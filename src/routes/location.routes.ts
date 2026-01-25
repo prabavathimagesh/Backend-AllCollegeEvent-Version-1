@@ -36,6 +36,6 @@ router.get("/location/complete-tree", LocationController.getCompleteLocationTree
 
 
 // Colleges API
-router.post("/:cityIdentity", LocationController.toggleCollege);
+router.post("/college/:cityIdentity", LocationController.toggleCollege);
 
 export default router;
