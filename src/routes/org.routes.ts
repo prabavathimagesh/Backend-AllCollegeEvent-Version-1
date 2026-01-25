@@ -66,5 +66,4 @@ router.get(
 router.post("/organizations/follow-org", authMiddleware, OrgController.followOrg);
 
 
-
 export default router;

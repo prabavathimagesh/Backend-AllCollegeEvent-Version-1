@@ -50,6 +50,87 @@ export class EventService {
     };
   }
 
+  static async getProtectedEventsByOrgslug(slug: string, userIdentity?: string) {
+    const org = await prisma.org.findUnique({
+      where: { slug },
+      select: { identity: true },
+    });
+
+    if (!org) {
+      throw new Error(EVENT_MESSAGES.ORG_NOT_FOUND);
+    }
+
+    // Fetch events + count together
+    const [events, count] = await prisma.$transaction([
+      prisma.event.findMany({
+        where: {
+          orgIdentity: org.identity,
+          status: "APPROVED",
+        },
+        orderBy: { createdAt: "desc" },
+        include: EVENT_FULL_INCLUDE,
+      }),
+
+      prisma.event.count({
+        where: {
+          orgIdentity: org.identity,
+          status: "APPROVED",
+        },
+      }),
+    ]);
+
+    // Enrich events
+    const enrichedEvents = await enrichEvents(events);
+
+    // Like & Save Logic
+    let likedEventIds: string[] = [];
+    let savedEventIds: string[] = [];
+
+    if (userIdentity) {
+      type EventRecord = {
+        identity: string;
+      };
+
+      const eventIds = events.map((e: EventRecord) => e.identity);
+
+      const [likes, saves] = await Promise.all([
+        prisma.eventLike.findMany({
+          where: {
+            userIdentity,
+            eventIdentity: { in: eventIds },
+          },
+          select: { eventIdentity: true },
+        }),
+        prisma.eventSave.findMany({
+          where: {
+            userIdentity,
+            eventIdentity: { in: eventIds },
+          },
+          select: { eventIdentity: true },
+        }),
+      ]);
+
+      type LikeRecord = { eventIdentity: string };
+      type SaveRecord = { eventIdentity: string };
+
+      likedEventIds = likes.map((l: LikeRecord) => l.eventIdentity);
+      savedEventIds = saves.map((s: SaveRecord) => s.eventIdentity);
+    }
+
+    // Attach isLiked & isSaved
+    const finalEvents = enrichedEvents.map((event: any) => ({
+      ...event,
+      isLiked: likedEventIds.includes(event.identity),
+      isSaved: savedEventIds.includes(event.identity),
+    }));
+
+    return {
+      count,
+      events: finalEvents,
+    };
+  }
+
+
   static async createEvent(payload: any) {
     return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       /* ---------------------------------------------------
@@ -777,7 +858,7 @@ export class EventService {
     return { liked: true, likeCount };
   }
 
-  
+
 
 
   /* ----------------------- BULK UPDATE FOR EVENT TYPES ----------------------- */

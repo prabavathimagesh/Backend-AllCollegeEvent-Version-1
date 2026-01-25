@@ -27,6 +27,18 @@ router.get(
 );
 
 /**
+ * private
+ * @route GET /api/v1/organizations/:orgId/events
+ * @desc  Get all events of a specific organization
+ */
+router.get(
+  "/organizations/:slug/events_protec",
+  validate(eventValidation.getAll),
+  authMiddleware,
+  EventController.getProtectedOrgEvents
+);
+
+/**
  * @route GET /api/v1/organizations/:orgId/events/:eventId
  * @desc  Get a single event under an organization
  */

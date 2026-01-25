@@ -57,6 +57,51 @@ export class EventController {
   }
 
   /**
+   * private
+   * Get all events of a specific organization (Public / Org view)
+   */
+  static async getProtectedOrgEvents(req: Request, res: Response) {
+    try {
+      const slug = String(req.params.slug);
+      const userIdentity = req.user?.identity
+
+      if (!slug) {
+        return res.status(200).json({
+          status: false,
+          message: EVENT_MESSAGES.ORG_SLUG_REQUIRED,
+        });
+      }
+
+      const result = await EventService.getProtectedEventsByOrgslug(slug as string,userIdentity as string)
+
+      return res.status(200).json({
+        status: true,
+        count: result.count,
+        data: result.events,
+        message: EVENT_MESSAGES.EVENTS_FETCHED,
+      });
+    } catch (err: any) {
+      const safeErrors = [
+        EVENT_MESSAGES.ORG_NOT_FOUND,
+        EVENT_MESSAGES.EVENTS_NOT_FOUND,
+      ];
+
+      if (safeErrors.includes(err.message)) {
+        return res.status(200).json({
+          status: false,
+          message: err.message,
+        });
+      }
+
+      return res.status(500).json({
+        status: false,
+        message: EVENT_MESSAGES.INTERNAL_ERROR,
+        error: err.message,
+      });
+    }
+  }
+
+  /**
    * Get a single event by organization and event ID
    */
   static async getEventById(req: Request, res: Response) {
