@@ -24,7 +24,7 @@ router.get(
 router.get(
   "/organizations/:orgId/events",
   authMiddleware,
-  validate(eventValidation.getAll),
+  validate(eventValidation.getAll1),
   AdminEventController.getEventsByOrg
 );
 

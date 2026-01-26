@@ -8,6 +8,8 @@ import { EVENT_STATUS_LIST } from "../../constants/event.status.message";
 
 // Admin event messages
 import { ADMIN_EVENT_MESSAGES } from "../../constants/admin.event.message";
+import { EVENT_FULL_INCLUDE } from "../event/event.include";
+import { enrichEvents } from "../event/event.enricher";
 
 /**
  * Admin Event Service
@@ -16,62 +18,26 @@ import { ADMIN_EVENT_MESSAGES } from "../../constants/admin.event.message";
 export default class AdminEventService {
 
   static async getAllEvents() {
-    const BASE_URL = process.env.BASE_URL ?? "";
-
     const events = await prisma.event.findMany({
-      orderBy: { createdAt: "desc" },
-      include: {
-        org: {
-          select: {
-            organizationName: true,
-            organizationCategory: true,
-            city: true,
-            state: true,
-            country: true,
-            profileImage: true,
-            whatsapp: true,
-            instagram: true,
-            linkedIn: true,
-            logoUrl: true,
-          },
-        },
+      where: {
+        status: "APPROVED",
       },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: EVENT_FULL_INCLUDE,
     });
 
-    return events.map((e: EventType) => ({
-      ...e,
-      bannerImage: e.bannerImage ? `${BASE_URL}${e.bannerImage}` : null,
-    }));
+    return enrichEvents(events);
   }
 
   static async getEventsByOrg(orgId: string) {
-    const BASE_URL = process.env.BASE_URL ?? "";
-
     const events = await prisma.event.findMany({
       where: { orgIdentity: orgId },
-      include: {
-        org: {
-          select: {
-            organizationName: true,
-            organizationCategory: true,
-            city: true,
-            state: true,
-            country: true,
-            profileImage: true,
-            whatsapp: true,
-            instagram: true,
-            linkedIn: true,
-            logoUrl: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
+      include: EVENT_FULL_INCLUDE,
     });
 
-    return events.map((e: EventType) => ({
-      ...e,
-      bannerImage: e.bannerImage ? `${BASE_URL}${e.bannerImage}` : null,
-    }));
+    return enrichEvents(events); // clean & simple
   }
 
   static async getEventById(orgId: string, eventId: string) {

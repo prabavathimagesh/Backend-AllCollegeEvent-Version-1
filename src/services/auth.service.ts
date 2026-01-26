@@ -27,56 +27,101 @@ const sendVerificationMail = async (
     email: string;
     identity?: string;
     id?: number;
+    name?: string;              // add this
     organizationName?: string;
   },
   platform: Platform = "web"
 ) => {
-  if (!recipient.email) {
-    throw new Error("Recipient email is missing");
+  if (!recipient.email) return;
+
+  let verifyUrl = process.env.MAIL_SEND || "";
+
+  if (recipient.identity && recipient.id) {
+    const token = generateToken({ identity: recipient.identity, id: recipient.id });
+    verifyUrl = `${process.env.MAIL_SEND}auth/email-verify?token=${token}`;
   }
 
-  const token =
-    recipient.identity && recipient.id
-      ? generateToken({ identity: recipient.identity, id: recipient.id })
-      : null;
-
-  if (!token) {
-    throw new Error("Token generation failed");
-  }
-
-  // ALWAYS WEB URL IN EMAIL
-  const verifyUrl = `${process.env.MAIL_SEND}auth/email-verify?token=${token}`;
+  const displayName =
+  recipient.name ||
+  recipient.organizationName?.split(" ")[0] ||
+  "User";
 
   const html = `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-      <h2>Verify Account</h2>
-
-      <p>Hello <strong>${recipient.organizationName ?? "User"}</strong>,</p>
-
-      <p>Please click the button below to verify your account:</p>
-
-      <a
-        href="${verifyUrl}"
-        style="
-          display: inline-block;
-          padding: 12px 20px;
-          background-color: #2563eb;
-          color: #ffffff !important;
-          text-decoration: none;
-          border-radius: 6px;
-          font-weight: bold;
-        "
-      >
-        Verify Account
-      </a>
-
-      <p style="margin-top: 16px; font-size: 12px; color: #555;">
-        If the button doesn’t work, copy and paste this link into your browser:
-        <br />
-        ${verifyUrl}
+<div style="font-family: Arial, Helvetica, sans-serif; background-color: #f9fafb; padding: 30px 0;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden;">
+    
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #2563eb, #1e40af); padding: 20px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 22px;">
+        All College Event
+      </h1>
+      <p style="color: #dbeafe; margin: 5px 0 0; font-size: 13px;">
+        Connecting Colleges, Events & Opportunities
       </p>
     </div>
-  `;
+
+    <!-- Body -->
+    <div style="padding: 30px;">
+      <h2 style="color: #111827; margin-bottom: 10px;">Welcome to All College Event 🎉</h2>
+
+      <p style="color: #374151; font-size: 14px; line-height: 1.6;">
+        Hello <strong>${displayName}</strong>,
+      </p>
+
+      <p style="color: #374151; font-size: 14px; line-height: 1.6;">
+        Thank you for joining <strong>All College Event</strong>.  
+        To get started, please verify your email address by clicking the button below.
+      </p>
+
+      <!-- Button -->
+      <div style="text-align: center; margin: 25px 0;">
+        <a href="${verifyUrl}"
+          style="
+            display: inline-block;
+            background: #2563eb;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 26px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+          ">
+          Verify Email Address
+        </a>
+      </div>
+
+      <p style="color: #6b7280; font-size: 13px; line-height: 1.6;">
+        If the button doesn’t work, copy and paste the link below into your browser:
+      </p>
+
+      <p style="word-break: break-all; color: #2563eb; font-size: 13px;">
+        ${verifyUrl}
+      </p>
+
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;" />
+
+      <p style="color: #6b7280; font-size: 12px; line-height: 1.6;">
+        If you didn’t create an account with All College Event, please ignore this email.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f3f4f6; padding: 15px; text-align: center;">
+      <p style="margin: 0; font-size: 12px; color: #6b7280;">
+        Need help? Contact us at 
+        <a href="mailto:support@allcollegeevent.com" style="color: #2563eb; text-decoration: none;">
+          support@allcollegeevent.com
+        </a>
+      </p>
+      <p style="margin: 5px 0 0; font-size: 11px; color: #9ca3af;">
+        © ${new Date().getFullYear()} All College Event. All rights reserved.
+      </p>
+    </div>
+
+  </div>
+</div>
+`;
+
 
   await sendEmail({
     to: recipient.email,
@@ -143,20 +188,21 @@ export class AuthService {
           name,
           email,
           password: hashedPassword,
-          roleId: role.id,
-          isActive: true,
+          roleId: role.id
         },
       });
       // console.log(user);
 
-      // await sendVerificationMail(
-      //   {
-      //     email: user.email,
-      //     identity: user.identity,
-      //     id: user.id,
-      //   },
-      //   platform
-      // );
+      await sendVerificationMail(
+        {
+          email: user.email,
+          identity: user.identity,
+          id: user.id,
+          name: user.name, //pass user name
+        },
+        platform
+      );
+
 
       return user;
     }
@@ -174,7 +220,7 @@ export class AuthService {
       //   throw new Error("Organization name must match the email domain");
       // }
 
-      
+
       const org = await prisma.org.create({
         data: {
           domainEmail: email,
@@ -182,7 +228,7 @@ export class AuthService {
           roleId: role.id,
           organizationName: extra.org_name,
           organizationCategory: extra.org_cat,
-          slug:generateSlug(extra.org_name),
+          slug: generateSlug(extra.org_name),
           country: extra.country,
           state: extra.state,
           city: extra.city,
@@ -196,13 +242,11 @@ export class AuthService {
           identity: org.identity,
           id: org.id,
           organizationName: org.organizationName,
+          name: org.organizationName, // optional (for unified display)
         },
         platform
       );
 
-      if (extra.contactEmail) {
-        await sendVerificationMail({ email: extra.contactEmail }, platform);
-      }
 
       return org;
     }

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import AdminEventService from "../../services/admin/admin.event.service";
 import { ADMIN_EVENT_MESSAGES } from "../../constants/admin.event.message";
+import { EVENT_MESSAGES } from "../../constants/event.message";
 
 export class AdminEventController {
   static async getAllEvents(req: Request, res: Response) {
@@ -25,6 +26,13 @@ export class AdminEventController {
       const { orgId } = req.params;
       const events = await AdminEventService.getEventsByOrg(orgId as string);
 
+      if (!events || events.length === 0) {
+        return res.status(200).json({
+          status: false,
+          message: EVENT_MESSAGES.EVENT_NOT_FOUND,
+        });
+      }
+
       return res.status(200).json({
         status: true,
         data: events,
@@ -38,6 +46,7 @@ export class AdminEventController {
       });
     }
   }
+
 
   static async getEventById(req: Request, res: Response) {
     try {

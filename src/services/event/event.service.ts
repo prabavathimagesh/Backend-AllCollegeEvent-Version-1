@@ -683,6 +683,8 @@ export class EventService {
       include: EVENT_FULL_INCLUDE,
     });
 
+    console.log(event)
+
     if (!event) return null;
 
     const [enriched] = await enrichEvents([event]);

@@ -35,7 +35,7 @@ export const sendEmail = async ({
     console.log("SMTP connection verified successfully!");
 
     const info = await transporter.sendMail({
-      from: `"ALL COLLEGE EVENT" <${process.env.FROM_EMAIL}>`,
+      from: `"All College Event Team" <${process.env.FROM_EMAIL}>`,
       to,
       subject,
       html,

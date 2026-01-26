@@ -5,6 +5,8 @@ export async function enrichEvents(
   events: EventWithRelations[]
 ) {
   if (!events.length) return [];
+  console.log(events);
+  
 
   /* ---------- Collect lookup IDs ---------- */
   const hostIds: string[] = [];
@@ -14,6 +16,8 @@ export async function enrichEvents(
   for (const ev of events) {
     if (ev.categoryIdentity) categoryIds.push(ev.categoryIdentity);
     if (ev.eventTypeIdentity) eventTypeIds.push(ev.eventTypeIdentity);
+
+    console.log(ev.Collaborator);
 
     for (const col of ev.Collaborator) {
       if (col.member.hostIdentity) {

@@ -1,14 +1,57 @@
 const prisma = require("../../config/db.config");
 import { hashPassword } from "../../utils/hash";
 import { ADMIN_ORG_MESSAGES } from "../../constants/admin.org.message";
+import { OrgWithCount } from "../../types/type";
 
 export default class AdminOrgService {
 
   static async getAllOrgs() {
-    // fetch all organizations (admin view)
-    return prisma.org.findMany({
-      orderBy: { createdAt: "desc" },
+    const orgs = await prisma.org.findMany({
+      orderBy: {
+        events: {
+          _count: "desc", // sort by event count
+        },
+      },
+      select: {
+        identity: true,
+        organizationName: true,
+        slug: true,
+        domainEmail: true,
+        createdAt: true,
+        id: true,
+        organizationCategory: true,
+        city: true,
+        state: true,
+        country: true,
+        profileImage: true,
+        isVerified: true,
+        updatedAt: true,
+        isActive: true,
+        website: true,
+        isAdminCreated: true,
+        adminCreatedBy: true,
+        socialLinks: true,
+        _count: {
+          select: {
+            events: {
+              where: {
+                status: "APPROVED",
+              },
+            },
+          },
+        },
+      },
     });
+
+    const sorted = orgs.sort(
+      (a: OrgWithCount, b: OrgWithCount) => b._count.events - a._count.events
+    );
+
+    return sorted.map((org: OrgWithCount, index: number) => ({
+      ...org,
+      eventCount: org._count.events,
+      rank: index + 1,
+    }));
   }
 
   static async getOrgById(identity: string) {
