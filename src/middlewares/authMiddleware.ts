@@ -62,7 +62,7 @@ export const authMiddleware = async (
       }
     }
 
-    // ✅ Attach only user data to req.user (BEST PRACTICE)
+    // Attach only user data to req.user (BEST PRACTICE)
     (req as any).user = decoded.data;
 
     next();

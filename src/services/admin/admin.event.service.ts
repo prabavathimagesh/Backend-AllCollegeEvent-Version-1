@@ -19,9 +19,6 @@ export default class AdminEventService {
 
   static async getAllEvents() {
     const events = await prisma.event.findMany({
-      where: {
-        status: "APPROVED",
-      },
       orderBy: {
         createdAt: "desc",
       },
