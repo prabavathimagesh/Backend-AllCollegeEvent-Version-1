@@ -42,9 +42,9 @@ const sendVerificationMail = async (
   }
 
   const displayName =
-  recipient.name ||
-  recipient.organizationName?.split(" ")[0] ||
-  "User";
+    recipient.name ||
+    recipient.organizationName?.split(" ")[0] ||
+    "User";
 
   const html = `
 <div style="font-family: Arial, Helvetica, sans-serif; background-color: #f9fafb; padding: 30px 0;">
@@ -69,39 +69,18 @@ const sendVerificationMail = async (
       </p>
 
       <p style="color: #374151; font-size: 14px; line-height: 1.6;">
-        Thank you for joining <strong>All College Event</strong>.  
-        To get started, please verify your email address by clicking the button below.
+        We’re excited to have you on board! 🚀  
+        Your account has been successfully created on <strong>All College Event</strong>.
       </p>
 
-      <!-- Button -->
-      <div style="text-align: center; margin: 25px 0;">
-        <a href="${verifyUrl}"
-          style="
-            display: inline-block;
-            background: #2563eb;
-            color: #ffffff;
-            text-decoration: none;
-            padding: 12px 26px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: bold;
-          ">
-          Verify Email Address
-        </a>
-      </div>
-
-      <p style="color: #6b7280; font-size: 13px; line-height: 1.6;">
-        If the button doesn’t work, copy and paste the link below into your browser:
-      </p>
-
-      <p style="word-break: break-all; color: #2563eb; font-size: 13px;">
-        ${verifyUrl}
+      <p style="color: #374151; font-size: 14px; line-height: 1.6;">
+        You can now explore events, connect with colleges, and discover new opportunities tailored for you.
       </p>
 
       <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;" />
 
       <p style="color: #6b7280; font-size: 12px; line-height: 1.6;">
-        If you didn’t create an account with All College Event, please ignore this email.
+        If you didn’t create this account, please contact our support team immediately.
       </p>
     </div>
 
@@ -125,9 +104,9 @@ const sendVerificationMail = async (
 
   await sendEmail({
     to: recipient.email,
-    subject: "Verify your account",
+    subject: "Welcome to All College Event",
     html,
-    text: `Verify your account: ${verifyUrl}`,
+    // text: `Verify your account: ${verifyUrl}`,
   });
 };
 
@@ -188,7 +167,8 @@ export class AuthService {
           name,
           email,
           password: hashedPassword,
-          roleId: role.id
+          roleId: role.id,
+          isActive: true
         },
       });
       // console.log(user);
@@ -233,6 +213,7 @@ export class AuthService {
           state: extra.state,
           city: extra.city,
           profileImage: extra.pImg ?? null,
+          isVerified: true
         },
       });
 
