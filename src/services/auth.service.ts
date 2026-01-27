@@ -572,6 +572,13 @@ export class AuthService {
       });
     }
 
+    await sendVerificationMail({
+      email: user.email,
+      identity: user.identity,
+      id: user.id,
+      name: user.name, // IMPORTANT
+    });
+
     /* ================= SOCIAL ACCOUNT ================= */
     const existingSocial = await prisma.socialAccount.findFirst({
       where: {
@@ -588,6 +595,13 @@ export class AuthService {
           providerUserId,
           providerEmail: email,
         },
+      });
+
+      await sendVerificationMail({
+        email: user.email,
+        identity: user.identity,
+        id: user.id,
+        name: user.name,
       });
     }
 
