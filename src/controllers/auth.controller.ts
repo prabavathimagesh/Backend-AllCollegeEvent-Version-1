@@ -77,17 +77,6 @@ export class AuthController {
       // Call login service
       const data = await AuthService.login(email, password, type);
 
-      // SET COOKIE HERE (added)
-
-      // http
-      // res.cookie("authToken", data.token, {
-      //   httpOnly: true, // Prevent JS access
-      //   maxAge: 60 * 60 * 1000, // 1 hour
-      //   path: "/", // Available across site
-      //   sameSite: "lax", // CSRF protection
-      //   secure: process.env.NODE_ENV === "production",
-      // });
-
       const isProd = process.env.NODE_ENV === "production";
 
       res.cookie("authToken", data.token, {

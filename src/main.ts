@@ -14,12 +14,14 @@ import masterRoutes from "./routes/master.routes";
 import locationRoutes from "./routes/location.routes";
 import path from "path";
 const cookieParser = require("cookie-parser");
-const { CorsOptions } = require("cors");
-import { sendEmail } from "./utils/mailer"
+import { applySecurityMiddleware } from "./middlewares/securityMiddleware";
+import { authLimiter } from "./config/rateLimit.config";
 
 dotenv.config();
 
 const app = express();
+
+applySecurityMiddleware(app);
 
 // enabling JSON body parsing
 app.use(express.json({ limit: "50mb" }));
@@ -49,8 +51,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-app.use(cors(corsOptions));
 // exposing uploaded images/files publicly
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
@@ -58,7 +58,7 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use(appLogger);
 
 // API routes with version prefix
-app.use("/api/v1/auth", authRoutes); // authentication routes
+app.use("/api/v1/auth", authLimiter, authRoutes);
 app.use("/api/v1", userRoutes); // user-related routes
 app.use("/api/v1", orgRoutes); // organization routes
 app.use("/api/v1", eventRoutes); // event routes

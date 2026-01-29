@@ -196,11 +196,6 @@ export class AuthService {
       const emailCompany = normalizeOrgName(getCompanyFromEmail(email));
       const orgName = normalizeOrgName(extra.org_name);
 
-      // if (emailCompany !== orgName) {
-      //   throw new Error("Organization name must match the email domain");
-      // }
-
-
       const org = await prisma.org.create({
         data: {
           domainEmail: email,

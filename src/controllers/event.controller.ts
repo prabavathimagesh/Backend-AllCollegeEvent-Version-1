@@ -640,7 +640,6 @@ export class EventFilterController {
   };
 }
 
-
 export class EventProtectedFilterController {
   private protectedfilterService: EventProtectedFilterService;
 
