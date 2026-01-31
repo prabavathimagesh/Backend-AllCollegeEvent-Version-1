@@ -110,8 +110,8 @@ export class AuthController {
         httpOnly: false,
         maxAge: 60 * 60 * 1000,
         path: "/",
-        sameSite: isProd ? "none" : "lax",
-        secure: isProd,
+        sameSite: "lax", 
+        secure: false, 
       });
 
       // Success response
