@@ -30,7 +30,7 @@ export class AuthController {
         password,
         type,
         platform,
-        rest
+        rest,
       );
 
       return res.status(200).json({
@@ -96,6 +96,22 @@ export class AuthController {
         path: "/",
         sameSite: isProd ? "none" : "lax",
         secure: isProd, // false for localhost
+      });
+
+      //AUTH DATA COOKIE
+      const authData = {
+        identity: data.data.identity,
+        email: data.data.email,
+        roleId: data.data.roleId,
+        type: data.data.type,
+      };
+
+      res.cookie("auth-data", JSON.stringify(authData), {
+        httpOnly: false,
+        maxAge: 60 * 60 * 1000,
+        path: "/",
+        sameSite: isProd ? "none" : "lax",
+        secure: isProd,
       });
 
       // Success response
